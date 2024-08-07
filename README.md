@@ -1,17 +1,16 @@
-RoboMaster Tello Talent ROS Driver. Developed by Tianbot
+# Sunray_swarm
 
-
-# Sunray_RMTT
-RoboMaster TT (also know as DJI Tello Talent or Ryze Tello Talent) features improved hardware and an LED light. RoboMaster TT suports Wi-Fi 5G channel and a flying map, which can be used for low-cost drone swarm. 
+思锐多智能体协同控制与规划开发平台
 
 ## 安装
-Only support authorized devices and the environment is pre-configured in ROS2GO Noetic version.
 
 ```
-##
+## 安装vrpn依赖
+sudo apt-get install ros-melodic-vrpn
+## 安装RMTT依赖
 pip install robomaster==0.1.1.63
 ## 下载代码
-git clone https://gitee.com/yundrone_sunray2023/Sunray_RMTT
+git clone https://gitee.com/yundrone_sunray2023/Sunray_swarm
 ## 编译
 ./build.sh
 ```
@@ -19,21 +18,24 @@ git clone https://gitee.com/yundrone_sunray2023/Sunray_RMTT
 ## 仿真
 
 ```
-cd Sunray_RMTT
-./rmtt_sim_step1.sh
-./rmtt_sim_step2.sh
+## 无人车仿真测试 - ORCA
+cd Sunray_swarm
+./ugv_sim.sh
+## 需要在终端发出对应指令无人车才会开始避障
 
-## start show
-roslaunch sunray_rmtt rmtt_show.launch
+
+## RMTT仿真测试 - ORCA
+cd Sunray_swarm
+./rmtt_sim.sh
+## 需要在终端发出对应指令RMTT才会开始避障
 ```
 
 ```
-cd Sunray_RMTT
-./rmtt_nokov_step1.sh
-./rmtt_nokov_step2.sh
-
-## start show
-roslaunch sunray_rmtt rmtt_nokov.launch
+## 多智能体绕圈
+cd Sunray_swarm
+./ugv_sim.sh
+## 可以在这个程序里修改对应轨迹参数
+rosrun sunray_swarm circle_trajectory 
 ```
 
 ## TODO

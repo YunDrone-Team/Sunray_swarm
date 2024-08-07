@@ -53,15 +53,6 @@ include_directories(
 ##      声明可执行cpp文件     ##
 ###############################
 
-add_executable(rmtt_show src/rmtt_show.cpp)
-add_dependencies(rmtt_show sunray_swarm_gencpp)
-target_link_libraries(rmtt_show ${catkin_LIBRARIES})
-
-add_executable(rmtt_nokov src/rmtt_nokov.cpp)
-add_dependencies(rmtt_nokov sunray_swarm_gencpp)
-target_link_libraries(rmtt_nokov ${catkin_LIBRARIES})
-
-
 ## 无人车控制
 add_executable(ugv_control_node
   ugv_control/ugv_control_node.cpp
@@ -110,6 +101,11 @@ add_executable(orca_node
 	orca/RVOSimulator.cpp
 	)
 target_link_libraries(orca_node ${catkin_LIBRARIES})
+
+## DEMO - 三智能体绕圈
+add_executable(circle_trajectory demo/circle_trajectory.cpp)
+add_dependencies(circle_trajectory sunray_swarm_gencpp)
+target_link_libraries(circle_trajectory ${catkin_LIBRARIES})
 
 
 ## Mark cpp header files for installation
