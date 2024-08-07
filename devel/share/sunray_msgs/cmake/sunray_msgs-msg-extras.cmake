@@ -1,2 +1,0 @@
-set(sunray_msgs_MESSAGE_FILES "/home/amov/Sunray_swarm/sunray_msgs/msg/agent_state.msg;/home/amov/Sunray_swarm/sunray_msgs/msg/rmtt_orca.msg;/home/amov/Sunray_swarm/sunray_msgs/msg/rmtt_state.msg;/home/amov/Sunray_swarm/sunray_msgs/msg/station_cmd.msg;/home/amov/Sunray_swarm/sunray_msgs/msg/ugv_cmd.msg;/home/amov/Sunray_swarm/sunray_msgs/msg/orca_state.msg;/home/amov/Sunray_swarm/sunray_msgs/msg/orca_cmd.msg;/home/amov/Sunray_swarm/sunray_msgs/msg/rmtt_cmd.msg")
-set(sunray_msgs_SERVICE_FILES "")
