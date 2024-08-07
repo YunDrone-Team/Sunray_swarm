@@ -1,0 +1,42 @@
+<launch>
+    <!-- 启动rmtt_show -->
+    <node pkg="sunray_rmtt" type="rmtt_show" name="rmtt_show_1" output="screen">
+        <param name="uav_id" value="1" />
+    </node>
+
+    <!-- 启动rmtt_show -->
+    <node pkg="sunray_rmtt" type="rmtt_show" name="rmtt_show_2" output="screen">
+        <param name="uav_id" value="2" />
+    </node>
+
+    <!-- 启动rmtt_show -->
+    <node pkg="sunray_rmtt" type="rmtt_show" name="rmtt_show_3" output="screen">
+        <param name="uav_id" value="3" />
+    </node>
+
+    <!-- 启动rmtt_show -->
+    <node pkg="sunray_rmtt" type="rmtt_show" name="rmtt_show_4" output="screen">
+        <param name="uav_id" value="4" />
+    </node>
+
+    <!-- 启动rmtt_show -->
+    <node pkg="sunray_rmtt" type="rmtt_show" name="rmtt_show_5" output="screen">
+        <param name="uav_id" value="5" />
+    </node>
+
+    <!-- 启动rmtt_show -->
+    <node pkg="sunray_rmtt" type="rmtt_show" name="rmtt_show_6" output="screen">
+        <param name="uav_id" value="6" />
+    </node>
+
+    <!-- 启动rmtt_show -->
+    <node pkg="sunray_rmtt" type="rmtt_show" name="rmtt_show_7" output="screen">
+        <param name="uav_id" value="7" />
+    </node>
+
+    <!-- 启动rmtt_show -->
+    <node pkg="sunray_rmtt" type="rmtt_show" name="rmtt_show_8" output="screen">
+        <param name="uav_id" value="8" />
+    </node>
+</launch>
+

@@ -1,37 +1,47 @@
-# Sunray_swarm
-
-#### 介绍
-思锐多智能体协同控制与规划开发平台
-
-#### 软件架构
-软件架构说明
+RoboMaster Tello Talent ROS Driver. Developed by Tianbot
 
 
-#### 安装教程
+# Sunray_RMTT
+RoboMaster TT (also know as DJI Tello Talent or Ryze Tello Talent) features improved hardware and an LED light. RoboMaster TT suports Wi-Fi 5G channel and a flying map, which can be used for low-cost drone swarm. 
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## 安装
+Only support authorized devices and the environment is pre-configured in ROS2GO Noetic version.
 
-#### 使用说明
+```
+##
+pip install robomaster==0.1.1.63
+## 下载代码
+git clone https://gitee.com/yundrone_sunray2023/Sunray_RMTT
+## 编译
+./build.sh
+```
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## 仿真
 
-#### 参与贡献
+```
+cd Sunray_RMTT
+./rmtt_sim_step1.sh
+./rmtt_sim_step2.sh
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+## start show
+roslaunch sunray_rmtt rmtt_show.launch
+```
 
+```
+cd Sunray_RMTT
+./rmtt_nokov_step1.sh
+./rmtt_nokov_step2.sh
 
-#### 特技
+## start show
+roslaunch sunray_rmtt rmtt_nokov.launch
+```
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+## TODO
+
+单机测试
+
+单车测试
+
+多机测试
+
+多车测试

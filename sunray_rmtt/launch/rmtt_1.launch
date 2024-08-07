@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="local_ip" default="192.168.31.162" />
+	<!-- 第1台无人机 -->
+	<group ns="/sunray_rmtt/rmtt_1">
+
+		<!-- 启动rmtt_control_node -->
+		<node pkg="sunray_rmtt" type="rmtt_control_node" name="rmtt_control_node_1" output="screen">
+			<param name="uav_id" value="1" />
+			<param name="uav_ip" value="192.168.31.241" />
+			<rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params.yaml" />
+		</node>
+	</group>
+
+</launch>

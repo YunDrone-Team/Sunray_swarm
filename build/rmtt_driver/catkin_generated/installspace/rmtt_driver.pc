@@ -1,0 +1,8 @@
+prefix=/home/amov/Sunray_swarm/install
+
+Name: rmtt_driver
+Description: Description of rmtt_driver
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/amov/Sunray_swarm/install
+
+Name: sunray_swarm
+Description: Description of sunray_swarm
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: message_runtime

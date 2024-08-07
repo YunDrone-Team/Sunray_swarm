@@ -1,0 +1,62 @@
+<launch>
+	<node pkg="sunray_rmtt" name="rmtt_orca_node" type="rmtt_orca_node" output="screen">
+        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params_sim.yaml" />
+	</node>
+
+    <!-- 启动rmtt_control_node -->
+    <node pkg="sunray_rmtt" type="rmtt_control_node" name="rmtt_control_node_1" output="screen">
+        <param name="uav_id" value="1" />
+        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params_sim.yaml" />
+    </node>
+
+    <!-- 启动rmtt_control_node -->
+    <node pkg="sunray_rmtt" type="rmtt_control_node" name="rmtt_control_node_2" output="screen">
+        <param name="uav_id" value="2" />
+        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params_sim.yaml" />
+    </node>
+
+    <!-- 启动rmtt_control_node -->
+    <node pkg="sunray_rmtt" type="rmtt_control_node" name="rmtt_control_node_3" output="screen">
+        <param name="uav_id" value="3" />
+        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params_sim.yaml" />
+    </node>
+
+    <!-- 启动rmtt_control_node -->
+    <node pkg="sunray_rmtt" type="rmtt_control_node" name="rmtt_control_node_4" output="screen">
+        <param name="uav_id" value="4" />
+        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params_sim.yaml" />
+    </node>
+
+    <!-- 启动rmtt_control_node -->
+    <node pkg="sunray_rmtt" type="rmtt_control_node" name="rmtt_control_node_5" output="screen">
+        <param name="uav_id" value="5" />
+        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params_sim.yaml" />
+    </node>
+
+    <!-- 启动rmtt_control_node -->
+    <node pkg="sunray_rmtt" type="rmtt_control_node" name="rmtt_control_node_6" output="screen">
+        <param name="uav_id" value="6" />
+        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params_sim.yaml" />
+    </node>
+
+    <!-- 启动rmtt_control_node -->
+    <node pkg="sunray_rmtt" type="rmtt_control_node" name="rmtt_control_node_7" output="screen">
+        <param name="uav_id" value="7" />
+        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params_sim.yaml" />
+    </node>
+
+    <!-- 启动rmtt_control_node -->
+    <node pkg="sunray_rmtt" type="rmtt_control_node" name="rmtt_control_node_8" output="screen">
+        <param name="uav_id" value="8" />
+        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params_sim.yaml" />
+    </node>
+
+    <!-- Rviz config -->
+    <arg name="rviz_enable" default="true"/>
+    <arg name="rivz_config" default="$(find sunray_rmtt)/rviz/rmtt_rviz_sim.rviz"/>
+	<!-- 启动Rviz-->
+	<group if="$(arg rviz_enable)">
+        <node type="rviz" name="rviz" pkg="rviz" args="-d $(arg rivz_config)"/>
+    </group>
+</launch>
+

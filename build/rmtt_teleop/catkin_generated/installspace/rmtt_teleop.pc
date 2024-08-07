@@ -1,0 +1,8 @@
+prefix=/home/amov/Sunray_swarm/install
+
+Name: rmtt_teleop
+Description: Description of rmtt_teleop
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

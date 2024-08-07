@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- 定义SN号和对应的IP地址 -->
+    <arg name="sn_1" default="0TQZM47CNT046P" />
+    <arg name="ip_1" default="192.168.25.8" />
+    <arg name="sn_2" default="0TQZM48CNT06PF" />
+    <arg name="ip_2" default="192.168.25.4" />
+    <arg name="sn_3" default="0TQZM48CNT06PY" />
+    <arg name="ip_3" default="192.168.25.13" />
+    <arg name="sn_4" default="0TQZJADCNT18QU" />
+    <arg name="ip_4" default="192.168.25.15" />
+
+
+    <!-- 定义本地IP -->
+    <arg name="local_ip" default="192.168.25.2" />
+
+    <!-- 第一台无人机 -->
+    <group ns="/sunray_swarm/rmtt_1">
+        <!-- 启动rmtt_driver -->
+        <node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
+            <param name="drone_sn" type="string" value="$(arg sn_1)" />
+            <param name="drone_ip" type="string" value="$(arg ip_1)" />
+            <param name="drone_port" type="string" value="8889" />
+            <param name="local_ip" type="string" value="$(arg local_ip)" />
+            <param name="local_port" type="string" value="8890" />
+            <param name="video_port" type="string" value="11111" />
+            <param name="enable_camera" type="bool" value="true" />
+        </node>
+        <!-- 启动rmtt_control_node -->
+        <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_1" output="screen">
+            <param name="uav_id" value="1" />
+            <param name="uav_ip" value="$(arg ip_1)" />
+            <rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
+        </node>
+    </group>
+
+    <!-- 第二台无人机 -->
+    <group ns="/sunray_swarm/rmtt_2">
+        <!-- 启动rmtt_driver -->
+        <node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
+            <param name="drone_sn" type="string" value="$(arg sn_2)" />
+            <param name="drone_ip" type="string" value="$(arg ip_2)" />
+            <param name="drone_port" type="string" value="8889" />
+            <param name="local_ip" type="string" value="$(arg local_ip)" />
+            <param name="local_port" type="string" value="8891" />
+            <param name="video_port" type="string" value="11112" />
+            <param name="enable_camera" type="bool" value="true" />
+        </node>
+        <!-- 启动rmtt_control_node -->
+        <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_2" output="screen">
+            <param name="uav_id" value="2" />
+            <param name="uav_ip" value="$(arg ip_2)" />
+            <rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
+        </node>
+    </group>
+
+    <!-- 第三台无人机 -->
+    <group ns="/sunray_swarm/rmtt_3">
+        <!-- 启动rmtt_driver -->
+        <node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
+            <param name="drone_sn" type="string" value="$(arg sn_3)" />
+            <param name="drone_ip" type="string" value="$(arg ip_3)" />
+            <param name="drone_port" type="string" value="8889" />
+            <param name="local_ip" type="string" value="$(arg local_ip)" />
+            <param name="local_port" type="string" value="8892" />
+            <param name="video_port" type="string" value="11113" />
+            <param name="enable_camera" type="bool" value="true" />
+        </node>
+        <!-- 启动rmtt_control_node -->
+        <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_3" output="screen">
+            <param name="uav_id" value="3" />
+            <param name="uav_ip" value="$(arg ip_3)" />
+            <rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
+        </node>
+    </group>
+
+    <!-- 第四台无人机 -->
+    <group ns="/sunray_swarm/rmtt_4">
+        <!-- 启动rmtt_driver -->
+        <node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
+            <param name="drone_sn" type="string" value="$(arg sn_4)" />
+            <param name="drone_ip" type="string" value="$(arg ip_4)" />
+            <param name="drone_port" type="string" value="8889" />
+            <param unless="$(eval local_ip=='')" name="local_ip" type="string" value="$(arg local_ip)" />
+            <param name="local_port" type="string" value="8893" />
+            <param name="video_port" type="string" value="11114" />
+            <param name="enable_camera" type="bool" value="true" />
+        </node>
+        <!-- 启动rmtt_control_node -->
+        <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_4" output="screen">
+            <param name="uav_id" value="4" />
+            <param name="uav_ip" value="$(arg ip_4)" />
+            <rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
+        </node>
+    </group>
+</launch>

@@ -1,0 +1,39 @@
+## parameter for ugv_control
+agent_type : 0
+agent_num : 8
+agent_height : 0.1
+agent_id : 1
+sim_mode : false
+flag_printf : true
+desired_yaw : 0.0
+target_name : "target"
+
+## 控制参数
+ugv_control_param:
+  Kp_xy : 1.4
+  Kp_yaw : 0.9
+  max_vel_xy : 0.5
+  max_vel_yaw : 0.5
+
+## 地理围栏
+ugv_geo_fence:
+  min_x: -100.0
+  max_x: 100.0
+  min_y: -100.0
+  max_y: 100.0
+  min_z: -0.5
+  max_z: 100.0
+
+orca_params:
+  ## 无人机之间的假象感知距离
+  neighborDist : 1.5
+  # 数字越大，无人机响应相邻无人机的碰撞越快，但速度可选的自由度越小
+  timeHorizon : 2.0
+  ## 数字越大，无人机响应障碍物的碰撞越快，但速度可选的自由度越小
+  timeHorizonObst : 2.0
+  ## 无人机体积半径
+  radius : 0.35
+  ## 无人机最大速度
+  maxSpeed : 0.25
+  ## 时间步长 不确定有啥用
+  time_step : 0.1

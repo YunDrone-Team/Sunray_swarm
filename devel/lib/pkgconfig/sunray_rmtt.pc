@@ -1,0 +1,8 @@
+prefix=/home/amov/Sunray_swarm/devel
+
+Name: sunray_rmtt
+Description: Description of sunray_rmtt
+Version: 0.0.0
+Cflags: -I/home/amov/Sunray_swarm/sunray_rmtt/include
+Libs: -L${prefix}/lib 
+Requires: message_runtime

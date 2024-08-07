@@ -1,0 +1,77 @@
+## parameter for rmtt
+
+rmtt_num : 5
+rmtt_height : 1.5
+sim_mode : true
+mled_text : "NOKOV"
+flag_printf : true
+desired_yaw : 3.14
+track_mode : true
+
+## 控制参数
+rmtt_control_param:
+  Kp_xy : 1.5
+  Kp_z : 1.5
+  Kp_yaw : 0.8
+  max_vel_xy : 0.3
+  max_vel_z : 0.3
+  max_vel_yaw : 0.2
+
+## 地理围栏
+rmtt_geo_fence:
+  min_x: -100.0
+  max_x: 100.0
+  min_y: -100.0
+  max_y: 100.0
+  min_z: -0.5
+  max_z: 100.0
+
+rmtt_orca_param:
+  ## 无人机之间的假象感知距离
+  neighborDist : 1.5
+  # 数字越大，无人机响应相邻无人机的碰撞越快，但速度可选的自由度越小
+  timeHorizon : 2.0
+  ## 数字越大，无人机响应障碍物的碰撞越快，但速度可选的自由度越小
+  timeHorizonObst : 2.0
+  ## 无人机体积半径
+  radius : 0.35
+  ## 无人机最大速度
+  maxSpeed : 0.25
+  ## 时间步长 不确定有啥用
+  time_step : 0.1
+  
+first_goal:
+  rmtt1_x: 1
+  rmtt1_y: 1.5
+  rmtt2_x: 1
+  rmtt2_y: 0.5
+  rmtt3_x: 0.2
+  rmtt3_y: 0
+  rmtt4_x: -1
+  rmtt4_y: -0.5
+  rmtt5_x: -1
+  rmtt5_y: -1.5
+  rmtt6_x: 2.0
+  rmtt6_y: 2.0
+  rmtt7_x: 1.0
+  rmtt7_y: 4.0
+  rmtt8_x: 5.0
+  rmtt8_y: 6.0
+
+second_goal:
+  rmtt1_x: 0
+  rmtt1_y: 1.5
+  rmtt2_x: 0
+  rmtt2_y: 0.7
+  rmtt3_x: 0
+  rmtt3_y: 0.1
+  rmtt4_x: 0
+  rmtt4_y: -0.6
+  rmtt5_x: 0
+  rmtt5_y: -1.3
+  rmtt6_x: 4.0
+  rmtt6_y: 5.0
+  rmtt7_x: 6.0
+  rmtt7_y: 2.0
+  rmtt8_x: 2.0
+  rmtt8_y: 3.0
