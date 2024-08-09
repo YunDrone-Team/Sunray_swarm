@@ -90,7 +90,7 @@ class UGV_CONTROL
         ros::Publisher ugv_mesh_pub;
         ros::Publisher ugv_trajectory_pub;
         ros::Publisher text_info_pub;
-        ros::Publisher goal_point_pub;
+        ros::Publisher goal_point_pub,test_pub;
 
         ros::Timer timer_state_pub;
         ros::Timer timer_rivz;

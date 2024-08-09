@@ -2,7 +2,7 @@
     <!-- 启动ugv_control_node -->
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_1" output="screen">
         <param name="agent_id" value="1" />
-        <rosparam command="load" file="$(find sunray_swarm)/launch_ugv/ugv_params.yaml" />
+        <rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params.yaml" />
     </node>
 
     <!-- 启动ugv_sim_node -->
@@ -10,7 +10,7 @@
         <param name="agent_id" value="1" />
         <param name="init_pos_x" value="-2.0" />
         <param name="init_pos_y" value="4.0" />
-        <rosparam command="load" file="$(find sunray_swarm)/launch_ugv/ugv_params.yaml" />
+        <rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params.yaml" />
     </node>
 
     <!-- Rviz config -->

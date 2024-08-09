@@ -72,6 +72,7 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 【发布】目标点marker 本节点 -> RVIZ
     goal_point_pub = nh.advertise<visualization_msgs::Marker>("/sunray_swarm" + agent_name + "/goal_point_rviz", 1);
+    test_pub = nh.advertise<nav_msgs::Odometry>("/sunray_swarm" + agent_name + "/test", 1);
 
     // 【定时器】 定时发布agent_state - 10Hz
     timer_state_pub = nh.createTimer(ros::Duration(0.1), &UGV_CONTROL::timercb_state, this);
@@ -531,6 +532,19 @@ void UGV_CONTROL::timercb_rviz(const ros::TimerEvent &e)
     ugv_trajectory.header.frame_id = "world";
     ugv_trajectory.poses = pos_vector;
     ugv_trajectory_pub.publish(ugv_trajectory);
+
+    nav_msgs::Odometry test;
+    test.header.stamp = ros::Time::now();
+    test.header.frame_id = "world";
+    test.pose.pose.position.x = agent_state.pos[0];
+    test.pose.pose.position.y = agent_state.pos[1];
+    test.pose.pose.position.z = agent_state.pos[2];
+
+    test.twist.twist.linear.x = desired_vel.linear.x;
+    test.twist.twist.linear.y = desired_vel.linear.y;
+    test.twist.twist.linear.z = desired_vel.linear.z;
+
+    test_pub.publish(test);
 
     if(current_agent_cmd.control_state == sunray_msgs::agent_cmd::POS_CONTROL)
     {
