@@ -23,7 +23,7 @@ void ORCA::init(ros::NodeHandle& nh)
     nh.param<float>("orca_params/time_step", orca_params.time_step, 0.1);
 
     // 初始化订阅器和发布器
-    // 【订阅】地面站指令
+    // 【订阅】ORCA指令 外部 -> 本节点
     orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm/orca_cmd", 1, &ORCA::orca_cmd_cb, this);
     // 【发布】文字提示消息（回传至地面站显示）
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
@@ -55,10 +55,12 @@ void ORCA::init(ros::NodeHandle& nh)
         agent_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm" + agent_name + "/agent_state", 1, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
         // 【订阅】无人机的目标点
         agent_goal_sub[i] = nh.subscribe<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 1, boost::bind(&ORCA::agent_goal_cb,this ,_1,i));
-        // 【发布】无人机ORCA控制指令（ENU系，单位：米/秒，Rad/秒）
-		orca_cmd_pub[i] = nh.advertise<geometry_msgs::Twist>("/sunray_swarm" + agent_name + "/orca_cmd_vel", 1); 
+        // 【发布】智能体控制指令
+		agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1); 
         // 【发布】无人机orca状态 回传地面站
 		agent_orca_state_pub[i] = nh.advertise<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1);
+        // 【发布】目标点marker 本节点 -> RVIZ
+        goal_point_pub[i] = nh.advertise<visualization_msgs::Marker>("/sunray_swarm" + agent_name + "/goal_point_rviz", 1);   
     }
 
     // 打印定时器
@@ -77,6 +79,8 @@ void ORCA::init(ros::NodeHandle& nh)
     setup_agents();
     // ORCA算法初始化 - 添加障碍物
     // setup_obstacles();
+
+    setup_color();
 
     node_name = ros::this_node::getName();
     text_info.data = node_name + ": ORCA init!";
@@ -117,13 +121,13 @@ bool ORCA::orca_run()
         // 如果达到目标点附近，则使用直接控制直接移动到目标点
 		if(arrived_goal[i])
 		{
-            cmd_vel[i].linear.x = 0.0;
-            cmd_vel[i].linear.y = 0.0;
-            cmd_vel[i].linear.z = 0.0;
-            cmd_vel[i].angular.x = 0.0;
-            cmd_vel[i].angular.y = 0.0;
-            cmd_vel[i].angular.z = 0.0; 
-            orca_cmd_pub[i].publish(cmd_vel[i]);
+            agnet_cmd[i].agent_id = i+1;
+            agnet_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agnet_cmd[i].desired_pos.x = sim->getAgentGoal(i).x();
+            agnet_cmd[i].desired_pos.y = sim->getAgentGoal(i).y();
+            agnet_cmd[i].desired_pos.z = agent_height; 
+            agnet_cmd[i].desired_yaw = 0.0;
+            agent_cmd_pub[i].publish(agnet_cmd[i]);
             if (!goal_reached_printed[i])
             {
                 cout << BLUE << node_name << agent_prefix << i+1 << " Arrived." << TAIL << endl;
@@ -136,14 +140,17 @@ bool ORCA::orca_run()
 		else
 		{
             // 获得期望速度 注：这个速度是ENU坐标系的，并将其转换为机体系速度指令
-            RVO::Vector2 vel = sim->getAgentVelCMD(i);           
-            cmd_vel[i].linear.x = vel.x();
-            cmd_vel[i].linear.y = vel.y();
-            cmd_vel[i].linear.z = 0.0;
-            cmd_vel[i].angular.x = 0.0;
-            cmd_vel[i].angular.y = 0.0;
-            cmd_vel[i].angular.z = 0.0; 
-            orca_cmd_pub[i].publish(cmd_vel[i]);
+            RVO::Vector2 vel = sim->getAgentVelCMD(i);   
+            agnet_cmd[i].agent_id = i+1;
+            agnet_cmd[i].control_state = sunray_msgs::agent_cmd::VEL_CONTROL_ENU;
+            agnet_cmd[i].desired_vel.linear.x = vel.x();
+            agnet_cmd[i].desired_vel.linear.y = vel.y();
+            agnet_cmd[i].desired_vel.linear.z = 0.0;
+            agnet_cmd[i].desired_vel.angular.x = 0.0;
+            agnet_cmd[i].desired_vel.angular.y = 0.0;
+            agnet_cmd[i].desired_vel.angular.z = 0.0; 
+            agnet_cmd[i].desired_yaw = 0.0;
+            agent_cmd_pub[i].publish(agnet_cmd[i]);
             // 只要有一个智能体未到达目标点，整体状态就是未完成
             arrived_all_goal = false;                   
         }
@@ -160,9 +167,31 @@ bool ORCA::orca_run()
         agent_orca_state[i].goal[0] = rvo_goal.x();
         agent_orca_state[i].goal[1] = rvo_goal.y();
         RVO::Vector2 vel = sim->getAgentVelCMD(i);
-        agent_orca_state[i].vel_orca[0] = cmd_vel[i].linear.x;
-        agent_orca_state[i].vel_orca[1] = cmd_vel[i].linear.y;
+        agent_orca_state[i].vel_orca[0] = agnet_cmd[i].desired_vel.linear.x;
+        agent_orca_state[i].vel_orca[1] = agnet_cmd[i].desired_vel.linear.y;
         agent_orca_state_pub[i].publish(agent_orca_state[i]);
+
+        // 发布目标点mesh
+        visualization_msgs::Marker goal_marker;
+        goal_marker.header.frame_id = "world";
+        goal_marker.header.stamp = ros::Time::now();
+        goal_marker.ns = "goal";
+        goal_marker.id = i+1;
+        goal_marker.type = visualization_msgs::Marker::SPHERE;
+        goal_marker.action = visualization_msgs::Marker::ADD;
+        goal_marker.pose.position.x = agent_orca_state[i].goal[0];
+        goal_marker.pose.position.y = agent_orca_state[i].goal[1];
+        goal_marker.pose.position.z = agent_height;
+        goal_marker.pose.orientation.x = 0.0;
+        goal_marker.pose.orientation.y = 0.0;
+        goal_marker.pose.orientation.z = 0.0;
+        goal_marker.pose.orientation.w = 1.0;
+        goal_marker.scale.x = 0.2;
+        goal_marker.scale.y = 0.2;
+        goal_marker.scale.z = 0.2;
+        goal_marker.color = led_color[i];
+        goal_marker.mesh_use_embedded_materials = false;
+        goal_point_pub[i].publish(goal_marker);
     }
 
     return arrived_all_goal;
@@ -241,20 +270,19 @@ void ORCA::debugCb(const ros::TimerEvent &e)
     cout << BLUE << ">>>>>>>>>>>>>>>>>>>>>>>> ORCA Node  <<<<<<<<<<<<<<<<<<<<<<<<" << TAIL << endl;
     for(int i = 0; i < agent_num; i++) 
     {
-        cout << GREEN << "Agent ID: " << i+1 << TAIL << endl;
+        cout << GREEN << ">>>>>>>>>>>>>>>>>>>>>>>> ORCA Agent" << i+1 << TAIL << endl;
 
-        if(arrived_goal[i])
+        if(agent_orca_state[i].arrived_goal)
         {
             cout << GREEN << "Arrived_goal : [ true ]" << TAIL << endl;
         }else
         {
-            cout << RED << "Arrived_goal : [ false ]" << TAIL << endl;
+            cout << RED   << "Arrived_goal : [ false ]" << TAIL << endl;
         }
         // 打印
         RVO::Vector2 rvo_goal = sim->getAgentGoal(i);
-        cout << GREEN << "GOAL [X Y Z]  : " << rvo_goal.x() << " [ m ] " << rvo_goal.y()<< " [ m ] " << TAIL << endl;
-        cout << GREEN << "CMD  [X Y Z]  : " << cmd_vel[i].linear.x << " [m/s] " << cmd_vel[i].linear.y << " [m/s] " << cmd_vel[i].linear.z << " [m/s] " << TAIL << endl;
-        cout << GREEN << "CMD  [ Yaw ]  : " << cmd_vel[i].angular.z * 180 / M_PI<< " [deg/s] " << TAIL << endl;
+        cout << GREEN << "GOAL [X Y]  : " << agent_orca_state[i].goal[0] << " [ m ] " << agent_orca_state[i].goal[1] << " [ m ] " << TAIL << endl;
+        cout << GREEN << "CMD  [X Y]  : " << agent_orca_state[i].vel_orca[0] << " [m/s] " << agent_orca_state[i].vel_orca[1] << " [m/s] " << TAIL << endl;
     }
 }
 
@@ -308,8 +336,8 @@ void ORCA::agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i)
 
 void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
 {
-    // 一键起飞的时候，才会设置home点
-    if(msg->orca_cmd == ORCA_CMD::SET_HOME)
+    // 设置home点
+    if(msg->orca_cmd == sunray_msgs::orca_cmd::SET_HOME)
     {
         start_flag = true;
         // 记录home点
@@ -326,7 +354,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         text_info_pub.publish(text_info);
     }
 
-    if(msg->orca_cmd == ORCA_CMD::RETURN_HOME)
+    if(msg->orca_cmd == sunray_msgs::orca_cmd::RETURN_HOME)
     {
         // 初始化arrived_goal
         for(int i = 0; i < agent_num; i++) 
@@ -357,7 +385,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
     }
 
     // 一次性设置所有目标点
-    if(msg->orca_cmd == ORCA_CMD::ORCA_SETUP)
+    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SETUP)
     {
         // 初始化arrived_goal
         for(int i = 0; i < agent_num; i++) 
@@ -487,6 +515,42 @@ void ORCA::setup_init_goals()
     }
 
     cout << BLUE << node_name << ":  set init goals success!" << TAIL << endl;
+}
+
+void ORCA::setup_color()
+{
+    led_color[0].a = 1.0;
+    led_color[0].r = 1.0;
+    led_color[0].g = 0.0;
+    led_color[0].b = 0.0;
+    led_color[1].a = 1.0;
+    led_color[1].r = 0.0;
+    led_color[1].g = 1.0;
+    led_color[1].b = 0.0;
+    led_color[2].a = 1.0;
+    led_color[2].r = 0.0;
+    led_color[2].g = 0.0;
+    led_color[2].b = 1.0;
+    led_color[3].a = 1.0;
+    led_color[3].r = 1.0;
+    led_color[3].g = 1.0;
+    led_color[3].b = 0.0;
+    led_color[4].a = 1.0;
+    led_color[4].r = 1.0;
+    led_color[4].g = 0.0;
+    led_color[4].b = 1.0;
+    led_color[5].a = 1.0;
+    led_color[5].r = 0.0;
+    led_color[5].g = 1.0;
+    led_color[5].b = 1.0;
+    led_color[6].a = 1.0;
+    led_color[6].r = 0.5;
+    led_color[6].g = 0.5;
+    led_color[6].b = 0.5;
+    led_color[7].a = 1.0;
+    led_color[7].r = 0.3;
+    led_color[7].g = 0.7;
+    led_color[7].b = 0.2;
 }
 
 void ORCA::setup_scenario_1()

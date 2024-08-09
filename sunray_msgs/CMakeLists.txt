@@ -23,7 +23,7 @@ add_message_files(
   rmtt_orca.msg
   rmtt_state.msg
   station_cmd.msg
-  ugv_cmd.msg
+  agent_cmd.msg
   orca_state.msg
   orca_cmd.msg
   rmtt_cmd.msg

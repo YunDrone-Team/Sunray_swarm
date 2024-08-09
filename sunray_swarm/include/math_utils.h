@@ -18,9 +18,9 @@ Eigen::Vector3d quaternion_to_rpy2(const Eigen::Quaterniond &q)
 geometry_msgs::Quaternion ros_quaternion_from_rpy(double roll, double pitch, double yaw)
 {
     Eigen::Quaterniond q = Eigen::Quaterniond(
-                        Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitZ()) *
+                        Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()) *
                         Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()) *
-                        Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitX()));
+                        Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitX()));
 
     geometry_msgs::Quaternion ros_q;
 

@@ -5,7 +5,7 @@
 #include <sunray_msgs/rmtt_state.h>
 #include <sunray_msgs/station_cmd.h>
 #include <sunray_msgs/agent_state.h>
-#include <sunray_msgs/ugv_cmd.h>
+#include <sunray_msgs/agent_cmd.h>
 #include <sunray_msgs/rmtt_cmd.h>
 #include <sunray_msgs/orca_state.h>
 #include <sunray_msgs/orca_cmd.h>

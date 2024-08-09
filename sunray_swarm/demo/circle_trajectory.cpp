@@ -14,7 +14,7 @@ float desired_yaw;
 int start_cmd = 0;
 float time_trajectory = 0.0;
 float trajectory_total_time;
-sunray_msgs::ugv_cmd ugv_cmd[MAX_AGENT_NUM];
+sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];
 float angle[MAX_AGENT_NUM];
 float cos_angle;
 float sin_angle;
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
     {
         agent_name = "/rmtt_" + std::to_string(i+1);
         // 【发布】无人车控制指令
-        ugv_cmd_pub[i] = nh.advertise<sunray_msgs::ugv_cmd>("/sunray_swarm" + agent_name + "/ugv_cmd", 1);
+        ugv_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
 	
     cout << GREEN << "Please enter 1 to move to start pos..." << TAIL << endl;
@@ -109,13 +109,13 @@ int main(int argc, char **argv)
         cos_angle = cos(angle[i]);
         sin_angle = sin(angle[i]);
 
-        ugv_cmd[i].agent_id = i+1;
-        ugv_cmd[i].control_state = sunray_msgs::ugv_cmd::POS_CONTROL;
-        ugv_cmd[i].desired_pos.x = circle_radius * cos_angle + circle_center[0];
-        ugv_cmd[i].desired_pos.y = circle_radius * sin_angle + circle_center[1];
-        ugv_cmd[i].desired_pos.z = circle_center[2];
-        ugv_cmd[i].desired_yaw = 0.0;
-        ugv_cmd_pub[i].publish(ugv_cmd[i]);
+        agent_cmd[i].agent_id = i+1;
+        agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+        agent_cmd[i].desired_pos.x = circle_radius * cos_angle + circle_center[0];
+        agent_cmd[i].desired_pos.y = circle_radius * sin_angle + circle_center[1];
+        agent_cmd[i].desired_pos.z = circle_center[2];
+        agent_cmd[i].desired_yaw = 0.0;
+        ugv_cmd_pub[i].publish(agent_cmd[i]);
     }
 
     sleep(1.0);
@@ -145,13 +145,13 @@ int main(int argc, char **argv)
             cos_angle = cos(angle[i]);
             sin_angle = sin(angle[i]);
 
-            ugv_cmd[i].agent_id = i+1;
-            ugv_cmd[i].control_state = sunray_msgs::ugv_cmd::POS_CONTROL;
-            ugv_cmd[i].desired_pos.x = circle_radius * cos_angle + circle_center[0];
-            ugv_cmd[i].desired_pos.y = circle_radius * sin_angle + circle_center[1];
-            ugv_cmd[i].desired_pos.z = circle_center[2];
-            ugv_cmd[i].desired_yaw = 0.0;
-            ugv_cmd_pub[i].publish(ugv_cmd[i]);
+            agent_cmd[i].agent_id = i+1;
+            agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agent_cmd[i].desired_pos.x = circle_radius * cos_angle + circle_center[0];
+            agent_cmd[i].desired_pos.y = circle_radius * sin_angle + circle_center[1];
+            agent_cmd[i].desired_pos.z = circle_center[2];
+            agent_cmd[i].desired_yaw = 0.0;
+            ugv_cmd_pub[i].publish(agent_cmd[i]);
         }
 
         time_trajectory = time_trajectory + 0.01;

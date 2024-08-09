@@ -43,8 +43,9 @@ catkin_package(
 ###########
 include_directories(
   include
-  include_ugv
-  include_rmtt
+  sim
+  agent_control
+  orca
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
@@ -55,41 +56,22 @@ include_directories(
 
 ## 无人车控制
 add_executable(ugv_control_node
-  ugv_control/ugv_control_node.cpp
-  ugv_control/ugv_control.cpp	
+  agent_control/ugv_control_node.cpp
+  agent_control/ugv_control.cpp	
 )
 target_link_libraries(ugv_control_node ${catkin_LIBRARIES})
 
-## 无人车仿真
-add_executable(ugv_sim_node
-  ugv_control/ugv_sim.cpp	
-  ugv_control/ugv_sim_node.cpp
-)
-target_link_libraries(ugv_sim_node ${catkin_LIBRARIES})
-
-## 无人车地面站
-add_executable(ugv_station ugv_control/ugv_station.cpp)
-add_dependencies(ugv_station sunray_swarm_gencpp)
-target_link_libraries(ugv_station ${catkin_LIBRARIES})
-
 ## RMTT控制
 add_executable(rmtt_control_node
-  rmtt_control/rmtt_control_node.cpp
-  rmtt_control/rmtt_control.cpp	
+  agent_control/rmtt_control_node.cpp
+  agent_control/rmtt_control.cpp	
 )
 target_link_libraries(rmtt_control_node ${catkin_LIBRARIES})
 
-## RMTT仿真
-add_executable(rmtt_sim_node
-  rmtt_control/rmtt_sim.cpp	
-  rmtt_control/rmtt_sim_node.cpp
-)
-target_link_libraries(rmtt_sim_node ${catkin_LIBRARIES})
-
-## RMTT地面站
-add_executable(rmtt_station rmtt_control/rmtt_station.cpp)
-add_dependencies(rmtt_station sunray_swarm_gencpp)
-target_link_libraries(rmtt_station ${catkin_LIBRARIES})
+## 终端地面站
+add_executable(agent_station agent_control/agent_station.cpp)
+add_dependencies(agent_station sunray_swarm_gencpp)
+target_link_libraries(agent_station ${catkin_LIBRARIES})
 
 ## ORCA
 add_executable(orca_node
@@ -102,11 +84,22 @@ add_executable(orca_node
 	)
 target_link_libraries(orca_node ${catkin_LIBRARIES})
 
+## 仿真
+add_executable(agent_sim_node
+  sim/agent_sim.cpp	
+  sim/agent_sim_node.cpp
+)
+target_link_libraries(agent_sim_node ${catkin_LIBRARIES})
+
 ## DEMO - 三智能体绕圈
 add_executable(circle_trajectory demo/circle_trajectory.cpp)
 add_dependencies(circle_trajectory sunray_swarm_gencpp)
 target_link_libraries(circle_trajectory ${catkin_LIBRARIES})
 
+## DEMO - 目标追踪
+add_executable(track_mission demo/track_mission.cpp)
+add_dependencies(track_mission sunray_swarm_gencpp)
+target_link_libraries(track_mission ${catkin_LIBRARIES})
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/

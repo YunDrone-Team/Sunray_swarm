@@ -18,24 +18,32 @@ git clone https://gitee.com/yundrone_sunray2023/Sunray_swarm
 ## 仿真
 
 ```
-## 无人车仿真测试 - ORCA
+## 单个无人车仿真测试
 cd Sunray_swarm
-./ugv_sim.sh
+./sim_single_ugv.sh
+## 需要在终端发出对应指令，可以测试：INIT、HOLD、POS_CONTROL、VEL_CONTROL_BODY、VEL_CONTROL_ENU
+
+
+## 单个RMTT仿真测试
+cd Sunray_swarm
+./sim_single_rmtt.sh
+## 需要在终端发出对应指令，可以测试：INIT、HOLD、POS_CONTROL、VEL_CONTROL_BODY、VEL_CONTROL_ENU、TAKEOFF、LAND
+```
+
+```
+## 多智能体ORCA仿真测试
+cd Sunray_swarm
+./sim_multi_ugv_orca.sh
 ## 需要在终端发出对应指令无人车才会开始避障
-
-
-## RMTT仿真测试 - ORCA
-cd Sunray_swarm
-./rmtt_sim.sh
-## 需要在终端发出对应指令RMTT才会开始避障
 ```
 
 ```
 ## 多智能体绕圈
 cd Sunray_swarm
-./ugv_sim.sh
-## 可以在这个程序里修改对应轨迹参数
+./sim_multi_rmtt_circle.sh
+## 可以在这个程序里修改对应轨迹参数(以及数量)
 rosrun sunray_swarm circle_trajectory 
+## 需要输入
 ```
 
 ## TODO
