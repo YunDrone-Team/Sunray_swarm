@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # 编译rmtt_driver模块
-catkin_make --source agent_driver/rmtt/rmtt_driver --build build/rmtt_driver
+catkin_make --source sunray_drivers/rmtt/rmtt_driver --build build/rmtt_driver
 # 编译rmtt_description模块
-catkin_make --source agent_driver/rmtt/rmtt_description --build build/rmtt_description
+catkin_make --source sunray_drivers/rmtt/rmtt_description --build build/rmtt_description
 # 编译rmtt_teleop模块
-catkin_make --source agent_driver/rmtt/rmtt_teleop --build build/rmtt_teleop
+catkin_make --source sunray_drivers/rmtt/rmtt_teleop --build build/rmtt_teleop
 # 编译turn_on_wheeltec_robot模块
-catkin_make --source agent_driver/wheeltec/turn_on_wheeltec_robot --build build/turn_on_wheeltec_robot
+catkin_make --source sunray_drivers/wheeltec/turn_on_wheeltec_robot --build build/turn_on_wheeltec_robot
 # 编译vrpn_client_ros模块
 catkin_make --source vrpn_client_ros --build build/vrpn_client_ros
 # 编译rmtt_msgs模块

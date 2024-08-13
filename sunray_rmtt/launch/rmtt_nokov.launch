@@ -1,7 +1,0 @@
-<launch>
-    <!-- 启动rmtt_nokov -->
-    <node pkg="sunray_rmtt" type="rmtt_nokov" name="rmtt_nokov_1" output="screen">
-        <param name="rmtt_num" value="5" />
-    </node>
-</launch>
-

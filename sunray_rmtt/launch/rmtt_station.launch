@@ -1,5 +1,0 @@
-<launch>
-	<node pkg="sunray_rmtt" name="tello_station" type="tello_station" output="screen">
-        <rosparam command="load" file="$(find sunray_rmtt)/launch/rmtt_params.yaml" />
-	</node>
-</launch>

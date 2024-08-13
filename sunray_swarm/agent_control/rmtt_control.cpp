@@ -377,6 +377,8 @@ void RMTT_CONTROL::timercb_debug(const ros::TimerEvent &e)
     }
 
     //集群控制命令状态打印
+    cout << GREEN << "CMD_SOURCE : [ " << current_agent_cmd.cmd_source   << " ] " << TAIL << endl;
+
     if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::INIT)
     {
         cout << GREEN << "CONTROL_STATE : [ Ready ]" << TAIL << endl;

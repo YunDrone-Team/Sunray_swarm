@@ -32,7 +32,7 @@ class ORCA
         int agent_num;
         float agent_height;
         RVO::RVOSimulator *sim = new RVO::RVOSimulator();;        //算法类
-        sunray_msgs::agent_cmd agnet_cmd[MAX_NUM];
+        sunray_msgs::agent_cmd agent_cmd[MAX_NUM];
         std::vector<RVO::Vector2> goals;    // goal
         geometry_msgs::Point home_point[MAX_NUM];
         std_msgs::ColorRGBA led_color[MAX_NUM];

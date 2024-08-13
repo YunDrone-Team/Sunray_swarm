@@ -111,6 +111,7 @@ int main(int argc, char **argv)
 
         agent_cmd[i].agent_id = i+1;
         agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+        agent_cmd[i].cmd_source = "circle_trajectory";
         agent_cmd[i].desired_pos.x = circle_radius * cos_angle + circle_center[0];
         agent_cmd[i].desired_pos.y = circle_radius * sin_angle + circle_center[1];
         agent_cmd[i].desired_pos.z = circle_center[2];
@@ -147,6 +148,7 @@ int main(int argc, char **argv)
 
             agent_cmd[i].agent_id = i+1;
             agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agent_cmd[i].cmd_source = "circle_trajectory";
             agent_cmd[i].desired_pos.x = circle_radius * cos_angle + circle_center[0];
             agent_cmd[i].desired_pos.y = circle_radius * sin_angle + circle_center[1];
             agent_cmd[i].desired_pos.z = circle_center[2];

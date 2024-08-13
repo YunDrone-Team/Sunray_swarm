@@ -101,6 +101,11 @@ add_executable(track_mission demo/track_mission.cpp)
 add_dependencies(track_mission sunray_swarm_gencpp)
 target_link_libraries(track_mission ${catkin_LIBRARIES})
 
+## DEMO - NOKOV队形
+add_executable(formation_nokov demo/formation_nokov.cpp)
+add_dependencies(formation_nokov sunray_swarm_gencpp)
+target_link_libraries(formation_nokov ${catkin_LIBRARIES})
+
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}

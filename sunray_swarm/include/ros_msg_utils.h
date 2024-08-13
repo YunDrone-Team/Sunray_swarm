@@ -15,6 +15,7 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/UInt32.h>
 #include <std_msgs/Empty.h>
+#include <std_msgs/Bool.h>
 #include <std_srvs/SetBool.h>
 #include <std_msgs/String.h>
 #include <std_msgs/ColorRGBA.h>

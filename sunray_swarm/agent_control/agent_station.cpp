@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 				break;
 
 			case 99:
-				cout << GREEN << "orca_cmd: 0 for SET_HOME, 1 for ORCA_SETUP, 2 for RETURN_HOME, 3 for start agent ORCA" << TAIL << endl;
+				cout << GREEN << "orca_cmd: 0 for SET_HOME, 1 for ORCA_SETUP, 2 for RETURN_HOME" << TAIL << endl;
 				cin >> start_cmd;
 				if(start_cmd == 0)
 				{

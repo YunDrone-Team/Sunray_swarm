@@ -41,11 +41,10 @@ void printf_params()
     cout << GREEN << "agent_num     : " << agent_num << "" << TAIL << endl;
     cout << GREEN << "agent_height   : " << agent_height << "" << TAIL << endl;
     cout << GREEN << "target_name   : " << target_name << "" << TAIL << endl;
-
 }
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "circle_trajectory");
+    ros::init(argc, argv, "track_mission");
     ros::NodeHandle nh("~");
     ros::Rate rate(100.0);
 
@@ -104,6 +103,7 @@ int main(int argc, char **argv)
         {
             agent_cmd[i].agent_id = i+1;
             agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agent_cmd[i].cmd_source = "track_mission";
             agent_cmd[i].desired_pos.x = target_pos[i].pose.position.x;
             agent_cmd[i].desired_pos.y = target_pos[i].pose.position.y;
             agent_cmd[i].desired_pos.z = agent_height;

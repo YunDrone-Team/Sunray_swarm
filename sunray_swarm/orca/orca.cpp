@@ -24,7 +24,7 @@ void ORCA::init(ros::NodeHandle& nh)
 
     // 初始化订阅器和发布器
     // 【订阅】ORCA指令 外部 -> 本节点
-    orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm/orca_cmd", 1, &ORCA::orca_cmd_cb, this);
+    orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm/orca_cmd", 10, &ORCA::orca_cmd_cb, this);
     // 【发布】文字提示消息（回传至地面站显示）
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 初始化 goal_reached_printed
@@ -52,9 +52,9 @@ void ORCA::init(ros::NodeHandle& nh)
     {
         agent_name = agent_prefix + std::to_string(i+1);
         // 【订阅】无人机状态数据
-        agent_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm" + agent_name + "/agent_state", 1, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
+        agent_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm" + agent_name + "/agent_state", 10, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
         // 【订阅】无人机的目标点
-        agent_goal_sub[i] = nh.subscribe<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 1, boost::bind(&ORCA::agent_goal_cb,this ,_1,i));
+        agent_goal_sub[i] = nh.subscribe<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 10, boost::bind(&ORCA::agent_goal_cb,this ,_1,i));
         // 【发布】智能体控制指令
 		agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1); 
         // 【发布】无人机orca状态 回传地面站
@@ -121,13 +121,14 @@ bool ORCA::orca_run()
         // 如果达到目标点附近，则使用直接控制直接移动到目标点
 		if(arrived_goal[i])
 		{
-            agnet_cmd[i].agent_id = i+1;
-            agnet_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-            agnet_cmd[i].desired_pos.x = sim->getAgentGoal(i).x();
-            agnet_cmd[i].desired_pos.y = sim->getAgentGoal(i).y();
-            agnet_cmd[i].desired_pos.z = agent_height; 
-            agnet_cmd[i].desired_yaw = 0.0;
-            agent_cmd_pub[i].publish(agnet_cmd[i]);
+            agent_cmd[i].agent_id = i+1;
+            agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agent_cmd[i].cmd_source = "ORCA";
+            agent_cmd[i].desired_pos.x = sim->getAgentGoal(i).x();
+            agent_cmd[i].desired_pos.y = sim->getAgentGoal(i).y();
+            agent_cmd[i].desired_pos.z = agent_height; 
+            agent_cmd[i].desired_yaw = 0.0;
+            agent_cmd_pub[i].publish(agent_cmd[i]);
             if (!goal_reached_printed[i])
             {
                 cout << BLUE << node_name << agent_prefix << i+1 << " Arrived." << TAIL << endl;
@@ -141,16 +142,17 @@ bool ORCA::orca_run()
 		{
             // 获得期望速度 注：这个速度是ENU坐标系的，并将其转换为机体系速度指令
             RVO::Vector2 vel = sim->getAgentVelCMD(i);   
-            agnet_cmd[i].agent_id = i+1;
-            agnet_cmd[i].control_state = sunray_msgs::agent_cmd::VEL_CONTROL_ENU;
-            agnet_cmd[i].desired_vel.linear.x = vel.x();
-            agnet_cmd[i].desired_vel.linear.y = vel.y();
-            agnet_cmd[i].desired_vel.linear.z = 0.0;
-            agnet_cmd[i].desired_vel.angular.x = 0.0;
-            agnet_cmd[i].desired_vel.angular.y = 0.0;
-            agnet_cmd[i].desired_vel.angular.z = 0.0; 
-            agnet_cmd[i].desired_yaw = 0.0;
-            agent_cmd_pub[i].publish(agnet_cmd[i]);
+            agent_cmd[i].agent_id = i+1;
+            agent_cmd[i].control_state = sunray_msgs::agent_cmd::VEL_CONTROL_ENU;
+            agent_cmd[i].cmd_source = "ORCA";
+            agent_cmd[i].desired_vel.linear.x = vel.x();
+            agent_cmd[i].desired_vel.linear.y = vel.y();
+            agent_cmd[i].desired_vel.linear.z = 0.0;
+            agent_cmd[i].desired_vel.angular.x = 0.0;
+            agent_cmd[i].desired_vel.angular.y = 0.0;
+            agent_cmd[i].desired_vel.angular.z = 0.0; 
+            agent_cmd[i].desired_yaw = 0.0;
+            agent_cmd_pub[i].publish(agent_cmd[i]);
             // 只要有一个智能体未到达目标点，整体状态就是未完成
             arrived_all_goal = false;                   
         }
@@ -167,8 +169,8 @@ bool ORCA::orca_run()
         agent_orca_state[i].goal[0] = rvo_goal.x();
         agent_orca_state[i].goal[1] = rvo_goal.y();
         RVO::Vector2 vel = sim->getAgentVelCMD(i);
-        agent_orca_state[i].vel_orca[0] = agnet_cmd[i].desired_vel.linear.x;
-        agent_orca_state[i].vel_orca[1] = agnet_cmd[i].desired_vel.linear.y;
+        agent_orca_state[i].vel_orca[0] = agent_cmd[i].desired_vel.linear.x;
+        agent_orca_state[i].vel_orca[1] = agent_cmd[i].desired_vel.linear.y;
         agent_orca_state_pub[i].publish(agent_orca_state[i]);
 
         // 发布目标点mesh
@@ -270,7 +272,7 @@ void ORCA::debugCb(const ros::TimerEvent &e)
     cout << BLUE << ">>>>>>>>>>>>>>>>>>>>>>>> ORCA Node  <<<<<<<<<<<<<<<<<<<<<<<<" << TAIL << endl;
     for(int i = 0; i < agent_num; i++) 
     {
-        cout << GREEN << ">>>>>>>>>>>>>>>>>>>>>>>> ORCA Agent" << i+1 << TAIL << endl;
+        cout << GREEN << ">>>>>>>>>>>>>>>>>>>>>>>> ORCA Agent" << i+1 << "<<<<<<<<<<<<<<<<<<<<" << TAIL << endl;
 
         if(agent_orca_state[i].arrived_goal)
         {

@@ -6,6 +6,9 @@ uint8 agent_id
 ## 状态机指令
 uint8 control_state   
 
+## 指令来源
+string cmd_source
+
 ## 期望位置、偏航角 -> 对应POS_CONTROL模式
 geometry_msgs/Point desired_pos    ## [m]
 float32 desired_yaw                 ## [rad]

@@ -46,6 +46,17 @@ rosrun sunray_swarm circle_trajectory
 ## 需要输入
 ```
 
+```
+## 多智能体ORCA仿真测试 - NOKOV阵型
+cd Sunray_swarm
+./sim_multi_ugv_orca.sh
+## 启动阵型任务节点
+roslaunch sunray_swarm formation_nokov.launch
+## 新建终端发布如下指令开始阵型
+rostopic pub /sunray_swarm/formation_nokov std_msgs/Bool "data: false" 
+```
+
+
 ## TODO
 
 单机测试
