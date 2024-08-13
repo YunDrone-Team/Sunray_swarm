@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Vel1/rmtt1_vel1
       Splitter Ratio: 0.45154184103012085
     Tree Height: 899
   - Class: rviz/Selection
@@ -173,8 +174,76 @@ Visualization Manager:
           Topic: /sunray_swarm/rmtt_8/vel_rviz
           Unreliable: false
           Value: true
-      Enabled: false
+      Enabled: true
       Name: Vel
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_1/goal_point_rviz
+          Name: rmtt1_goal
+          Namespaces:
+            goal: true
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_2/goal_point_rviz
+          Name: rmtt2_goal
+          Namespaces:
+            goal: true
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_3/goal_point_rviz
+          Name: rmtt3_goal
+          Namespaces:
+            goal: true
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_4/goal_point_rviz
+          Name: rmtt4_goal
+          Namespaces:
+            goal: true
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_5/goal_point_rviz
+          Name: rmtt5_goal
+          Namespaces:
+            goal: true
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_6/goal_point_rviz
+          Name: rmtt6_goal
+          Namespaces:
+            goal: true
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_7/goal_point_rviz
+          Name: rmtt7_goal
+          Namespaces:
+            goal: true
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_8/goal_point_rviz
+          Name: rmtt8_goal
+          Namespaces:
+            goal: true
+          Queue Size: 1
+          Value: true
+      Enabled: true
+      Name: Goal_point
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /sunray_swarm/rmtt_1/mesh
@@ -186,7 +255,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 25; 255; 0
+      Color: 255; 0; 0
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -218,7 +287,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 0; 0; 230
+      Color: 0; 255; 0
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -250,7 +319,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 240; 230; 36
+      Color: 0; 0; 255
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -282,7 +351,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 230; 0; 240
+      Color: 255; 255; 0
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -314,7 +383,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 0; 199; 255
+      Color: 255; 0; 255
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -346,7 +415,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 120; 130; 120
+      Color: 0; 255; 255
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -378,7 +447,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 76; 180; 50
+      Color: 127; 127; 127
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -410,7 +479,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 94; 38; 18
+      Color: 77; 179; 51
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -430,70 +499,6 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /sunray_swarm/rmtt_8/trajectory
       Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_1/goal_point_rviz
-      Name: rmtt1_goal
-      Namespaces:
-        goal: true
-      Queue Size: 1
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_2/goal_point_rviz
-      Name: rmtt2_goal
-      Namespaces:
-        goal: true
-      Queue Size: 1
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_3/goal_point_rviz
-      Name: rmtt3_goal
-      Namespaces:
-        goal: true
-      Queue Size: 1
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_4/goal_point_rviz
-      Name: rmtt4_goal
-      Namespaces:
-        goal: true
-      Queue Size: 1
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_5/goal_point_rviz
-      Name: rmtt5_goal
-      Namespaces:
-        goal: true
-      Queue Size: 1
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_6/goal_point_rviz
-      Name: rmtt6_goal
-      Namespaces:
-        goal: true
-      Queue Size: 1
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_7/goal_point_rviz
-      Name: rmtt7_goal
-      Namespaces:
-        goal: true
-      Queue Size: 1
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_8/goal_point_rviz
-      Name: rmtt8_goal
-      Namespaces:
-        goal: true
-      Queue Size: 1
       Value: true
     - Class: rviz/TF
       Enabled: true
@@ -572,7 +577,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 16.90381622314453
+      Distance: 26.59848403930664
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -608,5 +613,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1280
-  X: 884
+  X: 1280
   Y: 33
