@@ -1,0 +1,5 @@
+<launch>
+	<node pkg="sunray_swarm" name="track_mission" type="track_mission" output="screen">
+		<rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params.yaml" />
+	</node>
+</launch>

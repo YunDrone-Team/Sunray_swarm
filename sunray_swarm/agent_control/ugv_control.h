@@ -29,6 +29,7 @@ class UGV_CONTROL
         string node_name;               // 节点名称
         string agent_prefix{""};           
         string agent_ip;
+        string agent_name;
         int agent_id;                     // 无人机编号
         bool flag_printf;
         bool sim_mode;
@@ -90,11 +91,12 @@ class UGV_CONTROL
         ros::Publisher ugv_mesh_pub;
         ros::Publisher ugv_trajectory_pub;
         ros::Publisher text_info_pub;
-        ros::Publisher goal_point_pub,test_pub;
+        ros::Publisher goal_point_pub,vel_rviz_pub;
 
         ros::Timer timer_state_pub;
         ros::Timer timer_rivz;
         ros::Timer timer_debug;
+        ros::Timer timer_rivz2;
 
         void mocap_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg);
         void mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg);

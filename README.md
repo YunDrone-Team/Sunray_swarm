@@ -40,9 +40,9 @@ cd Sunray_swarm
 ```
 ## 多智能体绕圈
 cd Sunray_swarm
-./sim_multi_rmtt_circle.sh
+./sim_multi_ugv_circle.sh
 ## 可以在这个程序里修改对应轨迹参数(以及数量)
-rosrun sunray_swarm circle_trajectory 
+roslaunch sunray_swarm circle_trajectory.launch
 ## 需要输入
 ```
 
@@ -56,6 +56,13 @@ roslaunch sunray_swarm formation_nokov.launch
 rostopic pub /sunray_swarm/formation_nokov std_msgs/Bool "data: false" 
 ```
 
+
+## 真机测试
+
+```
+## 追踪
+roslaunch sunray_swarm track_mission.launch
+```
 
 ## TODO
 

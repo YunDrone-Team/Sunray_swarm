@@ -28,6 +28,7 @@ class RMTT_CONTROL
         int agent_type;
         string node_name;               // 节点名称
         string agent_ip;
+        string agent_name;
         int agent_id;                     // 无人机编号
         bool flag_printf;
         bool sim_mode;
@@ -100,6 +101,7 @@ class RMTT_CONTROL
         ros::Publisher rmtt_trajectory_pub;
         ros::Publisher text_info_pub;
         ros::Publisher goal_point_pub;
+        ros::Publisher vel_rviz_pub;
         // 服务
         ros::ServiceClient set_downvision;
 

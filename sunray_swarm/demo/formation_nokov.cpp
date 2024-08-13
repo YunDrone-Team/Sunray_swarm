@@ -14,7 +14,7 @@ float agent_height;
 string node_name;   
 sunray_msgs::orca_cmd orca_cmd;
 sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];
-sunray_msgs::rmtt_orca orca_state[MAX_AGENT_NUM];
+sunray_msgs::orca_state orca_state[MAX_AGENT_NUM];
 geometry_msgs::Point goal_N[MAX_AGENT_NUM];
 geometry_msgs::Point goal_O[MAX_AGENT_NUM];
 geometry_msgs::Point goal_K[MAX_AGENT_NUM];
@@ -44,7 +44,7 @@ void mySigintHandler(int sig)
     ROS_INFO("[formation_nokov] exit...");
     ros::shutdown();
 }
-void rmtt_orca_state_cb(const sunray_msgs::rmtt_orcaConstPtr& msg, int i)
+void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg, int i)
 {
     orca_state[i] = *msg;
 }
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
         // 【发布】无人机的目标点
         orca_goal_pub[i] = nh.advertise<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 1);
         // 【订阅】无人机orca状态
-		orca_state_sub[i] = nh.subscribe<sunray_msgs::rmtt_orca>("/sunray_swarm" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb,_1,i));
+		orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb,_1,i));
     }
 
     ros::Timer timer_show = nh.createTimer(ros::Duration(3.0), timercb_show);

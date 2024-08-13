@@ -43,35 +43,37 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     // 【参数】mLED 字符
     nh.param<string>("mled_text", mled_text.data, "yundrone");
 
-    string agent_name = "/rmtt_" + std::to_string(agent_id);
+    agent_name = "rmtt_" + std::to_string(agent_id);
     // 【订阅】订阅rmtt动捕的数据(位置+速度) vrpn -> 本节点
-    mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node"+ agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
-    mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node"+ agent_name + "/twist", 1, &RMTT_CONTROL::mocap_vel_cb, this);
+    mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
+    mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &RMTT_CONTROL::mocap_vel_cb, this);
     // 【订阅】地面站指令 地面站 -> 本节点
-    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1, &RMTT_CONTROL::agent_cmd_cb, this);
+    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 1, &RMTT_CONTROL::agent_cmd_cb, this);
     // 【订阅】rmtt电池的数据 rmtt_driver -> 本节点
-    battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm" + agent_name + "/battery", 1, &RMTT_CONTROL::battery_cb, this);  
+    battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm/" + agent_name + "/battery", 1, &RMTT_CONTROL::battery_cb, this);  
     
     // 【发布】无人机控制指令（机体系，单位：米/秒，Rad/秒）
-    agent_cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/sunray_swarm" + agent_name + "/cmd_vel", 1); 
+    agent_cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/sunray_swarm/" + agent_name + "/cmd_vel", 1); 
     // 【发布】无人机起飞指令 本节点 -> rmtt_driver
-    takeoff_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm" + agent_name + "/takeoff", 1); 
+    takeoff_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/takeoff", 1); 
     // 【发布】无人机降落指令 本节点 -> rmtt_driver
-    land_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm" + agent_name + "/land", 1); 
+    land_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/land", 1); 
     // 【发布】led灯 本节点 -> rmtt_driver
-    led_pub = nh.advertise<std_msgs::ColorRGBA>("/sunray_swarm" + agent_name + "/led", 1);
+    led_pub = nh.advertise<std_msgs::ColorRGBA>("/sunray_swarm/" + agent_name + "/led", 1);
     // 【发布】字符显示 本节点 -> rmtt_driver
-    mled_pub = nh.advertise<std_msgs::String>("/sunray_swarm" + agent_name + "/mled", 1);
+    mled_pub = nh.advertise<std_msgs::String>("/sunray_swarm/" + agent_name + "/mled", 1);
     // 【发布】智能体状态 本节点 -> 地面站
-    agent_state_pub = nh.advertise<sunray_msgs::agent_state>("/sunray_swarm" + agent_name + "/agent_state", 1); 
+    agent_state_pub = nh.advertise<sunray_msgs::agent_state>("/sunray_swarm/" + agent_name + "/agent_state", 1); 
     // 【发布】无人机位置(带图标) 本节点 -> RVIZ
-    rmtt_mesh_pub = nh.advertise<visualization_msgs::Marker>("/sunray_swarm" + agent_name + "/mesh", 1);
+    rmtt_mesh_pub = nh.advertise<visualization_msgs::Marker>("/sunray_swarm/" + agent_name + "/mesh", 1);
     // 【发布】运动轨迹  本节点 -> RVIZ
-    rmtt_trajectory_pub = nh.advertise<nav_msgs::Path>("/sunray_swarm" + agent_name + "/trajectory", 1);
+    rmtt_trajectory_pub = nh.advertise<nav_msgs::Path>("/sunray_swarm/" + agent_name + "/trajectory", 1);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 【发布】目标点marker 本节点 -> RVIZ
-    goal_point_pub = nh.advertise<visualization_msgs::Marker>("/sunray_swarm" + agent_name + "/goal_point_rviz", 1);
+    goal_point_pub = nh.advertise<visualization_msgs::Marker>("/sunray_swarm/" + agent_name + "/goal_point_rviz", 1);
+    // 【发布】速度方向 本节点 -> RVIZ
+    vel_rviz_pub = nh.advertise<geometry_msgs::TwistStamped>("/sunray_swarm/" + agent_name + "/vel_rviz", 1);
 
     // 【定时器】 定时发布agent_state - 10Hz
     timer_state_pub = nh.createTimer(ros::Duration(0.1), &RMTT_CONTROL::timercb_state, this);
@@ -587,6 +589,34 @@ void RMTT_CONTROL::timercb_rviz(const ros::TimerEvent &e)
     uav_trajectory.header.frame_id = "world";
     uav_trajectory.poses = pos_vector;
     rmtt_trajectory_pub.publish(uav_trajectory);
+
+    // 发布TF用于RVIZ显示（用于lidar）
+    static tf2_ros::TransformBroadcaster broadcaster;
+    geometry_msgs::TransformStamped tfs;
+    //  |----头设置
+    tfs.header.frame_id = "world";       //相对于世界坐标系
+    tfs.header.stamp = ros::Time::now(); //时间戳
+    //  |----坐标系 ID
+    tfs.child_frame_id = "rmtt_" + std::to_string(agent_id); + "/base_link"; //子坐标系，无人机的坐标系
+    //  |----坐标系相对信息设置  偏移量  无人机相对于世界坐标系的坐标
+    tfs.transform.translation.x = agent_state.pos[0];
+    tfs.transform.translation.y = agent_state.pos[1];
+    tfs.transform.translation.z = agent_state.pos[2];
+    //  |--------- 四元数设置
+    tfs.transform.rotation = agent_state.attitude_q;
+    //  |--------- 广播器发布数据
+    broadcaster.sendTransform(tfs);
+
+    geometry_msgs::TwistStamped vel_rviz;
+    vel_rviz.header.stamp = ros::Time::now();
+    vel_rviz.header.frame_id = agent_name + "/base_link";
+    vel_rviz.twist.linear.x = desired_vel.linear.x;
+    vel_rviz.twist.linear.y = desired_vel.linear.y;
+    vel_rviz.twist.linear.z = desired_vel.linear.z;
+    vel_rviz.twist.angular.x = desired_vel.angular.x;
+    vel_rviz.twist.angular.y = desired_vel.angular.y;
+    vel_rviz.twist.angular.z = desired_vel.angular.z;
+    vel_rviz_pub.publish(vel_rviz);
 
     if(current_agent_cmd.control_state == sunray_msgs::agent_cmd::POS_CONTROL)
     {

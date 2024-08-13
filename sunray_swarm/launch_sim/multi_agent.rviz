@@ -1,12 +1,13 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 81
+    Help Height: 111
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
         - /Status1
-      Splitter Ratio: 0.5
-    Tree Height: 929
+      Splitter Ratio: 0.45154184103012085
+    Tree Height: 899
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -50,6 +51,130 @@ Visualization Manager:
       Plane Cell Count: 20
       Reference Frame: <Fixed Frame>
       Value: true
+    - Class: rviz/Group
+      Displays:
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: rmtt1_vel
+          Queue Size: 10
+          Topic: /sunray_swarm/rmtt_1/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 3
+          Linear Color: 204; 51; 51
+          Name: rmtt2_vel
+          Queue Size: 20
+          Topic: /sunray_swarm/rmtt_2/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: rmtt3_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/rmtt_3/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: rmtt4_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/rmtt_4/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: rmtt5_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/rmtt_5/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: rmtt6_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/rmtt_6/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: rmtt7_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/rmtt_7/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: rmtt8_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/rmtt_8/vel_rviz
+          Unreliable: false
+          Value: true
+      Enabled: false
+      Name: Vel
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /sunray_swarm/rmtt_1/mesh
@@ -311,8 +436,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_1/goal_point_rviz
       Name: rmtt1_goal
       Namespaces:
-        orca_goal: true
-        ugv_goal: true
+        goal: true
       Queue Size: 1
       Value: true
     - Class: rviz/Marker
@@ -320,8 +444,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_2/goal_point_rviz
       Name: rmtt2_goal
       Namespaces:
-        orca_goal: true
-        ugv_goal: true
+        goal: true
       Queue Size: 1
       Value: true
     - Class: rviz/Marker
@@ -329,8 +452,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_3/goal_point_rviz
       Name: rmtt3_goal
       Namespaces:
-        orca_goal: true
-        ugv_goal: true
+        goal: true
       Queue Size: 1
       Value: true
     - Class: rviz/Marker
@@ -338,8 +460,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_4/goal_point_rviz
       Name: rmtt4_goal
       Namespaces:
-        orca_goal: true
-        ugv_goal: true
+        goal: true
       Queue Size: 1
       Value: true
     - Class: rviz/Marker
@@ -347,8 +468,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_5/goal_point_rviz
       Name: rmtt5_goal
       Namespaces:
-        orca_goal: true
-        ugv_goal: true
+        goal: true
       Queue Size: 1
       Value: true
     - Class: rviz/Marker
@@ -356,8 +476,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_6/goal_point_rviz
       Name: rmtt6_goal
       Namespaces:
-        orca_goal: true
-        ugv_goal: true
+        goal: true
       Queue Size: 1
       Value: true
     - Class: rviz/Marker
@@ -365,8 +484,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_7/goal_point_rviz
       Name: rmtt7_goal
       Namespaces:
-        orca_goal: true
-        ugv_goal: true
+        goal: true
       Queue Size: 1
       Value: true
     - Class: rviz/Marker
@@ -374,13 +492,61 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_8/goal_point_rviz
       Name: rmtt8_goal
       Namespaces:
-        orca_goal: true
-        ugv_goal: true
+        goal: true
       Queue Size: 1
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        rmtt_1/base_link:
+          Value: true
+        rmtt_2/base_link:
+          Value: true
+        rmtt_3/base_link:
+          Value: true
+        rmtt_4/base_link:
+          Value: true
+        rmtt_5/base_link:
+          Value: true
+        rmtt_6/base_link:
+          Value: true
+        rmtt_7/base_link:
+          Value: true
+        rmtt_8/base_link:
+          Value: true
+        world:
+          Value: true
+      Marker Alpha: 1
+      Marker Scale: 1.5
+      Name: TF
+      Show Arrows: false
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          rmtt_1/base_link:
+            {}
+          rmtt_2/base_link:
+            {}
+          rmtt_3/base_link:
+            {}
+          rmtt_4/base_link:
+            {}
+          rmtt_5/base_link:
+            {}
+          rmtt_6/base_link:
+            {}
+          rmtt_7/base_link:
+            {}
+          rmtt_8/base_link:
+            {}
+      Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
-    Background Color: 255; 255; 255
+    Background Color: 136; 138; 133
     Default Light: true
     Fixed Frame: world
     Frame Rate: 30
@@ -406,7 +572,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 30.461063385009766
+      Distance: 16.90381622314453
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -414,17 +580,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.6815460324287415
+        Y: 0.28380176424980164
+        Z: 0.30965644121170044
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.36479651927948
+      Pitch: 0.8497970104217529
       Target Frame: <Fixed Frame>
-      Yaw: 3.1667377948760986
+      Yaw: 3.1967382431030273
     Saved: ~
 Window Geometry:
   Displays:
@@ -442,5 +608,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1280
-  X: 1280
+  X: 884
   Y: 33

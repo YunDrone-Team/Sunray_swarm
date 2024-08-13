@@ -20,13 +20,9 @@ add_message_files(
   DIRECTORY msg
   FILES
   agent_state.msg
-  rmtt_orca.msg
-  rmtt_state.msg
-  station_cmd.msg
   agent_cmd.msg
   orca_state.msg
   orca_cmd.msg
-  rmtt_cmd.msg
 )
 
 generate_messages(
