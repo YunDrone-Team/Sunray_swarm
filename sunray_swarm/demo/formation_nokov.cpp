@@ -89,10 +89,28 @@ int main(int argc, char **argv)
     start_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/formation_nokov", 1, start_cmd_cb);
 
     string agent_name;
+    string agent_prefix;
+
+    if(agent_type == sunray_msgs::agent_state::RMTT)
+    {
+        agent_prefix = "rmtt_";
+    }else if(agent_type == sunray_msgs::agent_state::TIANBOT)
+    {
+        agent_prefix = "tianbot_";
+    }else if(agent_type == sunray_msgs::agent_state::WHEELTEC)
+    {
+        agent_prefix = "wheeltec_";
+    }else if(agent_type == sunray_msgs::agent_state::SIKONG)
+    {
+        agent_prefix = "sikong_";
+    }else
+    {
+        agent_prefix = "unkonown_";
+    }
 
     for(int i = 0; i < agent_num; i++) 
     {
-        agent_name = "/rmtt_" + std::to_string(i+1);
+        agent_name = "/" + agent_prefix + std::to_string(i+1);
         // 【发布】无人机的目标点
         orca_goal_pub[i] = nh.advertise<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 1);
         // 【订阅】无人机orca状态

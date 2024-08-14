@@ -6,8 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Vel1/rmtt1_vel1
-      Splitter Ratio: 0.45154184103012085
+        - /RMTT_vel1/rmtt1_vel1/Status1
+      Splitter Ratio: 0.48458150029182434
     Tree Height: 899
   - Class: rviz/Selection
     Name: Selection
@@ -52,6 +52,351 @@ Visualization Manager:
       Plane Cell Count: 20
       Reference Frame: <Fixed Frame>
       Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        rmtt_1:
+          Value: true
+        rmtt_2:
+          Value: true
+        rmtt_3:
+          Value: true
+        rmtt_4:
+          Value: true
+        rmtt_5:
+          Value: true
+        rmtt_6:
+          Value: true
+        rmtt_7:
+          Value: true
+        rmtt_8:
+          Value: true
+        tianbot_1/base_link:
+          Value: true
+        tianbot_2/base_link:
+          Value: true
+        tianbot_3/base_link:
+          Value: true
+        tianbot_4/base_link:
+          Value: true
+        tianbot_5/base_link:
+          Value: true
+        tianbot_6/base_link:
+          Value: true
+        tianbot_7/base_link:
+          Value: true
+        tianbot_8/base_link:
+          Value: true
+        world:
+          Value: true
+      Marker Alpha: 1
+      Marker Scale: 1.5
+      Name: TF
+      Show Arrows: false
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          rmtt_1:
+            {}
+          rmtt_2:
+            {}
+          rmtt_3:
+            {}
+          rmtt_4:
+            {}
+          rmtt_5:
+            {}
+          rmtt_6:
+            {}
+          rmtt_7:
+            {}
+          rmtt_8:
+            {}
+          tianbot_1/base_link:
+            {}
+          tianbot_2/base_link:
+            {}
+          tianbot_3/base_link:
+            {}
+          tianbot_4/base_link:
+            {}
+          tianbot_5/base_link:
+            {}
+          tianbot_6/base_link:
+            {}
+          tianbot_7/base_link:
+            {}
+          tianbot_8/base_link:
+            {}
+      Update Interval: 0
+      Value: true
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_8/mesh
+          Name: rmtt8_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_7/mesh
+          Name: rmtt7_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_6/mesh
+          Name: rmtt6_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_5/mesh
+          Name: rmtt5_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_4/mesh
+          Name: rmtt4_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_3/mesh
+          Name: rmtt3_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_2/mesh
+          Name: rmtt2_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/rmtt_1/mesh
+          Name: rmtt1_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: RMTT_mesh
+    - Class: rviz/Group
+      Displays:
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 255; 0; 0
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt1_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/rmtt_1/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 0; 255; 0
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt2_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/rmtt_2/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 0; 0; 255
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt3_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/rmtt_3/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 255; 255; 0
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt4_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/rmtt_4/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 255; 0; 255
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt5_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/rmtt_5/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 0; 255; 255
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt6_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/rmtt_6/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 127; 127; 127
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt7_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/rmtt_7/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 77; 179; 51
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt8_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/rmtt_8/trajectory
+          Unreliable: false
+          Value: true
+      Enabled: true
+      Name: RMTT_path
     - Class: rviz/Group
       Displays:
         - Alpha: 1
@@ -175,7 +520,7 @@ Visualization Manager:
           Unreliable: false
           Value: true
       Enabled: true
-      Name: Vel
+      Name: RMTT_vel
     - Class: rviz/Group
       Displays:
         - Class: rviz/Marker
@@ -183,7 +528,7 @@ Visualization Manager:
           Marker Topic: /sunray_swarm/rmtt_1/goal_point_rviz
           Name: rmtt1_goal
           Namespaces:
-            goal: true
+            {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
@@ -191,7 +536,7 @@ Visualization Manager:
           Marker Topic: /sunray_swarm/rmtt_2/goal_point_rviz
           Name: rmtt2_goal
           Namespaces:
-            goal: true
+            {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
@@ -199,7 +544,7 @@ Visualization Manager:
           Marker Topic: /sunray_swarm/rmtt_3/goal_point_rviz
           Name: rmtt3_goal
           Namespaces:
-            goal: true
+            {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
@@ -207,7 +552,7 @@ Visualization Manager:
           Marker Topic: /sunray_swarm/rmtt_4/goal_point_rviz
           Name: rmtt4_goal
           Namespaces:
-            goal: true
+            {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
@@ -215,7 +560,7 @@ Visualization Manager:
           Marker Topic: /sunray_swarm/rmtt_5/goal_point_rviz
           Name: rmtt5_goal
           Namespaces:
-            goal: true
+            {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
@@ -223,7 +568,7 @@ Visualization Manager:
           Marker Topic: /sunray_swarm/rmtt_6/goal_point_rviz
           Name: rmtt6_goal
           Namespaces:
-            goal: true
+            {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
@@ -231,7 +576,7 @@ Visualization Manager:
           Marker Topic: /sunray_swarm/rmtt_7/goal_point_rviz
           Name: rmtt7_goal
           Namespaces:
-            goal: true
+            {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
@@ -239,316 +584,467 @@ Visualization Manager:
           Marker Topic: /sunray_swarm/rmtt_8/goal_point_rviz
           Name: rmtt8_goal
           Namespaces:
-            goal: true
+            {}
           Queue Size: 1
           Value: true
       Enabled: true
-      Name: Goal_point
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_1/mesh
-      Name: rmtt1_mesh
-      Namespaces:
-        mesh: true
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 255; 0; 0
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: rmtt1_path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 1
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /sunray_swarm/rmtt_1/trajectory
-      Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_2/mesh
-      Name: rmtt2_mesh
-      Namespaces:
-        mesh: true
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 0; 255; 0
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: rmtt2_path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 1
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /sunray_swarm/rmtt_2/trajectory
-      Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_3/mesh
-      Name: rmtt3_mesh
-      Namespaces:
-        mesh: true
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 0; 0; 255
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: rmtt3_path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 1
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /sunray_swarm/rmtt_3/trajectory
-      Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_4/mesh
-      Name: rmtt4_mesh
-      Namespaces:
-        mesh: true
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 255; 255; 0
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: rmtt4_path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 1
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /sunray_swarm/rmtt_4/trajectory
-      Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_5/mesh
-      Name: rmtt5_mesh
-      Namespaces:
-        mesh: true
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 255; 0; 255
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: rmtt5_path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 1
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /sunray_swarm/rmtt_5/trajectory
-      Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_6/mesh
-      Name: rmtt6_mesh
-      Namespaces:
-        mesh: true
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 0; 255; 255
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: rmtt6_path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 1
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /sunray_swarm/rmtt_6/trajectory
-      Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_7/mesh
-      Name: rmtt7_mesh
-      Namespaces:
-        mesh: true
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 127; 127; 127
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: rmtt7_path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 1
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /sunray_swarm/rmtt_7/trajectory
-      Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /sunray_swarm/rmtt_8/mesh
-      Name: rmtt8_mesh
-      Namespaces:
-        mesh: true
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 77; 179; 51
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: rmtt8_path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 1
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /sunray_swarm/rmtt_8/trajectory
-      Unreliable: false
-      Value: true
-    - Class: rviz/TF
-      Enabled: true
-      Frame Timeout: 15
-      Frames:
-        All Enabled: true
-        rmtt_1/base_link:
+      Name: RMTT_goalpoint
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_8/mesh
+          Name: tianbot8_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
           Value: true
-        rmtt_2/base_link:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_7/mesh
+          Name: tianbot7_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
           Value: true
-        rmtt_3/base_link:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_6/mesh
+          Name: tianbot6_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
           Value: true
-        rmtt_4/base_link:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_5/mesh
+          Name: tianbot5_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
           Value: true
-        rmtt_5/base_link:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_4/mesh
+          Name: tianbot4_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
           Value: true
-        rmtt_6/base_link:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_3/mesh
+          Name: tianbot3_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
           Value: true
-        rmtt_7/base_link:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_2/mesh
+          Name: tianbot2_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
           Value: true
-        rmtt_8/base_link:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_1/mesh
+          Name: tianbot1_mesh
+          Namespaces:
+            mesh: true
+          Queue Size: 100
           Value: true
-        world:
+      Enabled: true
+      Name: Tianbot_mesh
+    - Class: rviz/Group
+      Displays:
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 255; 0; 0
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt1_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/tianbot_1/trajectory
+          Unreliable: false
           Value: true
-      Marker Alpha: 1
-      Marker Scale: 1.5
-      Name: TF
-      Show Arrows: false
-      Show Axes: true
-      Show Names: true
-      Tree:
-        world:
-          rmtt_1/base_link:
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 0; 255; 0
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt2_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/tianbot_2/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 0; 0; 255
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt3_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/tianbot_3/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 255; 255; 0
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt4_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/tianbot_4/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 255; 0; 255
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt5_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/tianbot_5/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 0; 255; 255
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt6_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/tianbot_6/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 127; 127; 127
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt7_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/tianbot_7/trajectory
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 77; 179; 51
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: rmtt8_path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 1
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /sunray_swarm/tianbot_8/trajectory
+          Unreliable: false
+          Value: true
+      Enabled: true
+      Name: Tianbot_path
+    - Class: rviz/Group
+      Displays:
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: tianbot1_vel
+          Queue Size: 10
+          Topic: /sunray_swarm/tianbot_1/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 3
+          Linear Color: 204; 51; 51
+          Name: tianbot2_vel
+          Queue Size: 20
+          Topic: /sunray_swarm/tianbot_2/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: tianbot3_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/tianbot_3/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: tianbot4_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/tianbot_4/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: tianbot5_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/tianbot_5/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: tianbot6_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/tianbot_6/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: tianbot7_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/tianbot_7/vel_rviz
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Angular Arrow Scale: 3
+          Angular Color: 204; 204; 51
+          Arrow Width: 1
+          Class: rviz/TwistStamped
+          Enabled: true
+          Hide Small Values: false
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: tianbot8_vel
+          Queue Size: 1
+          Topic: /sunray_swarm/tianbot_8/vel_rviz
+          Unreliable: false
+          Value: true
+      Enabled: true
+      Name: Tianbot_vel
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_1/goal_point_rviz
+          Name: tianbot1_goal
+          Namespaces:
             {}
-          rmtt_2/base_link:
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_2/goal_point_rviz
+          Name: tianbot2_goal
+          Namespaces:
             {}
-          rmtt_3/base_link:
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_3/goal_point_rviz
+          Name: tianbot3_goal
+          Namespaces:
             {}
-          rmtt_4/base_link:
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_4/goal_point_rviz
+          Name: tianbot4_goal
+          Namespaces:
             {}
-          rmtt_5/base_link:
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_5/goal_point_rviz
+          Name: tianbot5_goal
+          Namespaces:
             {}
-          rmtt_6/base_link:
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_6/goal_point_rviz
+          Name: tianbot6_goal
+          Namespaces:
             {}
-          rmtt_7/base_link:
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_7/goal_point_rviz
+          Name: tianbot7_goal
+          Namespaces:
             {}
-          rmtt_8/base_link:
+          Queue Size: 1
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /sunray_swarm/tianbot_8/goal_point_rviz
+          Name: tianbot8_goal
+          Namespaces:
             {}
-      Update Interval: 0
-      Value: true
+          Queue Size: 1
+          Value: true
+      Enabled: true
+      Name: Tianbot_goalpoint
   Enabled: true
   Global Options:
     Background Color: 136; 138; 133
@@ -577,7 +1073,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 26.59848403930664
+      Distance: 20.214847564697266
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -613,5 +1109,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1280
-  X: 1280
-  Y: 33
+  X: 482
+  Y: 44

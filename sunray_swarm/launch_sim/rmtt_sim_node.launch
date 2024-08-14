@@ -1,6 +1,6 @@
 <launch>
     <!-- 启动agent_sim_node -->
-    <node pkg="sunray_swarm" type="agent_sim_node" name="agent_sim_node_1" output="screen">
+    <node pkg="sunray_swarm" type="agent_sim_node" name="rmtt_sim_node_1" output="screen">
         <param name="agent_id" value="1" />
         <param name="init_pos_x" value="-2.0" />
         <param name="init_pos_y" value="4.0" />
@@ -8,7 +8,7 @@
     </node>
 
     <!-- 启动agent_sim_node -->
-    <node pkg="sunray_swarm" type="agent_sim_node" name="agent_sim_node_2" output="screen">
+    <node pkg="sunray_swarm" type="agent_sim_node" name="rmtt_sim_node_2" output="screen">
         <param name="agent_id" value="2" />
         <param name="init_pos_x" value="-2.0" />
         <param name="init_pos_y" value="2.0" />
@@ -17,7 +17,7 @@
     </node>
 
     <!-- 启动agent_sim_node -->
-    <node pkg="sunray_swarm" type="agent_sim_node" name="agent_sim_node_3" output="screen">
+    <node pkg="sunray_swarm" type="agent_sim_node" name="rmtt_sim_node_3" output="screen">
         <param name="agent_id" value="3" />
         <param name="init_pos_x" value="-2.0" />
         <param name="init_pos_y" value="-2.0" />
@@ -26,7 +26,7 @@
     </node>
 
     <!-- 启动agent_sim_node -->
-    <node pkg="sunray_swarm" type="agent_sim_node" name="agent_sim_node_4" output="screen">
+    <node pkg="sunray_swarm" type="agent_sim_node" name="rmtt_sim_node_4" output="screen">
         <param name="agent_id" value="4" />
         <param name="init_pos_x" value="-2.0" />
         <param name="init_pos_y" value="-4.0" />
@@ -35,7 +35,7 @@
     </node>
 
     <!-- 启动agent_sim_node -->
-    <node pkg="sunray_swarm" type="agent_sim_node" name="agent_sim_node_5" output="screen">
+    <node pkg="sunray_swarm" type="agent_sim_node" name="rmtt_sim_node_5" output="screen">
         <param name="agent_id" value="5" />
         <param name="init_pos_x" value="2.0" />
         <param name="init_pos_y" value="4.0" />
@@ -44,7 +44,7 @@
     </node>
 
     <!-- 启动agent_sim_node -->
-    <node pkg="sunray_swarm" type="agent_sim_node" name="agent_sim_node_6" output="screen">
+    <node pkg="sunray_swarm" type="agent_sim_node" name="rmtt_sim_node_6" output="screen">
         <param name="agent_id" value="6" />
         <param name="init_pos_x" value="2.0" />
         <param name="init_pos_y" value="2.0" />
@@ -53,7 +53,7 @@
     </node>
 
     <!-- 启动agent_sim_node -->
-    <node pkg="sunray_swarm" type="agent_sim_node" name="agent_sim_node_7" output="screen">
+    <node pkg="sunray_swarm" type="agent_sim_node" name="rmtt_sim_node_7" output="screen">
         <param name="agent_id" value="7" />
         <param name="init_pos_x" value="2.0" />
         <param name="init_pos_y" value="-2.0" />
@@ -62,7 +62,7 @@
     </node>
 
     <!-- 启动agent_sim_node -->
-    <node pkg="sunray_swarm" type="agent_sim_node" name="agent_sim_node_8" output="screen">
+    <node pkg="sunray_swarm" type="agent_sim_node" name="rmtt_sim_node_8" output="screen">
         <param name="agent_id" value="8" />
         <param name="init_pos_x" value="2.0" />
         <param name="init_pos_y" value="-4.0" />

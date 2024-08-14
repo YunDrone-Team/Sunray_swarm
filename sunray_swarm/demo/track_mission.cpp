@@ -59,13 +59,32 @@ int main(int argc, char **argv)
 
     printf_params();
 
+    string agent_prefix;
+
+    if(agent_type == sunray_msgs::agent_state::RMTT)
+    {
+        agent_prefix = "rmtt_";
+    }else if(agent_type == sunray_msgs::agent_state::TIANBOT)
+    {
+        agent_prefix = "tianbot_";
+    }else if(agent_type == sunray_msgs::agent_state::WHEELTEC)
+    {
+        agent_prefix = "wheeltec_";
+    }else if(agent_type == sunray_msgs::agent_state::SIKONG)
+    {
+        agent_prefix = "sikong_";
+    }else
+    {
+        agent_prefix = "unkonown_";
+    }
+
     // 【发布】文字提示消息（回传至地面站显示）
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
     string agent_name;
     for(int i = 0; i < agent_num; i++) 
     {
-        agent_name = "/rmtt_" + std::to_string(i+1);
+        agent_name = "/" + agent_prefix + std::to_string(i+1);
         target_name = "/" + target_name + "_" + std::to_string(i+1);
         target_pos_sub[i] = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node"+ target_name + "/pose", 1, boost::bind(&target_pos_cb,_1,i));
         // 【发布】无人车控制指令
