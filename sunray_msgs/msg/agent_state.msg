@@ -3,7 +3,7 @@ std_msgs/Header header
 ## 基本状态
 uint8 agent_type              ## 智能体类型
 uint8 agent_id                ## 智能体编号
-string agent_ip                 ## 智能体IP
+string agent_ip               ## 智能体IP
 bool connected                ## 是否连接上智能体驱动
 bool odom_valid               ## 是否收到动捕数据
 
@@ -16,7 +16,7 @@ geometry_msgs/Quaternion attitude_q ## 四元数
 ## 智能体电池状态
 float32 battery                ## [0-1]
 
-## 智能体控制状态
+## 智能体当前执行的控制状态
 uint8 control_state
 
 ## agent_type枚举

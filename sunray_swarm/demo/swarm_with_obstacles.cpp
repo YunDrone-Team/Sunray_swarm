@@ -41,7 +41,7 @@ ros::Publisher orca_goal_pub[MAX_AGENT_NUM];
 
 void mySigintHandler(int sig)
 {
-    ROS_INFO("[formation_nokov] exit...");
+    ROS_INFO("[swarm_with_obstacles] exit...");
     ros::shutdown();
 }
 void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg, int i)
@@ -64,9 +64,36 @@ void printf_params()
     cout << GREEN << "agent_num     : " << agent_num << "" << TAIL << endl;
     cout << GREEN << "agent_height   : " << agent_height << "" << TAIL << endl;
 }
+
+void setup_obstacles()
+{
+    orca_cmd.cmd_source = "demo";
+    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SETUP_OBS;
+	// 障碍物示例：中心在原点，边长为2的正方体
+
+    geometry_msgs::Point Point1,Point2,Point3,Point4;
+    Point1.x = 1.0;
+    Point1.y = 1.0;
+    Point2.x = -1.0;
+    Point2.y = 1.0;
+    Point3.x = -1.0;
+    Point3.y = -1.0;
+    Point4.x = 1.0;
+    Point4.y = -1.0;
+
+    orca_cmd.obs_point.push_back(Point1);
+    orca_cmd.obs_point.push_back(Point2);
+    orca_cmd.obs_point.push_back(Point3);
+    orca_cmd.obs_point.push_back(Point4);
+
+    orca_cmd_pub.publish(orca_cmd);
+    cout << GREEN << "setup_obstacles" << TAIL << endl;
+
+    // 发布RVIZ
+}
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "formation_nokov");
+    ros::init(argc, argv, "swarm_with_obstacles");
     ros::NodeHandle nh("~");
     ros::Rate rate(20.0);
     node_name = ros::this_node::getName();
@@ -105,7 +132,7 @@ int main(int argc, char **argv)
     // 【发布】文字提示消息（回传至地面站显示）
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 【订阅】程序触发指令
-    start_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/formation_nokov", 1, start_cmd_cb);
+    start_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/swarm_with_obstacles", 1, start_cmd_cb);
 
     for(int i = 0; i < agent_num; i++) 
     {
@@ -118,6 +145,8 @@ int main(int argc, char **argv)
 
     ros::Timer timer_show = nh.createTimer(ros::Duration(3.0), timercb_show);
 
+    sleep(1.0);
+    setup_obstacles();
     setup_show_goals();
 
     formation_state = FORMATION_STATE::INIT;
@@ -288,40 +317,43 @@ int main(int argc, char **argv)
 void setup_show_goals()
 {
     // 字母 N
-    goal_N[0].x = -1.0; goal_N[0].y = 1.5;   // 顶部左端
-    goal_N[1].x = 1.2; goal_N[1].y = 1.5;  // 底部左端
-    goal_N[2].x = 0.1; goal_N[2].y = 0.15;   // 中部交点
-    goal_N[3].x = 1.2; goal_N[3].y = -1.3;  // 顶部右端
-    goal_N[4].x = -1.0; goal_N[4].y = -1.3; // 底部右端
+    goal_N[0].x = -3.0; goal_N[0].y = 3.5;   // 顶部左端
+    goal_N[1].x = 2.2; goal_N[1].y = 1.5;  // 底部左端
+    goal_N[2].x = 5.1; goal_N[2].y = 4.15;   // 中部交点
+    goal_N[3].x = 6.2; goal_N[3].y = -2.3;  // 顶部右端
+    goal_N[4].x = -7.0; goal_N[4].y = -1.3; // 底部右端
     goal_N[5].x = 3.0; goal_N[5].y = 4.15;   // 中部交点
     goal_N[6].x = 3.2; goal_N[6].y = -4.3;  // 顶部右端
     goal_N[7].x = -2.0; goal_N[7].y = -4.3; // 底部右端
 
     // 字母 O
-    goal_O[0].x = 0.1;  goal_O[0].y = 1.5;  // 上部中点
-    goal_O[1].x = 1.4;  goal_O[1].y = 0.5; // 下部中点
-    goal_O[2].x = -0.8; goal_O[2].y = 0.0;  // 上部边点
-    goal_O[3].x = 1.4; goal_O[3].y = -0.5; // 下部边点
-    goal_O[4].x = 0.1;  goal_O[4].y = -1.5;  // 中心点
-    goal_O[5].x = 3.0; goal_O[5].y = 4.15;   // 中部交点
+    goal_O[0].x = 5.1;  goal_O[0].y = 1.5;  // 上部中点
+    goal_O[1].x = -4.4;  goal_O[1].y = 0.5; // 下部中点
+    goal_O[2].x = -4.8; goal_O[2].y = 4.0;  // 上部边点
+    goal_O[3].x = 2.4; goal_O[3].y = -0.5; // 下部边点
+    goal_O[4].x = -8.1;  goal_O[4].y = -1.5;  // 中心点
+    goal_O[5].x = 5.0; goal_O[5].y = 4.15;   // 中部交点
     goal_O[6].x = 3.2; goal_O[6].y = -4.3;  // 顶部右端
     goal_O[7].x = -2.0; goal_O[7].y = -4.3; // 底部右端
     // 字母 K
-    goal_K[0].x = 0.1; goal_K[0].y = 0.9;  // 上部交点
-    goal_K[1].x = 1.2; goal_K[1].y = 0.9; // 下部交点
-    goal_K[2].x = -0.8; goal_K[2].y = 0.9;  // 中部竖线
-    goal_K[3].x = 1.2; goal_K[3].y = -0.9;  // 斜线上端
-    goal_K[4].x = -0.8; goal_K[4].y = -0.9; // 斜线下端
+    goal_K[0].x = 8.1; goal_K[0].y = 3.9;  // 上部交点
+    goal_K[1].x = 7.2; goal_K[1].y = 0.9; // 下部交点
+    goal_K[2].x = -4.8; goal_K[2].y = 0.9;  // 中部竖线
+    goal_K[3].x = 3.2; goal_K[3].y = -2.9;  // 斜线上端
+    goal_K[4].x = -5.8; goal_K[4].y = -0.9; // 斜线下端
     goal_K[5].x = 3.0; goal_K[5].y = 4.15;   // 中部交点
     goal_K[6].x = 3.2; goal_K[6].y = -4.3;  // 顶部右端
     goal_K[7].x = -2.0; goal_K[7].y = -4.3; // 底部右端
     // 字母 V
-    goal_V[0].x = 0.1;  goal_V[0].y = 0.6;  // 左上点
-    goal_V[1].x = 1.1;  goal_V[1].y = 1.1; // 右上点
-    goal_V[2].x = -0.7;  goal_V[2].y = 0.0;  // 底部点
-    goal_V[3].x = 1.1;  goal_V[3].y = -1.1;  // 左下点
-    goal_V[4].x = 0.1;  goal_V[4].y = -0.6; // 右下点
+    goal_V[0].x = 0.1;  goal_V[0].y = 4.6;  // 左上点
+    goal_V[1].x = 1.1;  goal_V[1].y = 2.1; // 右上点
+    goal_V[2].x = -4.7;  goal_V[2].y = -4.0;  // 底部点
+    goal_V[3].x = 1.1;  goal_V[3].y = -5.1;  // 左下点
+    goal_V[4].x = 0.1;  goal_V[4].y = -3.6; // 右下点
     goal_V[5].x = 3.0; goal_V[5].y = 4.15;   // 中部交点
     goal_V[6].x = 3.2; goal_V[6].y = -4.3;  // 顶部右端
     goal_V[7].x = -2.0; goal_V[7].y = -4.3; // 底部右端
+
+    cout << GREEN << "setup_show_goals" << TAIL << endl;
+
 }

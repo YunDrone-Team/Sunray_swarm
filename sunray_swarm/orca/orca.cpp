@@ -23,8 +23,6 @@ void ORCA::init(ros::NodeHandle& nh)
     nh.param<float>("orca_params/time_step", orca_params.time_step, 0.1);
 
     // 初始化订阅器和发布器
-    // 【订阅】ORCA指令 外部 -> 本节点
-    orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm/orca_cmd", 10, &ORCA::orca_cmd_cb, this);
     // 【发布】文字提示消息（回传至地面站显示）
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 初始化 goal_reached_printed
@@ -47,6 +45,9 @@ void ORCA::init(ros::NodeHandle& nh)
     {
         agent_prefix = "/unkonown_";
     }
+
+    // 【订阅】ORCA指令 外部 -> 本节点
+    orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm" + agent_prefix + "/orca_cmd", 10, &ORCA::orca_cmd_cb, this);
 
     for(int i = 0; i < agent_num; i++) 
     {
@@ -161,8 +162,8 @@ bool ORCA::orca_run()
     // 循环遍历每个智能体，更新并发布ORCA状态信息
     for(int i = 0; i < agent_num; i++) 
     {
-        agent_orca_state[i].mission_state = 0;
-        agent_orca_state[i].uav_id = i+1;
+        agent_orca_state[i].agent_num = agent_num;
+        agent_orca_state[i].agent_id = i+1;
         agent_orca_state[i].arrived_goal = arrived_goal[i];
         agent_orca_state[i].arrived_all_goal = arrived_all_goal;
         RVO::Vector2 rvo_goal = sim->getAgentGoal(i);
@@ -202,7 +203,8 @@ bool ORCA::orca_run()
 void ORCA::setup_agents()
 {
     // 设置算法参数
-	// sim->setAgentDefaults(5.0f, 10, 2.0f, 2.0f, 0.5f, 0.5f);
+	// sim->setAgentDefaults(1.5f, 10, 2.0f, 2.0f, 0.5f, 0.5f);
+    // sim->setAgentDefaults(15.0f, 10, 5.0f, 5.0f, 2.0f, 2.0f);
     sim->setAgentDefaults(orca_params.neighborDist, orca_params.maxNeighbors, orca_params.timeHorizon, 
                     orca_params.timeHorizonObst, orca_params.radius, orca_params.maxSpeed);
 	// 设置时间间隔（这个似乎没有用？）
@@ -351,9 +353,8 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         }
         // ORCA算法初始化 - 添加当前为目标点（意味着起飞后无人机已经抵达对应目标点）
         setup_init_goals();
-        cout << BLUE << node_name << ":  ORCA start" << TAIL << endl;
-        text_info.data = "ORCA start"; 
-        text_info_pub.publish(text_info);
+        text_info.data = "Get orca_cmd: SET_HOME, ORCA start!"; 
+        cout << BLUE << node_name << text_info.data << TAIL << endl;
     }
 
     if(msg->orca_cmd == sunray_msgs::orca_cmd::RETURN_HOME)
@@ -381,83 +382,89 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
             }
             goal_reached_printed[i] = false;
         }
-        cout << BLUE << node_name << ":  Get orca_cmd: RETURN_HOME" << TAIL << endl;
         text_info.data = "Get orca_cmd: RETURN_HOME"; 
-        text_info_pub.publish(text_info);
+        cout << BLUE << node_name << text_info.data << TAIL << endl;
     }
 
-    // 一次性设置所有目标点
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SETUP)
+    if(msg->orca_cmd == sunray_msgs::orca_cmd::SETUP_OBS)
     {
-        // 初始化arrived_goal
+	    std::vector<RVO::Vector2> obstacle;
+
+        for(int i = 0; i < msg->obs_point.size(); i++) 
+        {
+            obstacle.push_back(RVO::Vector2(msg->obs_point[i].x, msg->obs_point[i].y));
+            cout << BLUE << node_name << "Add obstacle point_"<< i << " at ["<< msg->obs_point[i].x << "," << msg->obs_point[i].y << "]"<< TAIL << endl;
+        }
+        // 在算法中添加障碍物
+        sim->addObstacle(obstacle);
+        // 在算法中处理障碍物信息
+        sim->processObstacles();
+
+        text_info.data = "Received orca_cmd: SETUP_OBS"; 
+        cout << BLUE << node_name << text_info.data << TAIL << endl;
+    }
+
+    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_1)
+    {
         for(int i = 0; i < agent_num; i++) 
         {
             arrived_goal[i] = false;
         }
         arrived_all_goal = false;
-
-        if(msg->scenario_id == 1)
-        {
-            // 场景1的目标点设置
-            setup_scenario_1();
-            cout << BLUE << node_name << ":  Get orca_cmd: ORCA_SETUP, ID: " << int(msg->scenario_id) << TAIL << endl;
-            text_info.data = "Received orca_cmd: ORCA_SETUP, ID: 1"; 
-        }
-        else if(msg->scenario_id == 2)
-        {
-            // 场景2的目标点设置
-            setup_scenario_2();
-            cout << BLUE << node_name << ":  Get orca_cmd: ORCA_SETUP, ID: " << int(msg->scenario_id) << TAIL << endl;
-            text_info.data = "Received orca_cmd: ORCA_SETUP, ID: 2"; 
-        }
-        else if(msg->scenario_id == 3)
-        {
-            // 场景3的目标点设置
-            setup_scenario_3();
-            cout << BLUE << node_name << ":  Get orca_cmd: ORCA_SETUP, ID: " << int(msg->scenario_id) << TAIL << endl;
-            text_info.data = "Received orca_cmd: ORCA_SETUP, ID: 3"; 
-        }
-        else if(msg->scenario_id == 4)
-        {
-            // 场景4的目标点设置
-            setup_scenario_4();
-            cout << BLUE << node_name << ":  Get orca_cmd: ORCA_SETUP, ID: " << int(msg->scenario_id) << TAIL << endl;
-            text_info.data = "Received orca_cmd: ORCA_SETUP, ID: 4"; 
-        }
-        else if(msg->scenario_id == 5)
-        {
-            // 场景5的目标点设置
-            setup_scenario_5();
-            cout << BLUE << node_name << ":  Get orca_cmd: ORCA_SETUP, ID: " << int(msg->scenario_id) << TAIL << endl;
-            text_info.data = "Received orca_cmd: ORCA_SETUP, ID: 5"; 
-        }else if(msg->scenario_id == 99)
-        {
-            // 自定义，来自goal话题
-            goals.clear();
-            for (int i = 0; i < agent_num; i++)  
-            {  
-                goals.push_back(RVO::Vector2(agent_goal[i].x, agent_goal[i].y));
-            }
-
-            for (int i = 0; i < agent_num; i++)  
-            {   
-                if (i < goals.size()) 
-                {
-                    sim->setAgentGoal(i, goals[i]);
-                    cout << BLUE << node_name << ":  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
-                }
-                goal_reached_printed[i] = false;
-            }
-            cout << BLUE << node_name << ":  Get orca_cmd: ORCA_SETUP, ID: " << msg->scenario_id << TAIL << endl;
-            text_info.data = "Received orca_cmd: ORCA_SETUP, ID: 99"; 
-        }
-        else
-        {
-            cout << RED << node_name << ": Invalid scenario_id: " << msg->scenario_id << TAIL << endl;
-            text_info.data = "Received orca_cmd: ORCA_SETUP, Invalid ID"; 
-        }
-        text_info_pub.publish(text_info);
+        setup_scenario_1();
+        text_info.data = "Received orca_cmd: ORCA_SCENARIO_1"; 
+        cout << BLUE << node_name << text_info.data << TAIL << endl;
     }
+
+    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_2)
+    {
+        for(int i = 0; i < agent_num; i++) 
+        {
+            arrived_goal[i] = false;
+        }
+        arrived_all_goal = false;
+        setup_scenario_2();
+        text_info.data = "Received orca_cmd: ORCA_SCENARIO_2"; 
+        cout << BLUE << node_name << text_info.data << TAIL << endl;
+    }
+
+    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_3)
+    {
+        for(int i = 0; i < agent_num; i++) 
+        {
+            arrived_goal[i] = false;
+        }
+        arrived_all_goal = false;
+        setup_scenario_3();
+        text_info.data = "Received orca_cmd: ORCA_SCENARIO_3"; 
+        cout << BLUE << node_name << text_info.data << TAIL << endl;
+    }
+
+    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_4)
+    {
+        for(int i = 0; i < agent_num; i++) 
+        {
+            arrived_goal[i] = false;
+        }
+        arrived_all_goal = false;
+        setup_scenario_4();
+        text_info.data = "Received orca_cmd: ORCA_SCENARIO_4"; 
+        cout << BLUE << node_name << text_info.data << TAIL << endl;
+    }
+
+    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_5)
+    {
+        for(int i = 0; i < agent_num; i++) 
+        {
+            arrived_goal[i] = false;
+        }
+        arrived_all_goal = false;
+        setup_scenario_5();
+        text_info.data = "Received orca_cmd: ORCA_SCENARIO_5"; 
+        cout << BLUE << node_name << text_info.data << TAIL << endl;
+    }
+
+    text_info_pub.publish(text_info);
 }
 
 void ORCA::printf_param()

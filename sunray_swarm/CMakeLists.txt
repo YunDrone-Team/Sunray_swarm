@@ -108,6 +108,12 @@ add_executable(formation_nokov demo/formation_nokov.cpp)
 add_dependencies(formation_nokov sunray_swarm_gencpp)
 target_link_libraries(formation_nokov ${catkin_LIBRARIES})
 
+## DEMO - 有固定障碍物情况下的集群避障
+add_executable(swarm_with_obstacles demo/swarm_with_obstacles.cpp)
+add_dependencies(swarm_with_obstacles sunray_swarm_gencpp)
+target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
+
+
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}

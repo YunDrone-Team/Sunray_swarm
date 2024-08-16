@@ -1,19 +1,19 @@
 std_msgs/Header header
 
-## 当指定ID的时候，只有指定的ID响应
+## 当指定ID的时候，只有指定的ID响应(agent_id=99时，默认响应)
 uint8 agent_id  
 
-## 状态机指令
+## 控制指令
 uint8 control_state   
 
-## 指令来源
+## 控制指令来源
 string cmd_source
 
 ## 期望位置、偏航角 -> 对应POS_CONTROL模式
 geometry_msgs/Point desired_pos    ## [m]
 float32 desired_yaw                 ## [rad]
 
-## 期望速度 -> 对应VEL_CONTROL模式
+## 期望速度 -> 对应VEL_CONTROL_BODY和VEL_CONTROL_ENU模式
 geometry_msgs/Twist desired_vel
 
 ## control_state枚举

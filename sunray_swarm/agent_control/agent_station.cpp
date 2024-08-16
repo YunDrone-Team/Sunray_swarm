@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 
     string agent_name = agent_prefix + std::to_string(agent_id);
 
-	ros::Publisher orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm/orca_cmd", 1);	
+	ros::Publisher orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm" + agent_prefix + "/orca_cmd", 1);	
 
     for(int i = 0; i < agent_num; i++) 
     {
@@ -146,26 +146,32 @@ int main(int argc, char **argv)
 				break;
 
 			case 99:
-				cout << GREEN << "orca_cmd: 0 for SET_HOME, 1 for ORCA_SETUP, 2 for RETURN_HOME" << TAIL << endl;
+				cout << GREEN << "orca_cmd: 0 for SET_HOME, 1 for RETURN_HOME, 2 for ORCA_SCENARIO_1, 3 for ORCA_SCENARIO_2, 4 for ORCA_SCENARIO_3, 5 for ORCA_SCENARIO_4, 6 for ORCA_SCENARIO_5" << TAIL << endl;
 				cin >> start_cmd;
 				if(start_cmd == 0)
 				{
 					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
-					orca_cmd_pub.publish(orca_cmd);
 				}else if(start_cmd == 1)
 				{
-					cout << GREEN << "choose scenario_id: 1-5 "  << TAIL << endl;
-					int scenario_id;
-					cin >> scenario_id;
-					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SETUP;
-					orca_cmd.scenario_id = scenario_id;
-					orca_cmd_pub.publish(orca_cmd);
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME;
 				}else if(start_cmd == 2)
 				{
-					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME;
-					orca_cmd_pub.publish(orca_cmd);
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_1;
+				}else if(start_cmd == 3)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_2;
+				}else if(start_cmd == 4)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_3;
+				}else if(start_cmd == 5)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_4;
+				}else if(start_cmd == 6)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_5;
 				}
-				
+				orca_cmd_pub.publish(orca_cmd);
+
 				break;
 
 			default:

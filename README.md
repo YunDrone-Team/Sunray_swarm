@@ -56,6 +56,15 @@ roslaunch sunray_swarm formation_nokov.launch
 rostopic pub /sunray_swarm/formation_nokov std_msgs/Bool "data: false" 
 ```
 
+```
+## 多智能体ORCA仿真测试 - 固定障碍点
+cd Sunray_swarm
+./sim_multi_ugv_orca.sh
+## 启动阵型任务节点
+roslaunch sunray_swarm swarm_with_obstacles.launch
+## 新建终端发布如下指令开始阵型
+rostopic pub /sunray_swarm/swarm_with_obstacles std_msgs/Bool "data: false" 
+```
 
 ## 真机测试
 

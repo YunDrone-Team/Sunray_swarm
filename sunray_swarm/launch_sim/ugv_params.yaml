@@ -26,11 +26,11 @@ ugv_geo_fence:
 
 orca_params:
   ## 无人机之间的假象感知距离
-  neighborDist : 1.5
+  neighborDist : 2.0
   # 数字越大，无人机响应相邻无人机的碰撞越快，但速度可选的自由度越小
   timeHorizon : 2.0
   ## 数字越大，无人机响应障碍物的碰撞越快，但速度可选的自由度越小
-  timeHorizonObst : 2.0
+  timeHorizonObst : 4.0
   ## 无人机体积半径
   radius : 0.35
   ## 无人机最大速度

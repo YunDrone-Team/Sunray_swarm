@@ -33,7 +33,6 @@ class AGENT_SIM
         sunray_msgs::agent_cmd current_agent_cmd;
 
         geometry_msgs::Twist cmd_vel;
-        sunray_msgs::orca_state agent_orca_state;
         geometry_msgs::PoseStamped agent_pos;
         double agent_yaw;
 
