@@ -5,6 +5,7 @@
 #include "visualization_msgs/Marker.h"
 #include "sunray_msgs/agent_cmd.h"
 #include "sunray_msgs/orca_cmd.h"
+#include "printf_utils.h"
 
 using namespace std;
 

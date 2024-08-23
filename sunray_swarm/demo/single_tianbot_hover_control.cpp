@@ -3,6 +3,7 @@
 #include "sunray_msgs/agent_cmd.h"
 #include "geometry_msgs/Point.h"
 #include <iostream>
+#include "printf_utils.h"
 
 using namespace std;
 
