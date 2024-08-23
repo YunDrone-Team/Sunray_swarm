@@ -113,6 +113,43 @@ add_executable(swarm_with_obstacles demo/swarm_with_obstacles.cpp)
 add_dependencies(swarm_with_obstacles sunray_swarm_gencpp)
 target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
 
+##DEMO -单机悬停控制
+add_executable(single_rmtt_hover demo/single_rmtt_hover_control.cpp)
+add_dependencies(single_rmtt_hover sunray_swarm_gencpp)
+target_link_libraries(single_rmtt_hover ${catkin_LIBRARIES})
+
+add_executable(single_tianbot_hover demo/single_tianbot_hover_control.cpp)
+add_dependencies(single_tianbot_hover sunray_swarm_gencpp)
+target_link_libraries(single_tianbot_hover ${catkin_LIBRARIES})
+
+
+##DEMO -单机航点控制
+add_executable(single_rmtt_waypoint demo/single_rmtt_waypoint_control.cpp)
+add_dependencies(single_rmtt_waypoint sunray_swarm_gencpp)
+target_link_libraries(single_rmtt_waypoint ${catkin_LIBRARIES})
+
+add_executable(single_tianbot_waypoint demo/single_tianbot_waypoint_control.cpp)
+add_dependencies(single_tianbot_waypoint sunray_swarm_gencpp)
+target_link_libraries(single_tianbot_waypoint ${catkin_LIBRARIES})
+
+
+##DEMO -单机圆形轨迹跟踪
+add_executable(single_rmtt_circle demo/single_rmtt_circle_control.cpp)
+add_dependencies(single_rmtt_circle sunray_swarm_gencpp)
+target_link_libraries(single_rmtt_circle ${catkin_LIBRARIES})
+
+add_executable(single_tianbot_circle demo/single_tianbot_circle_control.cpp)
+add_dependencies(single_tianbot_circle sunray_swarm_gencpp)
+target_link_libraries(single_tianbot_circle ${catkin_LIBRARIES})
+
+##DEMO -单机路径规划
+add_executable(single_rmtt_slam demo/single_rmtt_slam_control.cpp)
+add_dependencies(single_rmtt_slam sunray_swarm_gencpp)
+target_link_libraries(single_rmtt_slam ${catkin_LIBRARIES})
+
+add_executable(single_tianbot_slam demo/single_tianbot_slam_control.cpp)
+add_dependencies(single_tianbot_slam sunray_swarm_gencpp)
+target_link_libraries(single_tianbot_slam ${catkin_LIBRARIES})
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
