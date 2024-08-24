@@ -15,6 +15,8 @@ float time_trajectory = 0.0;
 float trajectory_total_time;
 float omega;
 
+int start_cmd = 0;
+
 // 处理信号，确保ROS节点可以正确退出
 void mySigintHandler(int sig) {
     ROS_INFO("[circle_trajectory] exit...");
@@ -35,6 +37,19 @@ void initParams(ros::NodeHandle& nh) {
 
     // ROS_INFO_STREAM("Params -> Yaw: " << desired_yaw << ", Radius: " << circle_radius << ", Linear Velocity: " << linear_vel);
     cout << BLUE << "Params -> Yaw: " << desired_yaw << ", Radius: " << circle_radius << ", Linear Velocity: " << linear_vel << endl;
+}
+
+// 发布到初始位置的命令
+void publishInitialPosition() {
+    sunray_msgs::agent_cmd cmd;
+    cmd.agent_id = 1; // RMTT的ID
+    cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+    cmd.desired_pos.x = circle_radius; // 圆周轨迹起始位置
+    cmd.desired_pos.y = 0.0;
+    // cmd.desired_pos.z = 1.0; // 默认飞行高度
+    cmd.desired_yaw = desired_yaw;
+    cmd_pub.publish(cmd);
+    cout << GREEN << "RMTT moving to start position: x=" << circle_radius << " y=0" << " z=1" << " yaw=" << desired_yaw << TAIL << endl;
 }
 
 // 发布圆形轨迹的控制命令
@@ -65,9 +80,19 @@ int main(int argc, char **argv) {
     // 初始化发布者
     cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/tianbot_1/agent_cmd", 10);
 
+    cout << GREEN << "Please enter 1 to move to start pos..." << TAIL << endl;
+    cin >> start_cmd;
+
+    if (start_cmd == 1) {
+        publishInitialPosition(); // 发送到初始位置
+        ros::Duration(2.0).sleep(); // 等待到达初始位置
+    }
+
     // ROS_INFO("Enter total trajectory time (seconds): ");
     cout << GREEN << "Enter total trajectory time (seconds): ";
     cin >> trajectory_total_time;
+
+    start_cmd = 2;
 
     // 主循环
     while (ros::ok() && time_trajectory < trajectory_total_time) {

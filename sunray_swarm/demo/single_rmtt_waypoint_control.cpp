@@ -28,7 +28,7 @@ void navigateToWaypoints() {
         cmd_pub.publish(cmd);
         // ROS_INFO_STREAM("Drone navigating to waypoint: x=" << waypoint.x << " y=" << waypoint.y << " z=" << waypoint.z);
         cout << BLUE << "Drone navigating to waypoint: x=" << waypoint.x << " y=" << waypoint.y << " z=" << waypoint.z << endl;
-        ros::Duration(2.0).sleep(); // 等待2秒以模拟飞行到该点
+        ros::Duration(10.0).sleep(); // 等待2秒以模拟飞行到该点
     }
 }
 
@@ -63,3 +63,4 @@ int main(int argc, char **argv) {
 
     return 0;
 }
+
