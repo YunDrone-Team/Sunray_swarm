@@ -9,7 +9,7 @@
 
 	<group ns="tianbot$(arg tianbot_id)">
         <!-- 开启 底层单片机控制节点 -->
-		<node pkg="turn_on_wheeltec_robot" type="wheeltec_robot_node" name="wheeltec_robot_$(arg ugv_id)" output="screen">
+		<node pkg="turn_on_wheeltec_robot" type="wheeltec_robot_node" name="wheeltec_robot_$(arg tianbot_id)" output="screen">
 			<!-- <remap from="/imu"               to="/ugv$(arg ugv_id)/imu"/>
 			<remap from="/odom"              to="/ugv$(arg ugv_id)/odom"/>
 			<remap from="/cmd_vel"           to="/ugv$(arg ugv_id)/cmd_vel"/>

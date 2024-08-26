@@ -170,6 +170,10 @@ int main(int argc, char **argv)
 				{
 					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_5;
 				}
+				else if(start_cmd == 99)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_RUN;
+				}
 				orca_cmd_pub.publish(orca_cmd);
 
 				break;
