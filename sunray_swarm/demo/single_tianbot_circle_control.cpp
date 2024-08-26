@@ -76,6 +76,31 @@ int main(int argc, char **argv) {
     
     // 初始化参数
     initParams(nh);
+
+    //     if(agent_type == sunray_msgs::agent_state::RMTT)
+    // {
+    //     agent_prefix = "rmtt_";
+    // }else if(agent_type == sunray_msgs::agent_state::TIANBOT)
+    // {
+    //     agent_prefix = "tianbot_";
+    // }else if(agent_type == sunray_msgs::agent_state::WHEELTEC)
+    // {
+    //     agent_prefix = "wheeltec_";
+    // }else if(agent_type == sunray_msgs::agent_state::SIKONG)
+    // {
+    //     agent_prefix = "sikong_";
+    // }else
+    // {
+    //     agent_prefix = "unkonown_";
+    // }
+
+    // // 无人机编号 1号无人机则为1
+    // nh.param("wheeltec_id", wheeltec_id, 1);
+
+    // ugv_name = "/wheeltec" + std::to_string(ugv_id);
+
+    // // 【发布】控制指令
+    // command_pub = nh.advertise<sunray_wheeltec_robot::UGVControl>(ugv_name + "/sunray/ugv/cmd", 10);
     
     // 初始化发布者
     cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/tianbot_1/agent_cmd", 10);
