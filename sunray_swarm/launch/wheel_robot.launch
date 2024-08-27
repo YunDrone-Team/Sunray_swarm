@@ -9,7 +9,7 @@
 
 	<group ns="tianbot$(arg tianbot_id)">
         <!-- 开启 底层单片机控制节点 -->
-		<node pkg="turn_on_wheeltec_robot" type="wheeltec_robot_node" name="wheeltec_robot_$(arg tianbot_id)" output="screen">
+		<node pkg="turn_on_wheeltec_robot" type="wheeltec_robot_node" name="wheeltec_robot_node" output="screen">
 			<!-- <remap from="/imu"               to="/ugv$(arg ugv_id)/imu"/>
 			<remap from="/odom"              to="/ugv$(arg ugv_id)/odom"/>
 			<remap from="/cmd_vel"           to="/ugv$(arg ugv_id)/cmd_vel"/>
@@ -18,13 +18,13 @@
 			<param name="serial_baud_rate"   type="int"    value="115200"/>
 		</node>
 
-		<node pkg="sunray_swarm" type="single_tianbot_hover" name="single_tianbot_hover" output="screen">
+		<node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node" output="screen">
 			<param name="tianbot_name" value="tianbot"/>
 			<param name="tianbot_id" value="$(arg tianbot_id)"/>
 			<param name="k_p" value="1.0" />
 			<param name="k_yaw" value="1.0" />
 			<param name="max_vel" value="$(arg max_vel)" />
-			<param name="flag_printf" value="true" />
+			<param name="flag_printf" value="true" />  
 			<param name="geo_fence/x_min" value="$(arg x_min)"/>
 			<param name="geo_fence/x_max" value="$(arg x_max)"/>
 			<param name="geo_fence/y_min" value="$(arg y_min)"/>
