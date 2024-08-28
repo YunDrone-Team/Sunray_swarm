@@ -1,0 +1,9 @@
+drones:
+  rmtt_1:
+    uav_id: 1
+    uav_ip: 192.168.25.18
+    local_ip: 192.168.25.59
+    local_port: 8890
+    video_port: 11111
+    enable_camera: true
+    sn: 0TQZM47CNT046P
