@@ -130,9 +130,9 @@ add_dependencies(single_waypoint sunray_swarm_gencpp)
 target_link_libraries(single_waypoint ${catkin_LIBRARIES})
 
 ##DEMO -单机路径规划
-add_executable(single_slam demo/single_slam.cpp)
-add_dependencies(single_slam sunray_swarm_gencpp)
-target_link_libraries(single_slam ${catkin_LIBRARIES})
+add_executable(single_pathPlanning demo/single_pathPlanning.cpp)
+add_dependencies(single_pathPlanning sunray_pathPlanning_gencpp)
+target_link_libraries(single_pathPlanning ${catkin_LIBRARIES})
 
 # add_executable(wheeltec_control_node agent_control/wheeltec_control_node.cpp)
 # add_dependencies(wheeltec_control_node sunray_wheeltec_robot_gencpp)

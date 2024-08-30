@@ -1,5 +1,5 @@
 <launch>
-	<arg name="tianbot_id" default="1"/>
+	<arg name="ugv_id" default="1"/>
 	<arg name="max_vel" default="0.5" />
 	<arg name="x_min" default="-100.0"/>
 	<arg name="x_max" default="100.0"/>
@@ -7,7 +7,7 @@
 	<arg name="y_max" default="100.0"/>
 	<arg name="matlab_control" default="false"/>
 
-	<group ns="tianbot$(arg tianbot_id)">
+	<group ns="tianbot$(arg ugv_id)">
         <!-- 开启 底层单片机控制节点 -->
 		<node pkg="turn_on_wheeltec_robot" type="wheeltec_robot_node" name="wheeltec_robot_node" output="screen">
 			<!-- <remap from="/imu"               to="/ugv$(arg ugv_id)/imu"/>
@@ -18,9 +18,12 @@
 			<param name="serial_baud_rate"   type="int"    value="115200"/>
 		</node>
 
-		<node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node" output="screen">
-			<param name="tianbot_name" value="tianbot"/>
-			<param name="tianbot_id" value="$(arg tianbot_id)"/>
+		<!-- <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node" output="screen"> -->
+			<!-- <rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params.yaml" /> -->
+			<!-- <arg name="wheeltec_name" default="wheeltec" />
+			<param name="ugv_id" value="$(arg agv_id)"/>
+			<node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node" output="screen">
+
 			<param name="k_p" value="1.0" />
 			<param name="k_yaw" value="1.0" />
 			<param name="max_vel" value="$(arg max_vel)" />
@@ -30,7 +33,25 @@
 			<param name="geo_fence/y_min" value="$(arg y_min)"/>
 			<param name="geo_fence/y_max" value="$(arg y_max)"/>
 			<param name="matlab_control" value="$(arg matlab_control)"/>
+		</node> -->
+
+		<node pkg="sunray_wheeltec_robot" type="wheeltec_control_node" name="wheeltec_control_node" output="screen">
+			<rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params.yaml" />
+
+			<param name="ugv_name" value="ugv"/>
+			<param name="ugv_id" value="$(arg ugv_id)"/>
+			<param name="k_p" value="1.0" />
+			<param name="k_yaw" value="1.0" />
+			<param name="max_vel" value="$(arg max_vel)" />
+			<param name="flag_printf" value="true" />
+			<param name="geo_fence/x_min" value="$(arg x_min)"/>
+			<param name="geo_fence/x_max" value="$(arg x_max)"/>
+			<param name="geo_fence/y_min" value="$(arg y_min)"/>
+			<param name="geo_fence/y_max" value="$(arg y_max)"/>
+			<param name="matlab_control" value="$(arg matlab_control)"/>
 		</node>
     </group>
 	
 </launch>
+
+
