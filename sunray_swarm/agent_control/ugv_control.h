@@ -117,5 +117,8 @@ class UGV_CONTROL
         void rotation_yaw(double yaw_angle, float body_frame[2], float enu_frame[2]);
         void setup_led();
         void setup_color();
+
+
+        void agentCmdCallback();
 };
 #endif

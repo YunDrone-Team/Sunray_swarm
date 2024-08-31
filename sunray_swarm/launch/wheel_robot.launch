@@ -9,11 +9,14 @@
     <arg name="matlab_control" default="false"/>
 
     <!-- 加载 UGV 参数 -->
-    <rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params.yaml" />
+    <rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params_wheeltec.yaml" />
 
-    <group ns="tianbot$(arg ugv_id)">
+    <!-- <group ns="/sunray_swarm/wheeltec_$(arg ugv_id)"> -->
+    <group>
         <!-- 开启底层单片机控制节点 -->
         <node pkg="turn_on_wheeltec_robot" type="wheeltec_robot_node" name="wheeltec_robot_node" output="screen">
+            <remap from="/cmd_vel"        to="/sunray_swarm/wheeltec_$(arg ugv_id)/cmd_vel"/>
+            <!-- <remap from="/cmd_vel"        to="/wheeltec_$(arg ugv_id)/agent_cmd"/> -->
             <param name="usart_port_name" type="string" value="/dev/ttyACM0"/>  
             <param name="serial_baud_rate" type="int" value="115200"/>
         </node>
@@ -21,7 +24,7 @@
         <!-- 启动高级控制节点 -->
         <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node" output="screen">
             <param name="ugv_id" value="$(arg ugv_id)"/>
-            <param name="ugv_name" value="tianbot$(arg ugv_id)"/>
+            <param name="ugv_name" value="wheeltec_"/>
             <param name="flag_printf" value="true" />
             <!-- 使用rosparam命令从参数文件载入地理围栏和其他控制参数 -->
             <rosparam param="geo_fence" />
@@ -30,4 +33,3 @@
         </node>
     </group>
 </launch>
-

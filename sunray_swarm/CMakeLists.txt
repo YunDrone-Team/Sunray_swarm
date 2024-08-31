@@ -134,9 +134,25 @@ add_executable(single_pathPlanning demo/single_pathPlanning.cpp)
 add_dependencies(single_pathPlanning sunray_pathPlanning_gencpp)
 target_link_libraries(single_pathPlanning ${catkin_LIBRARIES})
 
-# add_executable(wheeltec_control_node agent_control/wheeltec_control_node.cpp)
-# add_dependencies(wheeltec_control_node sunray_wheeltec_robot_gencpp)
-# target_link_libraries(wheeltec_control_node ${catkin_LIBRARIES})
+#DEMO 编队控制
+add_executable(formation_control demo/formation_control.cpp)
+add_dependencies(formation_control sunray_wheeltec_robot_gencpp)
+target_link_libraries(formation_control ${catkin_LIBRARIES})
+
+#DEMO 编队控制，三角形
+add_executable(formation_control2 demo/formation_control.cpp)
+add_dependencies(formation_control2 formation_control_gencpp)
+target_link_libraries(formation_control2 ${catkin_LIBRARIES})
+
+#DEMO 跟随飞行
+add_executable(leader_follower demo/leader_follower_control.cpp)
+add_dependencies(leader_follower leader_follower_gencpp)
+target_link_libraries(leader_follower ${catkin_LIBRARIES})
+
+#DEMO 自主降落
+add_executable(autonomous_landing demo/autonomous_landing_demo.cpp)
+add_dependencies(autonomous_landing autonomous_landing_gencpp)
+target_link_libraries(autonomous_landing ${catkin_LIBRARIES})
 
 
 ## Mark cpp header files for installation

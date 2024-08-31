@@ -123,6 +123,6 @@ int main(int argc, char **argv) {
         ros::spinOnce();
         // 等待无人机行驶到目标点
         ros::Duration(2.0).sleep(); 
-
+    }
     return 0;
 }
