@@ -84,11 +84,6 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     timer_debug = nh.createTimer(ros::Duration(3.0), &UGV_CONTROL::timercb_debug, this);
 
 
-     twist_pub = nh.advertise<geometry_msgs::Twist>("/sunray/ugv/cmd", 10);
-    ros::Subscriber cmd_sub = nh.subscribe("/sunray_swarm/wheeltec_1/agent_cmd", 10, agentCmdCallback);
-
-
-
 
 
     agent_state.header.stamp = ros::Time::now();
@@ -125,27 +120,6 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
 }
 
 
-
-// ros::Publisher twist_pub;
-// void agentCmdCallback(const sunray_msgs::agent_cmd::ConstPtr& cmd) 
-
-
-// void agentCmdCallback(const sunray_msgs::agent_cmd::ConstPtr& cmd) {
-//     geometry_msgs::Twist twist;
-//     // 速度控制逻辑转换，简单示例
-//     if (cmd->control_state == sunray_msgs::agent_cmd::VEL_CONTROL_BODY || cmd->control_state == sunray_msgs::agent_cmd::VEL_CONTROL_ENU) {
-//         twist.linear.x = cmd->desired_vel.linear.x;
-//         twist.linear.y = cmd->desired_vel.linear.y;
-//         twist.angular.z = cmd->desired_vel.angular.z;
-//     } else {
-//         // 对于其他命令类型，如POS_CONTROL，可能需要额外的转换逻辑
-//         // 此处根据需要添加逻辑
-//         twist.linear.x = 0;
-//         twist.linear.y = 0;
-//         twist.angular.z = 0;
-//     }
-//     twist_pub.publish(twist);
-// }
 
 
 

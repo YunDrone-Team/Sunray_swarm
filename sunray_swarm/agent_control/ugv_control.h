@@ -118,7 +118,5 @@ class UGV_CONTROL
         void setup_led();
         void setup_color();
 
-
-        void agentCmdCallback();
 };
 #endif
