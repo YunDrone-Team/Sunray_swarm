@@ -131,14 +131,14 @@ void UGV_CONTROL::mainloop()
     // 动捕丢失情况下，不执行控制指令，直到动捕恢复
     if(!agent_state.odom_valid)
     {
-        // desired_vel.linear.x = 0.0;
-        // desired_vel.linear.y = 0.0;
-        // desired_vel.linear.z = 0.0;
-        // desired_vel.angular.x = 0.0;
-        // desired_vel.angular.y = 0.0;
-        // desired_vel.angular.z = 0.0;
-        // agent_cmd_vel_pub.publish(desired_vel);
-        // return;
+    //     desired_vel.linear.x = 0.0;
+    //     desired_vel.linear.y = 0.0;
+    //    desired_vel.linear.z = 0.0;
+    //    desired_vel.angular.x = 0.0;
+    //    desired_vel.angular.y = 0.0;
+    //    desired_vel.angular.z = 0.0;
+    //    agent_cmd_vel_pub.publish(desired_vel);
+    //     return;
     }
 
     switch (current_agent_cmd.control_state)
@@ -328,16 +328,34 @@ void UGV_CONTROL::timercb_debug(const ros::TimerEvent &e)
     cout.setf(ios::showpoint);
     // 强制显示符号
     cout.setf(ios::showpos);
+    if(agent_type == 0)
+    {
+        if(agent_state.battery < 15.0f)
+        {
+            cout << RED << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
+        }else if(agent_state.battery < 30.0f)
+        {
+            cout << YELLOW << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
+        }else
+        {
+            cout << GREEN << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
+        }
+    }
 
-    if(agent_state.battery < 15.0f)
+
+    if(agent_type == 1 || agent_type == 2)
     {
-        cout << RED << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
-    }else if(agent_state.battery < 30.0f)
-    {
-        cout << YELLOW << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
-    }else
-    {
-        cout << GREEN << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
+        // cout << RED << "Low Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
+        if(11.3f < agent_state.battery < 13.0f)
+        {
+            cout << GREEN << "Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
+        }else if(11.0f < agent_state.battery < 11.3f)
+        {
+            cout << YELLOW << "Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
+        }else
+        {
+            cout << RED << "Low Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
+        }
     }
 
     cout << GREEN << "UAV_pos [X Y] : " << agent_state.pos[0] << " [ m ] " << agent_state.pos[1] << " [ m ] " << TAIL << endl;
