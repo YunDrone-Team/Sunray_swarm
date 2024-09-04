@@ -20,8 +20,8 @@ void planAndDriveToTarget(const geometry_msgs::Point &target)
     // 依据代理类型设置的ID
     cmd.agent_id = 1;
     // 设置控制状态为位置控制模式
-    // cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
+    cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+    // orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
 
     // 将目标位置赋值给消息的desired_pos字段
     cmd.desired_pos = target;

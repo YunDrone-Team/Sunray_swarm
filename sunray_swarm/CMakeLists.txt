@@ -131,27 +131,27 @@ target_link_libraries(single_waypoint ${catkin_LIBRARIES})
 
 ##DEMO -单机路径规划
 add_executable(single_pathPlanning demo/single_pathPlanning.cpp)
-add_dependencies(single_pathPlanning sunray_pathPlanning_gencpp)
+add_dependencies(single_pathPlanning sunray_swarm_gencpp)
 target_link_libraries(single_pathPlanning ${catkin_LIBRARIES})
 
 #DEMO 编队控制
-add_executable(formation_control demo/formation_control.cpp)
-add_dependencies(formation_control sunray_swarm_gencpp)
-target_link_libraries(formation_control ${catkin_LIBRARIES})
+# add_executable(formation_control demo/formation_control.cpp)
+# add_dependencies(formation_control sunray_swarm_gencpp)
+# target_link_libraries(formation_control ${catkin_LIBRARIES})
 
 #DEMO 编队控制，三角形
 add_executable(formation_control2 demo/multi_formation_control.cpp)
-add_dependencies(formation_control2 formation_control_gencpp)
+add_dependencies(formation_control2 sunray_swarm_gencpp)
 target_link_libraries(formation_control2 ${catkin_LIBRARIES})
 
 #DEMO 跟随飞行
-add_executable(leader_follower demo/leader_follower_control.cpp)
-add_dependencies(leader_follower leader_follower_gencpp)
+add_executable(leader_follower demo/multi_leader_follower.cpp)
+add_dependencies(leader_follower sunray_swarm_gencpp)
 target_link_libraries(leader_follower ${catkin_LIBRARIES})
 
 #DEMO 自主降落
 add_executable(autonomous_landing demo/multi_autonomous_landing.cpp)
-add_dependencies(autonomous_landing autonomous_landing_gencpp)
+add_dependencies(autonomous_landing sunray_swarm_gencpp)
 target_link_libraries(autonomous_landing ${catkin_LIBRARIES})
 
 
