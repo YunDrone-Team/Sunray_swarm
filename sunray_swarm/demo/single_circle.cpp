@@ -17,6 +17,7 @@ float omega; //角速度
 int start_cmd = 0; //开始命令标志
 int agent_type; // 代理类型，用于区分无人机和无人车
 float agent_height;//设置无人机高度
+int agent_num;      //设置无人机数量
 
 // 处理信号
 void mySigintHandler(int sig) {
@@ -36,7 +37,8 @@ void initParams(ros::NodeHandle& nh) {
     nh.param<int>("agent_type", agent_type, 1); 
     //从参数服务器获取高度,默认为1
     nh.param<float>("agent_height", agent_height, 1.0f); 
-
+    // 默认为数量为1 
+    nh.param<int>("agent_num", agent_num, 1); 
 
     if (circle_radius != 0) {
         // 匀速圆周运动的角速度
@@ -118,8 +120,15 @@ int main(int argc, char **argv) {
             agent_prefix = "unknown_";
             break;
     }
+    string agent_name;
     // 初始化发布者
-    cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 10);
+    for (int i = 0; i < agent_num; i++)
+    {
+        agent_name = "/" + std::to_string(i+1);
+        cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
+    }
+    // cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 10);
+    
 
     // cout << BLUE << "Params -> Yaw: " << desired_yaw << ", Radius: " << circle_radius << ", Linear Velocity: " << linear_vel << ", Agent Prefix: " << agent_prefix << TAIL << endl;
 

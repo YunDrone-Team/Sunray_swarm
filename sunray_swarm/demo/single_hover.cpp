@@ -10,6 +10,9 @@ using namespace std;
 ros::Publisher cmd_pub;  // 发布控制命令
 int agent_type; // 代理类型，用于区分无人机和无人车
 float agent_height;//设置无人机高度
+int agent_num;//设置智能体数量
+ros::Subscriber trigger_sub; // 订阅触发信号
+bool triggered = 0; // 触发状态标志
 
 // 信号处理函数，用于关闭节点
 void mySigintHandler(int sig) {
@@ -34,6 +37,18 @@ void publishHoverPosition(float x, float y, float z, float yaw) {
     cmd_pub.publish(cmd);
     cout << BLUE << "Agent moving to hover position: x=" << x << " y=" << y << " z=" << z << " yaw=" << yaw << endl;
 }
+// 触发信号的回调函数
+void triggerCallback(const std_msgs::Bool::ConstPtr& msg) {
+    if (msg->data) {
+        cout << BLUE << "Trigger received, moving to preset position..." << endl;
+        // 预设目标位置
+        // float preset_x = 2.0, preset_y = 2.0, preset_z = agent_height, preset_yaw = 0.0;
+        // float preset_x = 1.0, preset_y = 2.0, preset_z = agent_height, preset_yaw = 0.0;
+        // float preset_x = 3.0, preset_y = 2.0, preset_z = agent_height, preset_yaw = 0.0;
+        // publishHoverPosition(preset_x, preset_y, preset_z, preset_yaw);
+        triggered = true; // 设置触发标志
+    }
+}
 
 int main(int argc, char **argv) {
     // 初始化ROS节点，节点名为"agent_hover_control"
@@ -47,6 +62,9 @@ int main(int argc, char **argv) {
     // 【参数】智能体高度
     nh.param<float>("agent_height", agent_height, 1.0);
     // 定义一个字符串变量，用于存储代理前缀
+
+    // 【参数】智能体编号
+    nh.param<int>("agent_num", agent_num, 1);
     string agent_prefix;
 
     // 根据类型选择适当的前缀
@@ -69,7 +87,15 @@ int main(int argc, char **argv) {
     }
 
     // 初始化发布者
-    cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 10);
+    string agent_name;
+    for (int i = 0; i < agent_num; i++)
+    {
+        agent_name = "/" +agent_prefix +std::to_string(i+1);
+        cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
+    }
+    trigger_sub = nh.subscribe<std_msgs::Bool>("/trigger_signal", 10, triggerCallback);
+    // cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agnet_prefix + "1/agent_cmd", 10);
+    
     // 定义悬停位置变量，默认z为0，对于无人车适用
     float x, y, yaw, z = 0.0;  // 默认Z为0，对于无人车适用
     if (agent_type == sunray_msgs::agent_state::RMTT || agent_type == sunray_msgs::agent_state::SIKONG) {

@@ -53,6 +53,8 @@ int main(int argc, char **argv)
     ros::NodeHandle nh("~");
 
     nh.param<float>("agent_height", agent_height, 1.0f);  // 默认飞行高度1米
+    nh.param<int>("agent_type", agent_type, 1);  // 默认飞行高度1米
+
 
     printf_params();
     setup_offsets();

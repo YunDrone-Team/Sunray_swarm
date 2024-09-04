@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     ros::Rate rate(100.0);
 
     // 【参数】智能体类型
-    nh.param<int>("agent_type", agent_type, 1);
+    nh.param<int>("agent_type", agent_type, 0);
     // 【参数】智能体编号
     nh.param<int>("agent_num", agent_num, 8);
     // 【参数】desired_yaw
@@ -102,6 +102,8 @@ int main(int argc, char **argv)
 
     // 【发布】文字提示消息（回传至地面站显示）
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
+    // 【订阅】程序触发指令
+    // start_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/circle_trajectory", 1, start_cmd_cb);
 
     string agent_name;
     for(int i = 0; i < agent_num; i++) 

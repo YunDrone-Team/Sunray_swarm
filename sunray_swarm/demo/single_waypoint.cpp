@@ -12,6 +12,7 @@ ros::Publisher cmd_pub; // 发布控制命令
 vector<geometry_msgs::Point> waypoints; // 航点列表
 int agent_type; // 代理类型变量，用于区分不同类型（无人机或无人车）
 float agent_height;//设置无人机高度
+int agent_num;
 
 // 信号处理函数，用于在接收到中断信号关闭节点
 void mySigintHandler(int sig) {
@@ -47,6 +48,8 @@ int main(int argc, char **argv) {
     nh.param<int>("agent_type", agent_type, 0); 
     // 【参数】智能体高度
     nh.param<float>("agent_height", agent_height, 1.0);
+    // 【参数】智能体高度
+    nh.param<int>("agent_num", agent_num, 1);
     // 定义一个字符串变量，用于存储代理前缀
     string agent_prefix;
     // 根据代理类型选择适当的前缀
@@ -67,8 +70,16 @@ int main(int argc, char **argv) {
             agent_prefix = "unknown_";
             break;
     }
-    // 初始化发布者
-    cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 1);
+    string agent_name;
+    for (int i = 0; i < agent_num; i++)
+    {
+        agent_name = "/" + std::to_string(i+1);
+        // 初始化发布者
+        cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
+
+    }
+    //  cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 1);
+    
     // 定义航点位置变量
     float x, y, z;
     // 用户输入选择变量
