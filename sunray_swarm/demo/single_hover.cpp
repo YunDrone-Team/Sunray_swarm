@@ -94,7 +94,10 @@ int main(int argc, char **argv) {
         cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     }
     trigger_sub = nh.subscribe<std_msgs::Bool>("/trigger_signal", 10, triggerCallback);
-    // cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agnet_prefix + "1/agent_cmd", 10);
+
+    // [订阅]触发条件
+    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/single_hover", 1， start_cmd_cb);
+
     
     // 定义悬停位置变量，默认z为0，对于无人车适用
     float x, y, yaw, z = 0.0;  // 默认Z为0，对于无人车适用

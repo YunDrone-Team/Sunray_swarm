@@ -128,6 +128,9 @@ int main(int argc, char **argv) {
         cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     }
     // cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 10);
+
+    // [订阅]触发条件
+    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/single_circle", 1， start_cmd_cb);
     
 
     // cout << BLUE << "Params -> Yaw: " << desired_yaw << ", Radius: " << circle_radius << ", Linear Velocity: " << linear_vel << ", Agent Prefix: " << agent_prefix << TAIL << endl;

@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh("~");
 
     nh.param<float>("agent_height", agent_height, 1.0f);  // 默认飞行高度1米
-    nh.param<int>("agent_type", agent_type, 1);  // 默认飞行高度1米
+    nh.param<int>("agent_type", agent_type, 0);  // 默认飞行高度1米
 
 
     printf_params();
@@ -87,6 +87,8 @@ int main(int argc, char **argv)
         // 【发布】无人车控制指令
         agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
+    // [订阅]触发条件
+    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/leader_follower", 1， start_cmd_cb);
     
     ros::Rate rate(100.0);
     ros::Time start_time = ros::Time::now();

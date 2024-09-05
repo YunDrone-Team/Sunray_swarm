@@ -78,8 +78,10 @@ int main(int argc, char **argv) {
         cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
 
     }
-    //  cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 1);
-    
+
+        // [订阅]触发条件
+    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/single_waypoint", 1， start_cmd_cb);
+
     // 定义航点位置变量
     float x, y, z;
     // 用户输入选择变量

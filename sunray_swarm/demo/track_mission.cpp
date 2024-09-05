@@ -90,6 +90,8 @@ int main(int argc, char **argv)
         // 【发布】无人车控制指令
         agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
+            // [订阅]触发条件
+    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/track_mission", 1， start_cmd_cb);
 
     cout << GREEN << "Please enter 1 to move to start pos..." << TAIL << endl;
     cin >> start_cmd;

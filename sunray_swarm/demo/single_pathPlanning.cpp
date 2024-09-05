@@ -114,6 +114,9 @@ int main(int argc, char **argv)
         cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
 
+    // [订阅]触发条件
+    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/single_pathPlanning", 1， start_cmd_cb);
+
     // cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 10);
     // 初始化marker_pub发布者，发布RVIZ标记
     marker_pub = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 10);
