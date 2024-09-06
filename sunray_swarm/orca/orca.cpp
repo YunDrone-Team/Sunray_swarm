@@ -463,19 +463,8 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         text_info.data = "Received orca_cmd: ORCA_SCENARIO_5"; 
         cout << BLUE << node_name << text_info.data << TAIL << endl;
     }
-    // if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_RUN)
-    // {
-    //     for(int i = 0; i < agent_num; i++) 
-    //     {
-    //         arrived_goal[i] = false;
-    //     }
-    //     arrived_all_goal = false;
-    //     setup_scenario_5();
-    //     text_info.data = "Received orca_cmd: ORCA_SCENARIO_5"; 
-    //     cout << BLUE << node_name << text_info.data << TAIL << endl;
-    // }
 
-    text_info_pub.publish(text_info);
+    text_info_pub.publish(text_info); 
 }
 
 void ORCA::printf_param()
