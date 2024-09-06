@@ -11,21 +11,21 @@ ros::Publisher agent_cmd_pub[MAX_NUM];
 sunray_msgs::agent_cmd agent_cmd;
 sunray_msgs::orca_cmd orca_cmd;
 
-ros::Publisher twist_pub;//转发】agent_cmd消息
+// ros::Publisher twist_pub;//转发】agent_cmd消息
 
-// 回调函数，处理接收到的agent_cmd消息并发布Twist消息
-void agentCmdCallback(const sunray_msgs::agent_cmd::ConstPtr& msg) {
-    // 只处理速度控制的消息
-    if (msg->control_state == sunray_msgs::agent_cmd::VEL_CONTROL_BODY || msg->control_state == sunray_msgs::agent_cmd::VEL_CONTROL_ENU) {
-        geometry_msgs::Twist twist_msg;
-        // 将agent_cmd的速度值转换为Twist消息
-        twist_msg.linear.x = msg->desired_vel.linear.x;
-        twist_msg.linear.y = msg->desired_vel.linear.y;
-        twist_msg.angular.z = msg->desired_vel.angular.z;
-        // 发布转换后的Twist消息
-        twist_pub.publish(twist_msg);
-    }
-}
+// // 回调函数，处理接收到的agent_cmd消息并发布Twist消息
+// void agentCmdCallback(const sunray_msgs::agent_cmd::ConstPtr& msg) {
+//     // 只处理速度控制的消息
+//     if (msg->control_state == sunray_msgs::agent_cmd::VEL_CONTROL_BODY || msg->control_state == sunray_msgs::agent_cmd::VEL_CONTROL_ENU) {
+//         geometry_msgs::Twist twist_msg;
+//         // 将agent_cmd的速度值转换为Twist消息
+//         twist_msg.linear.x = msg->desired_vel.linear.x;
+//         twist_msg.linear.y = msg->desired_vel.linear.y;
+//         twist_msg.angular.z = msg->desired_vel.angular.z;
+//         // 发布转换后的Twist消息
+//         twist_pub.publish(twist_msg);
+//     }
+// }
 
 int main(int argc, char **argv)
 {
@@ -66,11 +66,11 @@ int main(int argc, char **argv)
 		agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
 
-	// 订阅agent_cmd消息
-    ros::Subscriber agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/cmd_vel", 1, agentCmdCallback);
-    // 发布Twist消息
-    // twist_pub = nh.advertise<geometry_msgs::Twist>("/tianbot_1/cmd_vel", 10);
-	twist_pub = nh.advertise<geometry_msgs::Twist>("/sunray_swarm" + agent_name + "/cmd_vel", 1);
+	// // 订阅agent_cmd消息
+    // ros::Subscriber agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/cmd_vel", 1, agentCmdCallback);
+    // // 发布Twist消息
+    // // twist_pub = nh.advertise<geometry_msgs::Twist>("/tianbot_1/cmd_vel", 10);
+	// twist_pub = nh.advertise<geometry_msgs::Twist>("/sunray_swarm/" + agent_name + "/cmd_vel", 1);
 
 	agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
 	agent_cmd.agent_id = agent_id;
