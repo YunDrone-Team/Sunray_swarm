@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
     // 初始化发布者
     for (int i = 0; i < agent_num; i++)
     {
-        agent_name = "/" + std::to_string(i+1);
+        agent_name = "/" + agent_prefix + std::to_string(i+1);
         cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     }
     // cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 10);

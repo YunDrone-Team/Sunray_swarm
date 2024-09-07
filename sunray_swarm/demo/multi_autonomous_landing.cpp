@@ -13,6 +13,8 @@ geometry_msgs::PoseStamped car_position;
 geometry_msgs::PoseStamped drone_position;
 geometry_msgs::PoseStamped landing_target;
 
+float agent_height;
+
 // 状态枚举
 enum MISSION_STATE
 {
@@ -39,9 +41,9 @@ void flight()
     sunray_msgs::agent_cmd cmd;
     cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
     // 设置目标航点
-    cmd.desired_pos.x = 10.0;
-    cmd.desired_pos.y = 10.0;
-    cmd.desired_pos.z = 5.0; // 保持高度
+    cmd.desired_pos.x = 2.0;
+    cmd.desired_pos.y = 1.0;
+    cmd.desired_pos.z = agent_height; // 保持高度
     drone_cmd_pub.publish(cmd);
     ROS_INFO("Drone is flying along the path.");
     // 检查是否接近降落点
@@ -89,6 +91,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "autonomous_landing_demo");
     ros::NodeHandle nh;
+    nh.param<float>("agent_height", agent_height, 1.0f);  // 默认飞行高度1米
 
     // 初始化发布者和订阅者
     drone_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("drone_cmd", 10);

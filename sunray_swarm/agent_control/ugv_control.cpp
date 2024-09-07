@@ -1,8 +1,6 @@
 #include "ugv_control.h"
 
-ros::Publisher twist_pub;//转发】agent_cmd消息 
-void agentCmdCallback(const sunray_msgs::agent_cmd::ConstPtr& msg);
-int agent_type;
+
 
 void UGV_CONTROL::init(ros::NodeHandle& nh)
 {
@@ -87,12 +85,7 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     // 【定时器】 定时打印 - 1Hz
     timer_debug = nh.createTimer(ros::Duration(3.0), &UGV_CONTROL::timercb_debug, this);
 
-    // 订阅agent_cmd消息
-    ros::Subscriber agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 1, agentCmdCallback);
-    // 发布Twist消息
-    if(agent_type == sunray_msgs::agent_state::TIANBOT){
-        twist_pub = nh.advertise<geometry_msgs::Twist>("/sunray_swarm/" + agent_name + "/cmd_vel", 1);
-    }
+
 
 
 
@@ -129,19 +122,7 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     cout << BLUE << text_info.data << TAIL << endl;
 }
 
-// 回调函数，处理接收到的agent_cmd消息并发布Twist消息
-void agentCmdCallback(const sunray_msgs::agent_cmd::ConstPtr& msg) {
-    // 只处理速度控制的消息
-    if (agent_type == sunray_msgs::agent_state::TIANBOT && msg->control_state == sunray_msgs::agent_cmd::VEL_CONTROL_BODY || msg->control_state == sunray_msgs::agent_cmd::VEL_CONTROL_ENU) {
-        geometry_msgs::Twist twist_msg;
-        // 将agent_cmd的速度值转换为Twist消息
-        twist_msg.linear.x = msg->desired_vel.linear.x;
-        twist_msg.linear.y = msg->desired_vel.linear.y;
-        twist_msg.angular.z = msg->desired_vel.angular.z;
-        // 发布转换后的Twist消息
-        twist_pub.publish(twist_msg);
-    }
-}
+
 
 
 
@@ -153,14 +134,14 @@ void UGV_CONTROL::mainloop()
     // 动捕丢失情况下，不执行控制指令，直到动捕恢复
     if(!agent_state.odom_valid)
     {
-        desired_vel.linear.x = 0.0;
-        desired_vel.linear.y = 0.0;
+       desired_vel.linear.x = 0.0;
+       desired_vel.linear.y = 0.0;
        desired_vel.linear.z = 0.0;
        desired_vel.angular.x = 0.0;
        desired_vel.angular.y = 0.0;
        desired_vel.angular.z = 0.0;
        agent_cmd_vel_pub.publish(desired_vel);
-        return;
+       return;
     }
 
     switch (current_agent_cmd.control_state)

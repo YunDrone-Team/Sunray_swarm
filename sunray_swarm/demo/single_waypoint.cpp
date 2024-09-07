@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     string agent_name;
     for (int i = 0; i < agent_num; i++)
     {
-        agent_name = "/" + std::to_string(i+1);
+        agent_name = "/" + agent_prefix + std::to_string(i+1);
         // 初始化发布者
         cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
 
