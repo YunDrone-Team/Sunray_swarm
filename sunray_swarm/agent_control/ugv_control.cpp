@@ -1,11 +1,9 @@
 #include "ugv_control.h"
-
-
-
+    
 void UGV_CONTROL::init(ros::NodeHandle& nh)
 {
     // 【参数】智能体类型
-    nh.param<int>("agent_type", agent_type, 1);
+    nh.param<int>("agent_type", agent_type, 2);
     // 【参数】智能体编号
     nh.param<int>("agent_id", agent_id, 1);
     // 【参数】智能体IP
@@ -88,7 +86,6 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
 
 
 
-
     agent_state.header.stamp = ros::Time::now();
     agent_state.header.frame_id = "world";
     agent_state.agent_type = agent_type;
@@ -134,14 +131,14 @@ void UGV_CONTROL::mainloop()
     // 动捕丢失情况下，不执行控制指令，直到动捕恢复
     if(!agent_state.odom_valid)
     {
-       desired_vel.linear.x = 0.0;
-       desired_vel.linear.y = 0.0;
-       desired_vel.linear.z = 0.0;
-       desired_vel.angular.x = 0.0;
-       desired_vel.angular.y = 0.0;
-       desired_vel.angular.z = 0.0;
-       agent_cmd_vel_pub.publish(desired_vel);
-       return;
+    //     desired_vel.linear.x = 0.0;
+    //     desired_vel.linear.y = 0.0;
+    //    desired_vel.linear.z = 0.0;
+    //    desired_vel.angular.x = 0.0;
+    //    desired_vel.angular.y = 0.0;
+    //    desired_vel.angular.z = 0.0;
+    //    agent_cmd_vel_pub.publish(desired_vel);
+    //     return;
     }
 
     switch (current_agent_cmd.control_state)

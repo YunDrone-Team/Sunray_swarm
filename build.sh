@@ -14,3 +14,6 @@ catkin_make --source vrpn_client_ros --build build/vrpn_client_ros
 catkin_make --source sunray_msgs --build build/sunray_msgs
 # 编译sunray_swarm模块
 catkin_make --source sunray_swarm --build build/sunray_swarm
+
+# 编译root_update模块
+catkin_make --source robot_upstart --build build/robot_upstart
