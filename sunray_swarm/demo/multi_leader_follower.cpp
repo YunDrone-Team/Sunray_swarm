@@ -23,8 +23,8 @@ geometry_msgs::Point offset[MAX_AGENT_NUM];
 // 主机轨迹生成函数（可以根据需要修改）
 void generate_reference_trajectory(geometry_msgs::Point &point, double time)
 {
-    point.x = 2.0 * sin(0.1 * time);
-    point.y = 2.0 * cos(0.1 * time);
+    point.x = 1.0 * sin(0.1 * time);
+    point.y = 1.0 * cos(0.1 * time);
     point.z = agent_height;
 }
 

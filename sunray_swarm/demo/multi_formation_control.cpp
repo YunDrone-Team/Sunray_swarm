@@ -43,17 +43,19 @@ void setup_formations()
 {
     // 设置三角形队形
     triangle_formation.resize(agent_num);
-    triangle_formation[0].x = 0.0; triangle_formation[0].y = 0.0;
-    triangle_formation[1].x = 1.0; triangle_formation[1].y = 1.0;
-    triangle_formation[2].x = -1.0; triangle_formation[2].y = 1.0;
+    triangle_formation[0].x = 0.1; triangle_formation[0].y = -1.0;
+    triangle_formation[2].x = 1.0; triangle_formation[2].y = 1.0;
+    triangle_formation[1].x = -1.0; triangle_formation[1].y = 1.0;
     // 更多无人机可以根据需要设置
 
     // 设置一字型队形
     line_formation.resize(agent_num);
-    for(int i = 0; i < agent_num; i++) 
+    for(int i = 1; i < agent_num; i++) 
     {
         line_formation[i].x = i * 1.0;
         line_formation[i].y = 0.0;
+
+        line_formation[0].x = 0;line_formation[0].y = -0.2;
     }
 }
 
@@ -91,7 +93,7 @@ int main(int argc, char **argv)
 
     nh.param<int>("agent_num", agent_num, 3);  // 默认3台无人机/车
     nh.param<float>("agent_height", agent_height, 1.0f);  // 默认飞行高度1米
-
+    nh.param<int>("agent_type", agent_type, 2);  // 默认飞行高度1米
     printf_params();
     setup_formations();
 

@@ -131,14 +131,14 @@ void UGV_CONTROL::mainloop()
     // 动捕丢失情况下，不执行控制指令，直到动捕恢复
     if(!agent_state.odom_valid)
     {
-    //     desired_vel.linear.x = 0.0;
-    //     desired_vel.linear.y = 0.0;
-    //    desired_vel.linear.z = 0.0;
-    //    desired_vel.angular.x = 0.0;
-    //    desired_vel.angular.y = 0.0;
-    //    desired_vel.angular.z = 0.0;
-    //    agent_cmd_vel_pub.publish(desired_vel);
-    //     return;
+        desired_vel.linear.x = 0.0;
+        desired_vel.linear.y = 0.0;
+       desired_vel.linear.z = 0.0;
+       desired_vel.angular.x = 0.0;
+       desired_vel.angular.y = 0.0;
+       desired_vel.angular.z = 0.0;
+       agent_cmd_vel_pub.publish(desired_vel);
+        return;
     }
 
     switch (current_agent_cmd.control_state)
@@ -288,16 +288,16 @@ void UGV_CONTROL::agnet_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
             desired_position.y = msg->desired_pos.y;
             desired_position.z = agent_height;
             desired_yaw = msg->desired_yaw;
-             text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: POS_CONTROL!";
-             cout << BLUE << text_info.data << TAIL << endl;
+            //  text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: POS_CONTROL!";
+            //  cout << BLUE << text_info.data << TAIL << endl;
             break;
         case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:  
-             text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_BODY!";
-             cout << BLUE << text_info.data << TAIL << endl;
+            //  text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_BODY!";
+            //  cout << BLUE << text_info.data << TAIL << endl;
             break;
         case sunray_msgs::agent_cmd::VEL_CONTROL_ENU:
-             text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_ENU!";
-             cout << BLUE << text_info.data << TAIL << endl;
+            //  text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_ENU!";
+            //  cout << BLUE << text_info.data << TAIL << endl;
             break;
         default:
             text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: Wrong!";
