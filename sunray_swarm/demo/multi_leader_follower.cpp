@@ -11,6 +11,7 @@
 
 using namespace std;
 int agent_type; // 代理类型，用于区分无人机和无人车
+ros::Subscriber agent_cmd_sub;//触发条件
 
 
 int agent_num = MAX_AGENT_NUM;
@@ -47,13 +48,55 @@ void setup_offsets()
     offset[2].x = -1.0; offset[2].y = 0.5; offset[2].z = 0.0;
 }
 
+void startCmdCallback(const std_msgs::Bool::ConstPtr& msg) {
+    ros::Time start_time = ros::Time::now();
+    if (msg->data) {
+        while (ros::ok())
+        {
+            ros::Time current_time = ros::Time::now();
+            double elapsed_time = (current_time - start_time).toSec();
+            ros::Rate rate(10);  //10 Hz
+
+            // 生成1号机的参考轨迹
+            generate_reference_trajectory(reference_point, elapsed_time);
+
+            // 发布1号机的控制指令
+            sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];
+            agent_cmd[0].agent_id = 1;
+            agent_cmd[0].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agent_cmd[0].desired_pos = reference_point;
+            agent_cmd[0].desired_yaw = 0.0;  // 假设固定yaw
+            agent_cmd_pub[0].publish(agent_cmd[0]);
+
+            // 2号和3号机跟随1号机
+            for(int i = 1; i < agent_num; i++) 
+            {
+                agent_cmd[i].agent_id = i+1;
+                agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+                agent_cmd[i].desired_pos.x = reference_point.x + offset[i].x;
+                agent_cmd[i].desired_pos.y = reference_point.y + offset[i].y;
+                agent_cmd[i].desired_pos.z = reference_point.z + offset[i].z;
+                agent_cmd[i].desired_yaw = 0.0;  // 假设固定yaw
+                agent_cmd_pub[i].publish(agent_cmd[i]);
+            }
+
+            ros::spinOnce();
+            rate.sleep();
+        }
+    } else {
+        // 如果接收到的消息是false，也执行一些操作
+        ROS_INFO("Received false signal, executing alternative task.");
+        // 这里可以添加执行其他任务的代码
+    }
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "leader_follower_control");
     ros::NodeHandle nh("~");
 
     nh.param<float>("agent_height", agent_height, 1.0f);  // 默认飞行高度1米
-    nh.param<int>("agent_type", agent_type, 0);  // 默认飞行高度1米
+    nh.param<int>("agent_type", agent_type, 1);  // 默认飞行高度1米
 
 
     printf_params();
@@ -88,41 +131,41 @@ int main(int argc, char **argv)
         agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
     // [订阅]触发条件
-    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/leader_follower", 1， start_cmd_cb);
+    agent_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/leader_follower", 1, startCmdCallback);
     
-    ros::Rate rate(100.0);
-    ros::Time start_time = ros::Time::now();
+    // ros::Time start_time = ros::Time::now();
 
     while (ros::ok())
     {
-        ros::Time current_time = ros::Time::now();
-        double elapsed_time = (current_time - start_time).toSec();
+        // ros::Time current_time = ros::Time::now();
+        // double elapsed_time = (current_time - start_time).toSec();
 
-        // 生成1号机的参考轨迹
-        generate_reference_trajectory(reference_point, elapsed_time);
+        // // 生成1号机的参考轨迹
+        // generate_reference_trajectory(reference_point, elapsed_time);
 
-        // 发布1号机的控制指令
-        sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];
-        agent_cmd[0].agent_id = 1;
-        agent_cmd[0].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-        agent_cmd[0].desired_pos = reference_point;
-        agent_cmd[0].desired_yaw = 0.0;  // 假设固定yaw
-        agent_cmd_pub[0].publish(agent_cmd[0]);
+        // // 发布1号机的控制指令
+        // sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];
+        // agent_cmd[0].agent_id = 1;
+        // agent_cmd[0].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+        // agent_cmd[0].desired_pos = reference_point;
+        // agent_cmd[0].desired_yaw = 0.0;  // 假设固定yaw
+        // agent_cmd_pub[0].publish(agent_cmd[0]);
 
-        // 2号和3号机跟随1号机
-        for(int i = 1; i < agent_num; i++) 
-        {
-            agent_cmd[i].agent_id = i+1;
-            agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-            agent_cmd[i].desired_pos.x = reference_point.x + offset[i].x;
-            agent_cmd[i].desired_pos.y = reference_point.y + offset[i].y;
-            agent_cmd[i].desired_pos.z = reference_point.z + offset[i].z;
-            agent_cmd[i].desired_yaw = 0.0;  // 假设固定yaw
-            agent_cmd_pub[i].publish(agent_cmd[i]);
-        }
+        // // 2号和3号机跟随1号机
+        // for(int i = 1; i < agent_num; i++) 
+        // {
+        //     agent_cmd[i].agent_id = i+1;
+        //     agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+        //     agent_cmd[i].desired_pos.x = reference_point.x + offset[i].x;
+        //     agent_cmd[i].desired_pos.y = reference_point.y + offset[i].y;
+        //     agent_cmd[i].desired_pos.z = reference_point.z + offset[i].z;
+        //     agent_cmd[i].desired_yaw = 0.0;  // 假设固定yaw
+        //     agent_cmd_pub[i].publish(agent_cmd[i]);
+        // }
 
         ros::spinOnce();
-        rate.sleep();
+        // 休眠0.1秒
+        ros::Duration(0.1).sleep();
     }
 
     return 0;

@@ -16,6 +16,7 @@ ros::Publisher agent_cmd_pub[MAX_AGENT_NUM];
 ros::Publisher text_info_pub;
 std::vector<geometry_msgs::Point> triangle_formation;
 std::vector<geometry_msgs::Point> line_formation;
+ros::Subscriber agent_cmd_sub;//触发条件
 
 int agent_type; // 代理类型，用于区分无人机和无人车
 
@@ -86,6 +87,31 @@ void switch_formation(FORMATION_STATE state)
     }
 }
 
+
+void startCmdCallback(const std_msgs::Bool::ConstPtr& msg) {
+    if (msg->data) {
+        ros::Rate rate(10.0);
+        formation_state = FORMATION_STATE::TRIANGLE;
+
+        while (ros::ok()) {
+
+            // 在三角形和一字型队形之间切换
+            switch_formation(formation_state);
+
+            // 模拟在两种队形之间切换
+            formation_state = (formation_state == FORMATION_STATE::TRIANGLE) ? FORMATION_STATE::LINE : FORMATION_STATE::TRIANGLE;
+
+            ros::Duration(8.0).sleep();  // 每8秒切换一次
+        }
+    } else {
+        // 如果接收到的消息是false，也执行一些操作
+        ROS_INFO("Received false signal, executing alternative task.");
+        // 这里可以添加执行其他任务的代码
+    }
+}
+
+
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "formation_control");
@@ -126,22 +152,24 @@ int main(int argc, char **argv)
         agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
     // [订阅]触发条件
-    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/formation_control", 1， start_cmd_cb);
+    agent_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/formation_control", 1, startCmdCallback);
     ros::Rate rate(10.0);
-    formation_state = FORMATION_STATE::TRIANGLE;
+    // formation_state = FORMATION_STATE::TRIANGLE;
+
 
     while (ros::ok())
     {
-        // 在三角形和一字型队形之间切换
-        switch_formation(formation_state);
+        // // 在三角形和一字型队形之间切换
+        // switch_formation(formation_state);
 
-        // 模拟在两种队形之间切换
-        formation_state = (formation_state == FORMATION_STATE::TRIANGLE) ? FORMATION_STATE::LINE : FORMATION_STATE::TRIANGLE;
+        // // 模拟在两种队形之间切换
+        // formation_state = (formation_state == FORMATION_STATE::TRIANGLE) ? FORMATION_STATE::LINE : FORMATION_STATE::TRIANGLE;
 
-        ros::Duration(8.0).sleep();  // 每8秒切换一次
+        // ros::Duration(8.0).sleep();  // 每8秒切换一次
         ros::spinOnce();
-        rate.sleep();
-    }
+        // 休眠0.1秒
+        ros::Duration(0.1).sleep();
 
+    }
     return 0;
 }

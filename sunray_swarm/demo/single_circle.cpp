@@ -18,6 +18,8 @@ int start_cmd = 0; //开始命令标志
 int agent_type; // 代理类型，用于区分无人机和无人车
 float agent_height;//设置无人机高度
 int agent_num;      //设置无人机数量
+ros::Subscriber agent_cmd_sub;//触发条件
+
 
 // 处理信号
 void mySigintHandler(int sig) {
@@ -69,27 +71,62 @@ void publishInitialPosition() {
     cout << GREEN << "Moving to start position: x=" << circle_radius << " y=0" << " z=" << cmd.desired_pos.z << " yaw=" << desired_yaw << TAIL << endl;
 }
 
-// 发布圆形轨迹的控制命令
-void publishCircleCommand() {
-    // 计算当前的角度
+// // 发布圆形轨迹的控制命令
+// void publishCircleCommand() {
+//     // 计算当前的角度
+//     float angle = time_trajectory * omega;
+//     sunray_msgs::agent_cmd cmd;
+//     // 设置代理的ID，默认为1
+//     cmd.agent_id = 1;  
+//     // 设置控制状态为位置控制模式
+//     cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+//     // 计算并设置当前位置的x坐标
+//     cmd.desired_pos.x = circle_radius * cos(angle);
+//     // 计算并设置当前位置的y坐标
+//     cmd.desired_pos.y = circle_radius * sin(angle);
+//      // 根据代理类型设置高度
+//     cmd.desired_pos.z = agent_type == sunray_msgs::agent_state::RMTT || agent_type == sunray_msgs::agent_state::SIKONG ? agent_height : 0.0; 
+//     // 设置起始位置的偏航角
+//     cmd.desired_yaw = desired_yaw;
+//     // 发布初始位置命令
+//     cmd_pub.publish(cmd);
+//     cout << BLUE << "Moving in circle: x=" << cmd.desired_pos.x << " y=" << cmd.desired_pos.y << " z=" << cmd.desired_pos.z << " yaw=" << desired_yaw << TAIL << endl;
+// }
+
+void publishCircleCommand(double &time_trajectory) {
     float angle = time_trajectory * omega;
     sunray_msgs::agent_cmd cmd;
-    // 设置代理的ID，默认为1
-    cmd.agent_id = 1;  
-    // 设置控制状态为位置控制模式
+    cmd.agent_id = 1;
     cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-    // 计算并设置当前位置的x坐标
     cmd.desired_pos.x = circle_radius * cos(angle);
-    // 计算并设置当前位置的y坐标
     cmd.desired_pos.y = circle_radius * sin(angle);
-     // 根据代理类型设置高度
-    cmd.desired_pos.z = agent_type == sunray_msgs::agent_state::RMTT || agent_type == sunray_msgs::agent_state::SIKONG ? agent_height : 0.0; 
-    // 设置起始位置的偏航角
+    cmd.desired_pos.z = agent_height;
     cmd.desired_yaw = desired_yaw;
-    // 发布初始位置命令
     cmd_pub.publish(cmd);
     cout << BLUE << "Moving in circle: x=" << cmd.desired_pos.x << " y=" << cmd.desired_pos.y << " z=" << cmd.desired_pos.z << " yaw=" << desired_yaw << TAIL << endl;
 }
+
+void startCmdCallback(const std_msgs::Bool::ConstPtr& msg) {
+    if (msg->data) {
+        // 如果接收到的消息是true，执行初始位置的命令
+        publishInitialPosition();
+        ros::Duration(5.0).sleep();  // 等待5秒
+
+        ros::Rate rate(10);  //10 Hz
+        double time_trajectory = 0.0;
+        while (ros::ok() && time_trajectory < 20.0) {  // 执行20秒
+            publishCircleCommand(time_trajectory);
+            time_trajectory += 0.1;
+            rate.sleep();
+        }
+    } else {
+        // 如果接收到的消息是false，也执行一些操作
+        ROS_INFO("Received false signal, executing alternative task.");
+        // 这里可以添加执行其他任务的代码
+    }
+}
+
+
 
 int main(int argc, char **argv) {
     // 初始化ROS节点
@@ -130,34 +167,33 @@ int main(int argc, char **argv) {
     // cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 10);
 
     // [订阅]触发条件
-    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/single_circle", 1， start_cmd_cb);
+    agent_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/single_circle", 1, startCmdCallback);
     
 
     // cout << BLUE << "Params -> Yaw: " << desired_yaw << ", Radius: " << circle_radius << ", Linear Velocity: " << linear_vel << ", Agent Prefix: " << agent_prefix << TAIL << endl;
 
 
-    cout << GREEN << "Enter 1 to move to start position..." << TAIL << endl;
-    
-    // 获取用户输入
-    cin >> start_cmd;
-    if (start_cmd == 1) {
-        // 发布初始位置命令
-        publishInitialPosition();
-        // 等待2秒以确保移动完成
-        ros::Duration(2.0).sleep();
-    }
-    // 提示用户输入总轨迹时间
-    cout << GREEN << "Enter total trajectory time (seconds): " << TAIL;
-    // 获取用户输入的轨迹总时间
-    cin >> trajectory_total_time;
+    // cout << GREEN << "Enter 1 to move to start position..." << TAIL << endl;
+    // // 获取用户输入
+    // cin >> start_cmd;
+    // if (start_cmd == 1) {
+    //     // 发布初始位置命令
+    //     publishInitialPosition();
+    //     // 等待2秒以确保移动完成
+    //     ros::Duration(2.0).sleep();
+    // }
+    // // 提示用户输入总轨迹时间
+    // cout << GREEN << "Enter total trajectory time (seconds): " << TAIL;
+    // // 获取用户输入的轨迹总时间
+    // cin >> trajectory_total_time;
     // 主循环，在轨迹时间内发布圆形轨迹的控制命令
-    while (ros::ok() && time_trajectory < trajectory_total_time) {
-        // 发布圆形轨迹控制命令
-        publishCircleCommand();
-        // 增加时间计数器
-        time_trajectory += 0.1;
+    while (ros::ok()) {
+        // // 发布圆形轨迹控制命令
+        // publishCircleCommand();
+        // // 增加时间计数器
+        // time_trajectory += 0.1;
         // 处理回调函数
-        ros::spinOnce();
+        ros::spin();
         // 休眠0.1秒
         ros::Duration(0.1).sleep();
     }

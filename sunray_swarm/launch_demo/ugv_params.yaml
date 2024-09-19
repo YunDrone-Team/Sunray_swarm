@@ -1,5 +1,5 @@
 ## parameter for ugv_control
-agent_type : 2
+agent_type : 1
 agent_num : 3
 agent_height : 0.1
 agent_id : 1
