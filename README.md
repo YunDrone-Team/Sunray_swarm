@@ -72,6 +72,8 @@ rostopic pub /sunray_swarm/swarm_with_obstacles std_msgs/Bool "data: false"
 ## 追踪
 roslaunch sunray_swarm track_mission.launch
 ```
+
+```
 ## 多智能体跟随
 cd Sunray_swarm
 ./sim_multi_ugv_circle.sh
@@ -79,8 +81,8 @@ cd Sunray_swarm
 roslaunch sunray_swarm multi_lead_follower.launch
 ## 新建终端发布如下指令开始阵型
 rostopic pub /sunray_swarm/leader_follower std_msgs/Bool "data: true"
-
-
+```
+```
 ## 多智能体队形变换
 cd Sunray_swarm
 ./sim_multi_ugv_circle.sh
@@ -88,13 +90,13 @@ cd Sunray_swarm
 roslaunch sunray_swarm multi_formation_triangle.launch
 ## 新建终端发布如下指令开始阵型
 rostopic pub /sunray_swarm/formation_control std_msgs/Bool "data: true"
-
+```
 ## TODO
 
 单机测试
 
 单车测试
-
+```
 ## 单智能体绕圈
 cd Sunray_swarm
 ./sim_multi_ugv_circle.sh
@@ -102,7 +104,7 @@ cd Sunray_swarm
 roslaunch sunray_swarm single_circle.launch
 ## 新建终端发布如下指令开始阵型
 rostopic pub /sunray_swarm/single_circle std_msgs/Bool "data: true" 
-
+```
 多机测试
 
 多车测试
