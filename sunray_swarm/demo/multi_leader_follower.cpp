@@ -44,8 +44,8 @@ void printf_params()
 void setup_offsets()
 {
     // 设置2号和3号无人机的偏移量
-    offset[1].x = 1.0; offset[1].y = 0.5; offset[1].z = 0.0;
-    offset[2].x = -1.0; offset[2].y = 0.5; offset[2].z = 0.0;
+    offset[1].x = 0.4; offset[1].y = 0.7; offset[1].z = 0.0;
+    offset[2].x = -0.4; offset[2].y = 0.7; offset[2].z = 0.0;
 }
 
 void startCmdCallback(const std_msgs::Bool::ConstPtr& msg) {

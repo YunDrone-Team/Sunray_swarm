@@ -13,6 +13,9 @@ int agent_type;            // 代理类型变量，用于区分不同类型（�
 float agent_height;        // 设置无人机高度变量
 int agent_num;              //设置智能体数量
 
+sunray_msgs::orca_cmd orca_cmd;
+ros::Subscriber agent_cmd_sub;
+
 // 规划路径到达目标点
 void planAndDriveToTarget(const geometry_msgs::Point &target)
 {
@@ -72,6 +75,47 @@ void setupObstacles()
     marker_pub.publish(marker);
 }
 
+// void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg, int i)
+// {
+//     orca_state[i] = *msg;
+// }
+
+void startCmdCallback(const std_msgs::Bool::ConstPtr& msg) {
+    if (msg->data) {
+        ros::Rate rate(10.0);
+        // Point对象，用于存储目标位置
+        geometry_msgs::Point target;
+        // 定义并初始化z轴位置变量
+        float z = 0.0;
+        while (ros::ok())
+        {
+            cout << GREEN << "Enter target position (x y" << ((agent_type == sunray_msgs::agent_state::RMTT || agent_type == sunray_msgs::agent_state::SIKONG) ? " z" : "") << "): ";
+            cin >> target.x >> target.y;
+            if (agent_type == sunray_msgs::agent_state::RMTT || agent_type == sunray_msgs::agent_state::SIKONG)
+            {
+                // cin >> target.z;
+                // 从参数服务器获取z
+                target.z = agent_height;
+            }
+            else
+            {
+                // 对于无人车，z轴设置为0
+                target.z = 0.0; // ugv设置
+            }
+            // 调用planAndDriveToTarget函数规划路径并驱动到目标点
+            planAndDriveToTarget(target);
+            // 处理一次回调函数
+            ros::spinOnce();
+            // 等待无人机行驶到目标点
+            ros::Duration(2.0).sleep();
+        }
+    } else {
+        // 如果接收到的消息是false，也执行一些操作
+        ROS_INFO("Received false signal, executing alternative task.");
+
+    }
+}
+
 int main(int argc, char **argv)
 {
     // 初始化ROS节点
@@ -110,43 +154,46 @@ int main(int argc, char **argv)
     // 初始化发布者
     for (int i = 0; i < agent_num; i++)
     {
-        agent_name = "/" + agent_prefix + std::to_string(i + 1);
-        cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
+        // agent_name = "/" + agent_prefix + std::to_string(i+1);
+        // // 【发布】无人机的目标点
+        // orca_goal_pub[i] = nh.advertise<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 1);
+        // // 【订阅】无人机orca状态
+		// orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb,_1,i));
     }
 
     // [订阅]触发条件
-    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/single_pathPlanning", 1， start_cmd_cb);
+    // agent_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/single_pathPlanning", 1, startCmdCallback);
 
     // cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_prefix + "1/agent_cmd", 10);
     // 初始化marker_pub发布者，发布RVIZ标记
     marker_pub = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 10);
     // 调用setupObstacles函数设置障碍物并发布到RVIZ
     setupObstacles();
-    // Point对象，用于存储目标位置
-    geometry_msgs::Point target;
-    // 定义并初始化z轴位置变量
-    float z = 0.0;
-    while (ros::ok())
-    {
-        cout << GREEN << "Enter target position (x y" << ((agent_type == sunray_msgs::agent_state::RMTT || agent_type == sunray_msgs::agent_state::SIKONG) ? " z" : "") << "): ";
-        cin >> target.x >> target.y;
-        if (agent_type == sunray_msgs::agent_state::RMTT || agent_type == sunray_msgs::agent_state::SIKONG)
-        {
-            // cin >> target.z;
-            // 从参数服务器获取z
-            target.z = agent_height;
-        }
-        else
-        {
-            // 对于无人车，z轴设置为0
-            target.z = 0.0; // ugv设置
-        }
-        // 调用planAndDriveToTarget函数规划路径并驱动到目标点
-        planAndDriveToTarget(target);
-        // 处理一次回调函数
-        ros::spinOnce();
-        // 等待无人机行驶到目标点
-        ros::Duration(2.0).sleep();
-    }
+    // // Point对象，用于存储目标位置
+    // geometry_msgs::Point target;
+    // // 定义并初始化z轴位置变量
+    // float z = 0.0;
+    // while (ros::ok())
+    // {
+    //     cout << GREEN << "Enter target position (x y" << ((agent_type == sunray_msgs::agent_state::RMTT || agent_type == sunray_msgs::agent_state::SIKONG) ? " z" : "") << "): ";
+    //     cin >> target.x >> target.y;
+    //     if (agent_type == sunray_msgs::agent_state::RMTT || agent_type == sunray_msgs::agent_state::SIKONG)
+    //     {
+    //         // cin >> target.z;
+    //         // 从参数服务器获取z
+    //         target.z = agent_height;
+    //     }
+    //     else
+    //     {
+    //         // 对于无人车，z轴设置为0
+    //         target.z = 0.0; // ugv设置
+    //     }
+    //     // 调用planAndDriveToTarget函数规划路径并驱动到目标点
+    //     planAndDriveToTarget(target);
+    //     // 处理一次回调函数
+    //     ros::spinOnce();
+    //     // 等待无人机行驶到目标点
+    //     ros::Duration(2.0).sleep();
+    // }
     return 0;
 }
