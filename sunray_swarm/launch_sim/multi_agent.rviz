@@ -73,21 +73,21 @@ Visualization Manager:
           Value: true
         rmtt_8:
           Value: true
-        tianbot_1/base_link:
+        ugv_1/base_link:
           Value: true
-        tianbot_2/base_link:
+        ugv_2/base_link:
           Value: true
-        tianbot_3/base_link:
+        ugv_3/base_link:
           Value: true
-        tianbot_4/base_link:
+        ugv_4/base_link:
           Value: true
-        tianbot_5/base_link:
+        ugv_5/base_link:
           Value: true
-        tianbot_6/base_link:
+        ugv_6/base_link:
           Value: true
-        tianbot_7/base_link:
+        ugv_7/base_link:
           Value: true
-        tianbot_8/base_link:
+        ugv_8/base_link:
           Value: true
         world:
           Value: true
@@ -115,21 +115,21 @@ Visualization Manager:
             {}
           rmtt_8:
             {}
-          tianbot_1/base_link:
+          ugv_1/base_link:
             {}
-          tianbot_2/base_link:
+          ugv_2/base_link:
             {}
-          tianbot_3/base_link:
+          ugv_3/base_link:
             {}
-          tianbot_4/base_link:
+          ugv_4/base_link:
             {}
-          tianbot_5/base_link:
+          ugv_5/base_link:
             {}
-          tianbot_6/base_link:
+          ugv_6/base_link:
             {}
-          tianbot_7/base_link:
+          ugv_7/base_link:
             {}
-          tianbot_8/base_link:
+          ugv_8/base_link:
             {}
       Update Interval: 0
       Value: true
@@ -593,70 +593,70 @@ Visualization Manager:
       Displays:
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_8/mesh
-          Name: tianbot8_mesh
+          Marker Topic: /sunray_swarm/ugv_8/mesh
+          Name: ugv8_mesh
           Namespaces:
             mesh: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_7/mesh
-          Name: tianbot7_mesh
+          Marker Topic: /sunray_swarm/ugv_7/mesh
+          Name: ugv7_mesh
           Namespaces:
             mesh: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_6/mesh
-          Name: tianbot6_mesh
+          Marker Topic: /sunray_swarm/ugv_6/mesh
+          Name: ugv6_mesh
           Namespaces:
             mesh: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_5/mesh
-          Name: tianbot5_mesh
+          Marker Topic: /sunray_swarm/ugv_5/mesh
+          Name: ugv5_mesh
           Namespaces:
             mesh: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_4/mesh
-          Name: tianbot4_mesh
+          Marker Topic: /sunray_swarm/ugv_4/mesh
+          Name: ugv4_mesh
           Namespaces:
             mesh: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_3/mesh
-          Name: tianbot3_mesh
+          Marker Topic: /sunray_swarm/ugv_3/mesh
+          Name: ugv3_mesh
           Namespaces:
             mesh: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_2/mesh
-          Name: tianbot2_mesh
+          Marker Topic: /sunray_swarm/ugv_2/mesh
+          Name: ugv2_mesh
           Namespaces:
             mesh: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_1/mesh
-          Name: tianbot1_mesh
+          Marker Topic: /sunray_swarm/ugv_1/mesh
+          Name: ugv1_mesh
           Namespaces:
             mesh: true
           Queue Size: 100
           Value: true
       Enabled: true
-      Name: Tianbot_mesh
+      Name: ugv_mesh
     - Class: rviz/Group
       Displays:
         - Alpha: 1
@@ -680,7 +680,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /sunray_swarm/tianbot_1/trajectory
+          Topic: /sunray_swarm/ugv_1/trajectory
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -704,7 +704,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /sunray_swarm/tianbot_2/trajectory
+          Topic: /sunray_swarm/ugv_2/trajectory
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -728,7 +728,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /sunray_swarm/tianbot_3/trajectory
+          Topic: /sunray_swarm/ugv_3/trajectory
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -752,7 +752,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /sunray_swarm/tianbot_4/trajectory
+          Topic: /sunray_swarm/ugv_4/trajectory
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -776,7 +776,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /sunray_swarm/tianbot_5/trajectory
+          Topic: /sunray_swarm/ugv_5/trajectory
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -800,7 +800,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /sunray_swarm/tianbot_6/trajectory
+          Topic: /sunray_swarm/ugv_6/trajectory
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -824,7 +824,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /sunray_swarm/tianbot_7/trajectory
+          Topic: /sunray_swarm/ugv_7/trajectory
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -848,11 +848,11 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /sunray_swarm/tianbot_8/trajectory
+          Topic: /sunray_swarm/ugv_8/trajectory
           Unreliable: false
           Value: true
       Enabled: true
-      Name: Tianbot_path
+      Name: ugv_path
     - Class: rviz/Group
       Displays:
         - Alpha: 1
@@ -865,9 +865,9 @@ Visualization Manager:
           History Length: 1
           Linear Arrow Scale: 2
           Linear Color: 204; 51; 51
-          Name: tianbot1_vel
+          Name: ugv1_vel
           Queue Size: 10
-          Topic: /sunray_swarm/tianbot_1/vel_rviz
+          Topic: /sunray_swarm/ugv_1/vel_rviz
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -880,9 +880,9 @@ Visualization Manager:
           History Length: 1
           Linear Arrow Scale: 3
           Linear Color: 204; 51; 51
-          Name: tianbot2_vel
+          Name: ugv2_vel
           Queue Size: 20
-          Topic: /sunray_swarm/tianbot_2/vel_rviz
+          Topic: /sunray_swarm/ugv_2/vel_rviz
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -895,9 +895,9 @@ Visualization Manager:
           History Length: 1
           Linear Arrow Scale: 2
           Linear Color: 204; 51; 51
-          Name: tianbot3_vel
+          Name: ugv3_vel
           Queue Size: 1
-          Topic: /sunray_swarm/tianbot_3/vel_rviz
+          Topic: /sunray_swarm/ugv_3/vel_rviz
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -910,9 +910,9 @@ Visualization Manager:
           History Length: 1
           Linear Arrow Scale: 2
           Linear Color: 204; 51; 51
-          Name: tianbot4_vel
+          Name: ugv4_vel
           Queue Size: 1
-          Topic: /sunray_swarm/tianbot_4/vel_rviz
+          Topic: /sunray_swarm/ugv_4/vel_rviz
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -925,9 +925,9 @@ Visualization Manager:
           History Length: 1
           Linear Arrow Scale: 2
           Linear Color: 204; 51; 51
-          Name: tianbot5_vel
+          Name: ugv5_vel
           Queue Size: 1
-          Topic: /sunray_swarm/tianbot_5/vel_rviz
+          Topic: /sunray_swarm/ugv_5/vel_rviz
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -940,9 +940,9 @@ Visualization Manager:
           History Length: 1
           Linear Arrow Scale: 2
           Linear Color: 204; 51; 51
-          Name: tianbot6_vel
+          Name: ugv6_vel
           Queue Size: 1
-          Topic: /sunray_swarm/tianbot_6/vel_rviz
+          Topic: /sunray_swarm/ugv_6/vel_rviz
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -955,9 +955,9 @@ Visualization Manager:
           History Length: 1
           Linear Arrow Scale: 2
           Linear Color: 204; 51; 51
-          Name: tianbot7_vel
+          Name: ugv7_vel
           Queue Size: 1
-          Topic: /sunray_swarm/tianbot_7/vel_rviz
+          Topic: /sunray_swarm/ugv_7/vel_rviz
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -970,81 +970,81 @@ Visualization Manager:
           History Length: 1
           Linear Arrow Scale: 2
           Linear Color: 204; 51; 51
-          Name: tianbot8_vel
+          Name: ugv8_vel
           Queue Size: 1
-          Topic: /sunray_swarm/tianbot_8/vel_rviz
+          Topic: /sunray_swarm/ugv_8/vel_rviz
           Unreliable: false
           Value: true
       Enabled: true
-      Name: Tianbot_vel
+      Name: ugv_vel
     - Class: rviz/Group
       Displays:
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_1/goal_point_rviz
-          Name: tianbot1_goal
+          Marker Topic: /sunray_swarm/ugv_1/goal_point_rviz
+          Name: ugv1_goal
           Namespaces:
             {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_2/goal_point_rviz
-          Name: tianbot2_goal
+          Marker Topic: /sunray_swarm/ugv_2/goal_point_rviz
+          Name: ugv2_goal
           Namespaces:
             {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_3/goal_point_rviz
-          Name: tianbot3_goal
+          Marker Topic: /sunray_swarm/ugv_3/goal_point_rviz
+          Name: ugv3_goal
           Namespaces:
             {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_4/goal_point_rviz
-          Name: tianbot4_goal
+          Marker Topic: /sunray_swarm/ugv_4/goal_point_rviz
+          Name: ugv4_goal
           Namespaces:
             {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_5/goal_point_rviz
-          Name: tianbot5_goal
+          Marker Topic: /sunray_swarm/ugv_5/goal_point_rviz
+          Name: ugv5_goal
           Namespaces:
             {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_6/goal_point_rviz
-          Name: tianbot6_goal
+          Marker Topic: /sunray_swarm/ugv_6/goal_point_rviz
+          Name: ugv6_goal
           Namespaces:
             {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_7/goal_point_rviz
-          Name: tianbot7_goal
+          Marker Topic: /sunray_swarm/ugv_7/goal_point_rviz
+          Name: ugv7_goal
           Namespaces:
             {}
           Queue Size: 1
           Value: true
         - Class: rviz/Marker
           Enabled: true
-          Marker Topic: /sunray_swarm/tianbot_8/goal_point_rviz
-          Name: tianbot8_goal
+          Marker Topic: /sunray_swarm/ugv_8/goal_point_rviz
+          Name: ugv8_goal
           Namespaces:
             {}
           Queue Size: 1
           Value: true
       Enabled: true
-      Name: Tianbot_goalpoint
+      Name: ugv_goalpoint
   Enabled: true
   Global Options:
     Background Color: 136; 138; 133

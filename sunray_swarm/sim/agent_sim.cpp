@@ -16,12 +16,9 @@ void AGENT_SIM::init(ros::NodeHandle& nh)
     if(agent_type == sunray_msgs::agent_state::RMTT)
     {
         agent_prefix = "/rmtt_";
-    }else if(agent_type == sunray_msgs::agent_state::TIANBOT)
+    }else if(agent_type == sunray_msgs::agent_state::UGV)
     {
-        agent_prefix = "/tianbot_";
-    }else if(agent_type == sunray_msgs::agent_state::WHEELTEC)
-    {
-        agent_prefix = "/wheeltec_";
+        agent_prefix = "/ugv_";
     }else if(agent_type == sunray_msgs::agent_state::SIKONG)
     {
         agent_prefix = "/sikong_";

@@ -57,11 +57,8 @@ int main(int argc, char **argv) {
         case sunray_msgs::agent_state::RMTT:
             agent_prefix = "rmtt_";
             break;
-        case sunray_msgs::agent_state::TIANBOT:
-            agent_prefix = "tianbot_";
-            break;
-        case sunray_msgs::agent_state::WHEELTEC:
-            agent_prefix = "wheeltec_";
+        case sunray_msgs::agent_state::UGV:
+            agent_prefix = "ugv_";
             break;
         case sunray_msgs::agent_state::SIKONG:
             agent_prefix = "sikong_";
@@ -88,7 +85,7 @@ int main(int argc, char **argv) {
     char choice;
     // 从用户输入获取航点位置
     while (ros::ok()) {
-        cout << GREEN << "Enter waypoint position (x, y" << ((agent_type == sunray_msgs::agent_state::TIANBOT || agent_type == sunray_msgs::agent_state::WHEELTEC) ? "" : ", z") << "): ";
+        cout << GREEN << "Enter waypoint position (x, y" << ((agent_type == sunray_msgs::agent_state::UGV) ? "" : ", z") << "): ";
         if (!(cin >> x >> y)) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');

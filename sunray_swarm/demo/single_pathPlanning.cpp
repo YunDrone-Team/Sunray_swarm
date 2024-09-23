@@ -136,11 +136,8 @@ int main(int argc, char **argv)
     case sunray_msgs::agent_state::RMTT:
         agent_prefix = "rmtt_";
         break;
-    case sunray_msgs::agent_state::TIANBOT:
-        agent_prefix = "tianbot_";
-        break;
-    case sunray_msgs::agent_state::WHEELTEC:
-        agent_prefix = "wheeltec_";
+    case sunray_msgs::agent_state::UGV:
+        agent_prefix = "ugv_";
         break;
     case sunray_msgs::agent_state::SIKONG:
         agent_prefix = "sikong_";
