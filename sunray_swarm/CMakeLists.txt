@@ -93,6 +93,11 @@ add_executable(agent_sim_node
 )
 target_link_libraries(agent_sim_node ${catkin_LIBRARIES})
 
+## RMTT_DEMO - 定点悬停
+add_executable(rmtt_hover demo_rmtt/rmtt_hover.cpp)
+add_dependencies(rmtt_hover sunray_swarm_gencpp)
+target_link_libraries(rmtt_hover ${catkin_LIBRARIES})
+
 ## DEMO - 三智能体绕圈
 add_executable(circle_trajectory demo/circle_trajectory.cpp)
 add_dependencies(circle_trajectory sunray_swarm_gencpp)
@@ -112,12 +117,6 @@ target_link_libraries(formation_nokov ${catkin_LIBRARIES})
 add_executable(swarm_with_obstacles demo/swarm_with_obstacles.cpp)
 add_dependencies(swarm_with_obstacles sunray_swarm_gencpp)
 target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
-
-##DEMO -单机目标点悬停控制
-add_executable(single_hover demo/single_hover.cpp)
-add_dependencies(single_hover sunray_swarm_gencpp)
-target_link_libraries(single_hover ${catkin_LIBRARIES})
-
 
 ##DEMO -单机圆形轨迹跟踪
 add_executable(single_circle demo/single_circle.cpp)
