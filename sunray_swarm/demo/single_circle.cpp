@@ -1,7 +1,4 @@
 #include <ros/ros.h>
-#include <signal.h>
-#include <cmath>
-#include "sunray_msgs/agent_cmd.h"
 #include "printf_utils.h"
 #include "math_utils.h"
 using namespace std;
@@ -23,14 +20,14 @@ ros::Subscriber agent_cmd_sub; // 触发条件
 sunray_msgs::agent_cmd cmd;
 bool received_start_cmd = false; // 设置开始点
 
-// 处理信号
-void mySigintHandler(int sig)
-{
-    ROS_INFO("[rmtt_circle_trajectory] exit...");
-    ros::shutdown();
-}
+
+string node_name;                       // 节点名称
+ros::Publisher agent_cmd_pub;           // 发布控制命令
+ros::Publisher text_info_pub;           // 发布文字提示消息
+ros::Subscriber single_hover_sub;       // 触发条件
+
 // 回调函数
-void startCmdCallback(const std_msgs::Bool::ConstPtr &msg)
+void single_hover_cb(const std_msgs::Bool::ConstPtr &msg)
 {
     received_start_cmd = msg->data; // 设置输入信息(trul、false)
 }
@@ -38,45 +35,26 @@ void startCmdCallback(const std_msgs::Bool::ConstPtr &msg)
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "single_circle");
-    ros::NodeHandle nh("~");
-    signal(SIGINT, mySigintHandler); // 设置信号处理函数
-
-    // 从参数服务器获取期望的偏航角，默认为0.0
-    nh.param<float>("desired_yaw", desired_yaw, 1.0f);
-    // 从参数服务器获取圆周轨迹的半径，默认为1.0
-    nh.param<float>("circle_radius", circle_radius, 1.0f);
-    // 从参数服务器获取线速度，默认为0.3
-    nh.param<float>("linear_vel", linear_vel, 0.3f);
-    // 默认为1 (RMTT)
-    nh.param<int>("agent_type", agent_type, 1);
-    // 从参数服务器获取高度,默认为1
-    nh.param<float>("agent_height", agent_height, 1.0f);
-    // 默认为数量为1
-    nh.param<int>("agent_num", agent_num, 1);
-
-    // 设置名称
-    string agent_prefix;
-    switch (agent_type)
-    {
-    case sunray_msgs::agent_state::RMTT:
-        agent_prefix = "rmtt_";
-        break;
-    case sunray_msgs::agent_state::UGV:
-        agent_prefix = "ugv_";
-        break;
-    case sunray_msgs::agent_state::SIKONG:
-        agent_prefix = "sikong_";
-        break;
-    default:
-        agent_prefix = "unknown_";
-        break;
-    }
-    string agent_name;
-    agent_name = "/" + agent_prefix + std::to_string(agent_id);
-    cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
-    agent_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/single_circle", 1, startCmdCallback);
-
+    ros::NodeHandle nh;
+    // 设置循环频率为10Hz
     ros::Rate rate(10);
+    node_name = ros::this_node::getName();
+
+    // 【参数】智能体编号
+    nh.param<int>("agent_id", agent_id, 1);
+    // 【参数】目标点位置——TODO
+    nh.param<int>("agent_goals", agent_id, 1);
+
+    string agent_name;
+    agent_name = "/rmtt_" + std::to_string(agent_id);
+    // 【订阅】触发指令 外部 -> 本节点 ——TODO设置为BOOL值变量
+    single_hover_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/single_circle", 1, single_hover_cb);
+    // 【发布】控制指令 本节点 -> 控制节点
+    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
+    // 【发布】文字提示消息  本节点 -> 地面站
+    text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
+
+   
     while (ros::ok())
     {
         if (circle_radius != 0)
@@ -121,7 +99,6 @@ int main(int argc, char **argv)
                     cmd_pub.publish(cmd);
                     cout << BLUE << "Moving in circle: x=" << cmd.desired_pos.x << " y=" << cmd.desired_pos.y << " z=" << cmd.desired_pos.z << " yaw=" << desired_yaw << TAIL << endl;
                     time_trajectory += 0.1;
-                    rate.sleep();
                 }
             }
         }

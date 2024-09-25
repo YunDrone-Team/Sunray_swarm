@@ -130,11 +130,11 @@ void UGV_CONTROL::mainloop()
     {
         desired_vel.linear.x = 0.0;
         desired_vel.linear.y = 0.0;
-       desired_vel.linear.z = 0.0;
-       desired_vel.angular.x = 0.0;
-       desired_vel.angular.y = 0.0;
-       desired_vel.angular.z = 0.0;
-       agent_cmd_vel_pub.publish(desired_vel);
+        desired_vel.linear.z = 0.0;
+        desired_vel.angular.x = 0.0;
+        desired_vel.angular.y = 0.0;
+        desired_vel.angular.z = 0.0;
+        agent_cmd_vel_pub.publish(desired_vel);
         return;
     }
 

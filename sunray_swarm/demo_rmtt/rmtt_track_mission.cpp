@@ -1,6 +1,4 @@
 #include <ros/ros.h>
-#include <signal.h>
-
 #include "printf_utils.h"
 #include "math_utils.h"
 #include "ros_msg_utils.h"
@@ -9,131 +7,88 @@
     
 using namespace std;
 int agent_type;
-int agent_num;
+int agent_id;;
 float agent_height;
 string target_name;
 int start_cmd = 0;
-geometry_msgs::PoseStamped target_pos[MAX_AGENT_NUM];
-float target_yaw[MAX_AGENT_NUM];
-sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];
+geometry_msgs::PoseStamped target_pos;
+float target_yaw;
+sunray_msgs::agent_cmd agent_cmd;
 
-ros::Subscriber target_pos_sub[MAX_AGENT_NUM];
-ros::Publisher agent_cmd_pub[MAX_AGENT_NUM];
+ros::Subscriber target_pos_sub;
+ros::Publisher agent_cmd_pub;
 ros::Publisher text_info_pub;
+bool received_start_cmd = false;     // 接收到开始命令
+ros::Subscriber single_trackMission_sub;
 
-void mySigintHandler(int sig)
+
+
+void single_trackMission_cb(const std_msgs::Bool::ConstPtr &msg)
 {
-    ROS_INFO("[circle_trajectory] exit...");
-    ros::shutdown();
+    received_start_cmd = true;     // 接收到开始命令
+    start_cmd = 1;
 }
+
 void target_pos_cb(const geometry_msgs::PoseStamped::ConstPtr& msg, int i)
 {
-    target_pos[i] = *msg;
+    target_pos = *msg;
 
     Eigen::Quaterniond q_mocap = Eigen::Quaterniond(msg->pose.orientation.w, msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z);
     Eigen::Vector3d target_att = quaternion_to_euler(q_mocap);
-    target_yaw[i] = target_att.z();
+    target_yaw = target_att.z();
 }
 
-void printf_params()
-{
-    cout << GREEN << "agent_type    : " << agent_type << "" << TAIL << endl;
-    cout << GREEN << "agent_num     : " << agent_num << "" << TAIL << endl;
-    cout << GREEN << "agent_height   : " << agent_height << "" << TAIL << endl;
-    cout << GREEN << "target_name   : " << target_name << "" << TAIL << endl;
-}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "track_mission");
     ros::NodeHandle nh("~");
     ros::Rate rate(100.0);
+ 
 
-    // 【参数】智能体类型
-    nh.param<int>("agent_type", agent_type, 1);
-    // 【参数】智能体编号
-    nh.param<int>("agent_num", agent_num, 8);
     // 【参数】agent_height
-    nh.param<float>("agent_height", agent_height, 0.0f);
+    nh.param<float>("agent_height", agent_height, 1.0f);
     // 【参数】目标名称
     nh.param<string>("target_name", target_name, "none");
 
-    printf_params();
 
-    string agent_prefix;
+    cout << GREEN << "agent_height   : " << agent_height << "" << TAIL << endl;
+    cout << GREEN << "target_name   : " << target_name << "" << TAIL << endl;
 
-    if(agent_type == sunray_msgs::agent_state::RMTT)
-    {
-        agent_prefix = "rmtt_";
-    }else if(agent_type == sunray_msgs::agent_state::TIANBOT)
-    {
-        agent_prefix = "tianbot_";
-    }else if(agent_type == sunray_msgs::agent_state::WHEELTEC)
-    {
-        agent_prefix = "wheeltec_";
-    }else if(agent_type == sunray_msgs::agent_state::SIKONG)
-    {
-        agent_prefix = "sikong_";
-    }else
-    {
-        agent_prefix = "unkonown_";
-    }
 
-    // 【发布】文字提示消息（回传至地面站显示）
-    text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
     string agent_name;
-    for(int i = 0; i < agent_num; i++) 
-    {
-        agent_name = "/" + agent_prefix + std::to_string(i+1);
-        target_name = "/" + target_name + "_" + std::to_string(i+1);
-        target_pos_sub[i] = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node"+ target_name + "/pose", 1, boost::bind(&target_pos_cb,_1,i));
-        // 【发布】无人车控制指令
-        agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
-    }
-            // [订阅]触发条件
-    // agent_cmd_pub = nh.advertise<std_msgs::Bool>("/sunray_swarm/track_mission", 1， start_cmd_cb);
+    agent_name = "/rmtt_" + std::to_string(agent_id);
+    target_name = "/ugv_" + std::to_string(agent_id);
+    
+    target_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node"+ target_name + "/pose", 1, boost::bind(&target_pos_cb,_1,1));
+    // 【订阅】触发指令 外部 -> 本节点 ——TODO设置为BOOL值变量
+    single_trackMission_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/single_trackMission", 1, single_trackMission_cb);
+    // 【发布】控制指令 本节点 -> 控制节点
+    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
+    // 【发布】文字提示消息  本节点 -> 地面站
+    text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
+    
+     sleep(1.0);
 
-    cout << GREEN << "Please enter 1 to move to start pos..." << TAIL << endl;
-    cin >> start_cmd;
-
-    // for(int i = 0; i < agent_num; i++) 
-    // {
-    //     agent_cmd[i].agent_id = i+1;
-    //     agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-    //     agent_cmd[i].desired_pos.x = circle_radius * cos_angle + circle_center[0];
-    //     agent_cmd[i].desired_pos.y = circle_radius * sin_angle + circle_center[1];
-    //     agent_cmd[i].desired_pos.z = circle_center[2];
-    //     agent_cmd[i].desired_yaw = 0.0;
-    //     agent_cmd_pub[i].publish(agent_cmd[i]);
-    // }
-
-    sleep(1.0);
-
-    cout << GREEN << "Please enter 1 to move to start track target..." << TAIL << endl;
-    cin >> start_cmd;
-
-    start_cmd = 2;
 
     // 主循环
     while (ros::ok())
     {
-        // 回调函数,timer开始运行
-        ros::spinOnce();
-        
-        for(int i = 0; i < agent_num; i++) 
+        if(start_cmd)
         {
-            agent_cmd[i].agent_id = i+1;
-            agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-            agent_cmd[i].cmd_source = "track_mission";
-            agent_cmd[i].desired_pos.x = target_pos[i].pose.position.x;
-            agent_cmd[i].desired_pos.y = target_pos[i].pose.position.y;
-            agent_cmd[i].desired_pos.z = agent_height;
-            agent_cmd[i].desired_yaw = target_yaw[i];
-            agent_cmd_pub[i].publish(agent_cmd[i]);
+            agent_cmd.agent_id =1;
+            agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agent_cmd.cmd_source = "track_mission";
+            agent_cmd.desired_pos.x = target_pos.pose.position.x;
+            agent_cmd.desired_pos.y = target_pos.pose.position.y;
+            agent_cmd.desired_pos.z = agent_height;
+            agent_cmd.desired_yaw = target_yaw;
+            agent_cmd_pub.publish(agent_cmd);
         }
 
-        // cout << GREEN << "Trajectory tracking: " << time_trajectory << " / " << trajectory_total_time << " [ s ]" << TAIL << endl;
-        // sleep
+        // 回调函数,timer开始运行
+        ros::spinOnce();
         ros::Duration(0.05).sleep();
     }
 

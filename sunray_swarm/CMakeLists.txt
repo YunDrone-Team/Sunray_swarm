@@ -97,6 +97,25 @@ target_link_libraries(agent_sim_node ${catkin_LIBRARIES})
 add_executable(rmtt_hover demo_rmtt/rmtt_hover.cpp)
 add_dependencies(rmtt_hover sunray_swarm_gencpp)
 target_link_libraries(rmtt_hover ${catkin_LIBRARIES})
+## RMTT_DEMO - 无人机绕圆
+add_executable(rmtt_circle demo_rmtt/rmtt_circle.cpp)
+add_dependencies(rmtt_circle sunray_swarm_gencpp)
+target_link_libraries(rmtt_circle ${catkin_LIBRARIES})
+## RMTT_DEMO - 航点
+add_executable(rmtt_waypoint demo_rmtt/rmtt_waypoint.cpp)
+add_dependencies(rmtt_waypoint sunray_swarm_gencpp)
+target_link_libraries(rmtt_waypoint ${catkin_LIBRARIES})
+## RMTT_DEMO - 路径规划
+add_executable(rmtt_pathPlanning demo_rmtt/rmtt_pathplanning.cpp)
+add_dependencies(rmtt_pathPlanning sunray_swarm_gencpp)
+target_link_libraries(rmtt_pathPlanning ${catkin_LIBRARIES})
+# RMTT_DEMO - 无人机跟随无人车
+add_executable(rmtt_track_mission demo_rmtt/rmtt_track_mission.cpp)
+add_dependencies(rmtt_track_mission sunray_swarm_gencpp)
+target_link_libraries(rmtt_track_mission ${catkin_LIBRARIES})
+
+
+
 
 ## DEMO - 三智能体绕圈
 add_executable(circle_trajectory demo/circle_trajectory.cpp)
@@ -118,20 +137,8 @@ add_executable(swarm_with_obstacles demo/swarm_with_obstacles.cpp)
 add_dependencies(swarm_with_obstacles sunray_swarm_gencpp)
 target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
 
-##DEMO -单机圆形轨迹跟踪
-add_executable(single_circle demo/single_circle.cpp)
-add_dependencies(single_circle sunray_swarm_gencpp)
-target_link_libraries(single_circle ${catkin_LIBRARIES})
 
-##DEMO -单机航点控制
-add_executable(single_waypoint demo/single_waypoint.cpp)
-add_dependencies(single_waypoint sunray_swarm_gencpp)
-target_link_libraries(single_waypoint ${catkin_LIBRARIES})
 
-##DEMO -单机路径规划
-add_executable(single_pathPlanning demo/single_pathPlanning.cpp)
-add_dependencies(single_pathPlanning sunray_swarm_gencpp)
-target_link_libraries(single_pathPlanning ${catkin_LIBRARIES})
 
 #DEMO 编队控制
 # add_executable(formation_control demo/formation_control.cpp)
