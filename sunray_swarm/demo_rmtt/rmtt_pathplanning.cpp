@@ -1,22 +1,20 @@
-#include <ros/ros.h>    
+#include <ros/ros.h>
 #include "printf_utils.h"
 #include "math_utils.h"
 #include "ros_msg_utils.h"
 
 using namespace std;
 
-ros::Publisher agent_cmd_pub;     // 发布无人机控制命令
-ros::Publisher marker_pub;  // 发布RVIZ标记用于显示障碍物
-float agent_height;         // 设置无人机高度变量
-int agent_id;               //设置智能体数量
-string node_name;           // 节点名称
-ros::Publisher text_info_pub;           // 发布文字提示消息
-bool received_start_cmd = false; // 设置开始点
+ros::Publisher agent_cmd_pub;            // 发布无人机控制命令
+ros::Publisher marker_pub;               // 发布RVIZ标记，用于显示障碍物
+ros::Publisher text_info_pub;            // 发布文字提示消息
+ros::Subscriber single_pathPlanning_sub; // 订阅单个路径规划触发信号
 
-sunray_msgs::orca_cmd orca_cmd;
-ros::Subscriber single_pathPlanning_sub;
-geometry_msgs::Point target;// Point对象，用于存储目标位置
-
+bool received_start_cmd = false; // 标记是否接收到开始命令
+geometry_msgs::Point target;     // 存储目标位置
+int agent_id;                    // 设置智能体编号
+float agent_height;              // 设置无人机飞行高度
+string node_name;                // 节点名称
 
 // 设置障碍物并发布到RVIZ进行可视化
 void setupObstacles()
@@ -56,69 +54,85 @@ void setupObstacles()
     marker_pub.publish(marker);
 }
 
-
-void single_pathPlanning_cb(const std_msgs::Bool::ConstPtr& msg) 
+// 触发路径规划的回调函数
+void single_pathPlanning_cb(const std_msgs::Bool::ConstPtr &msg)
 {
-    received_start_cmd = msg->data; // 设置输入信息
+    received_start_cmd = msg->data; // 当收到触发信号为true时，更新状态
 }
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "single_hover");
+    // 初始化ROS节点
+    ros::init(argc, argv, "rmtt_pathPlanning");
+    // 创建节点句柄
     ros::NodeHandle nh;
     // 设置循环频率为10Hz
     ros::Rate rate(10);
+    // 获取当前节点名称
     node_name = ros::this_node::getName();
 
-    // 从参数服务器设置高度,默认为1
+    // 【参数】从参数服务器设置高度,默认为1
     nh.param<float>("agent_height", agent_height, 1.0f);
-    //从参数服务器设置数量，默认为1
+    // 【参数】从参数服务器设置数量，默认为1
     nh.param<int>("agent_id", agent_id, 1);
-    
+    // 【参数】从参数服务器获取目标位置——TODO
+    nh.param<double>("target_x", target.x, 0.0);
+    nh.param<double>("target_y", target.y, 0.0);
+    // 【参数】使用智能体飞行高度作为z值
+    nh.param<float>("target_z", agent_height);
 
     // 声明一个字符串变量存储代理前缀
     string agent_name;
+    // 构造用于发布控制命令话题名称
     agent_name = "/rmtt_" + std::to_string(agent_id);
-    // 【订阅】触发指令 外部 -> 本节点 
+    // 【订阅】触发指令 外部 -> 本节点
     single_pathPlanning_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/single_pathPlanning", 1, single_pathPlanning_cb);
     // 【发布】控制指令 本节点 -> 控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
-
-   
-    // 初始化marker_pub发布者，发布RVIZ标记
+    // 【发布】 初始化marker_pub发布者，发布RVIZ标记
     marker_pub = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 10);
     // 调用setupObstacles函数设置障碍物并发布到RVIZ
     setupObstacles();
     // 定义并初始化z轴位置变量
     float z = 0;
     while (ros::ok())
-    {     
-        if(received_start_cmd)
+    {
+        if (received_start_cmd)
         {
-            cout << GREEN << "Enter target position (x y): ";
-            cin >> target.x >> target.y;
+            // 发送开始画圆信息
+            std_msgs::String start_info;
+            start_info.data = "Start Moving";
+            // 终端打印信息
+            cout << GREEN << "Start Moving" << TAIL << endl;
+            // 发布信息
+            text_info_pub.publish(start_info);
+            // 创建控制命令对象
+            sunray_msgs::agent_cmd cmd;
             // 从参数服务器获取z
             target.z = agent_height;
-            // 调用planAndDriveToTarget函数规划路径并驱动到目标点
-            sunray_msgs::agent_cmd cmd;
             // 依据代理类型设置的ID
             cmd.agent_id = 1;
             // 设置控制状态为位置控制模式
             cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
             // 设置指令来源
-            cmd.cmd_source = "single_pathplaning";
+            cmd.cmd_source = "ugv_pathplaning";
             // 将目标位置赋值给消息的desired_pos字段
             cmd.desired_pos = target;
-
             // 设置默认的朝向角度为0.0
             cmd.desired_yaw = 0.0;
             // 发布控制命令
             agent_cmd_pub.publish(cmd);
-            cout << BLUE << "Agent driving to target: x=" << target.x << " y=" << target.y << " z=" << target.z << endl;
+            // 打印目标信息
+            std_msgs::String end_info;
+            end_info.data = "ending Moving";
+            // 终端打印信息
+            cout << GREEN << "ending Moving" << TAIL << endl;
+            // 发布信息
+            text_info_pub.publish(end_info);
         }
-        // 处理一次回调函数
+        // 处理回调函数
         ros::spinOnce();
         // 等待无人机行驶到目标点
         ros::Duration(2.0).sleep();
