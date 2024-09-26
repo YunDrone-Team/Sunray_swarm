@@ -114,13 +114,30 @@ add_executable(rmtt_track_mission demo_rmtt/rmtt_track_mission.cpp)
 add_dependencies(rmtt_track_mission sunray_swarm_gencpp)
 target_link_libraries(rmtt_track_mission ${catkin_LIBRARIES})
 
+# UGV_DEMO - 无人车绕圆
+add_executable(ugv_circle demo_ugv/ugv_circle.cpp)
+add_dependencies(ugv_circle sunray_swarm_gencpp)
+target_link_libraries(ugv_circle ${catkin_LIBRARIES})
+# UGV_DEMO - 无人车绕圆
+add_executable(ugv_pathplanning demo_ugv/ugv_pathplanning.cpp)
+add_dependencies(ugv_pathplanning sunray_swarm_gencpp)
+target_link_libraries(ugv_pathplanning ${catkin_LIBRARIES})
+# UGV_DEMO - 无人车绕圆
+add_executable(ugv_waypoint demo_ugv/ugv_waypoint.cpp)
+add_dependencies(ugv_waypoint sunray_swarm_gencpp)
+target_link_libraries(ugv_waypoint ${catkin_LIBRARIES})
 
 
 
-## DEMO - 三智能体绕圈
-add_executable(circle_trajectory demo/circle_trajectory.cpp)
+
+## SWARM_DEMO - 三智能体绕圈
+add_executable(circle_trajectory demo_swarm/swarm_circle.cpp)
 add_dependencies(circle_trajectory sunray_swarm_gencpp)
 target_link_libraries(circle_trajectory ${catkin_LIBRARIES})
+## SWARM_DEMO - 智能体跟随
+add_executable(leader_follower demo_swarm/swarm_leader_follower.cpp)
+add_dependencies(leader_follower sunray_swarm_gencpp)
+target_link_libraries(leader_follower ${catkin_LIBRARIES})
 
 ## DEMO - 目标追踪
 add_executable(track_mission demo/track_mission.cpp)
@@ -151,9 +168,9 @@ add_dependencies(formation_control2 sunray_swarm_gencpp)
 target_link_libraries(formation_control2 ${catkin_LIBRARIES})
 
 #DEMO 跟随飞行
-add_executable(leader_follower demo/multi_leader_follower.cpp)
-add_dependencies(leader_follower sunray_swarm_gencpp)
-target_link_libraries(leader_follower ${catkin_LIBRARIES})
+# add_executable(leader_follower demo/multi_leader_follower.cpp)
+# add_dependencies(leader_follower sunray_swarm_gencpp)
+# target_link_libraries(leader_follower ${catkin_LIBRARIES})
 
 #DEMO 自主降落
 add_executable(autonomous_landing demo/multi_autonomous_landing.cpp)

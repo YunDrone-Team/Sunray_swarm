@@ -11,6 +11,7 @@ bool received_start_cmd = false;     // 接收到开始命令
 ros::Publisher agent_cmd_pub;     // 发布控制命令
 ros::Publisher text_info_pub;     // 发布文字提示消息
 ros::Subscriber single_hover_sub; // 触发条件
+ros::Time last_command_time;         // 上次命令时间
 
 // 触发信号的回调函数，处理接收到的位置
 void single_hover_cb(const std_msgs::Bool::ConstPtr &msg)
@@ -58,38 +59,55 @@ int main(int argc, char **argv)
             text_info_pub.publish(start_info);
             // 构建并发送悬停指令
             sunray_msgs::agent_cmd cmd;
-            // 判断触发条件
-            if (received_start_cmd)
-            {
-                // 设置agent_id
-                cmd.agent_id = agent_id;
-                // 设置控制指令为POS_CONTROL
-                cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-                // 设置指令来源
-                cmd.cmd_source = "single_hover";
-                // 设置目标位置为接收到的位置
-                cmd.desired_pos = position_hover;
-                // 可以设置偏航角，这里设置为0
-                cmd.desired_yaw = hover_yaw;
-                // 发布话题
-                agent_cmd_pub.publish(cmd);
-                // 地面站打印
-                std_msgs::String text_info;
-                text_info.data = node_name + ": send a new hover position!";
-                text_info_pub.publish(text_info);
-                // 控制台打印
-                cout << GREEN << "POS_REF [X Y Z] : " << cmd.desired_pos.x << " [ m ] " << cmd.desired_pos.y << " [ m ] " << cmd.desired_pos.z << " [ m ] " << TAIL << endl;
+            // 设置agent_id
+            cmd.agent_id = agent_id;
+            // 设置为起飞状态
+            cmd.control_state = 11; 
+            // 设置控制指令为POS_CONTROL
+            cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            // 设置指令来源
+            cmd.cmd_source = "single_hover";
+            // 设置目标位置为接收到的位置
+            cmd.desired_pos = position_hover;
+            // 可以设置偏航角，这里设置为0
+            cmd.desired_yaw = hover_yaw;
+            // 发布话题
+            agent_cmd_pub.publish(cmd);
+            // 记录命令时间,用于判断15无操作降落时间
+            last_command_time = ros::Time::now(); 
+            // 地面站打印
+            std_msgs::String text_info;
+            text_info.data = node_name + ": send a new hover position!";
+            text_info_pub.publish(text_info);
+            // 控制台打印
+            cout << GREEN << "POS_REF [X Y Z] : " << cmd.desired_pos.x << " [ m ] " << cmd.desired_pos.y << " [ m ] " << cmd.desired_pos.z << " [ m ] " << TAIL << endl;
 
-                // 重置标志
-                received_start_cmd = false;
-                std_msgs::String end_info;
-                // 结束消息打印
-                end_info.data = "ending hover";
-                // 终端打印信息
-                cout << GREEN << "ending hover" << TAIL << endl;
-                // 发布信息
-                text_info_pub.publish(end_info);
-            }
+            // 重置标志
+            received_start_cmd = false;
+            std_msgs::String end_info;
+            // 结束消息打印
+            end_info.data = "ending hover";
+            // 终端打印信息
+            cout << GREEN << "ending hover" << TAIL << endl;
+            // 发布信息
+            text_info_pub.publish(end_info);
+        }
+        // 检查是否需要降落(15秒无操作降落)
+        if (ros::Time::now() - last_command_time > ros::Duration(15.0))
+        {
+            // 发送降落命令
+            sunray_msgs::agent_cmd cmd;
+            cmd.agent_id = agent_id;
+            cmd.control_state = 12; // 设置为降落状态
+
+            agent_cmd_pub.publish(cmd); // 发布降落命令
+
+            std_msgs::String end_info;
+            end_info.data = "ending hover";
+            cout << GREEN << "ending hover" << TAIL << endl;
+            text_info_pub.publish(end_info);
+
+            break; // 退出循环
         }
 
         // 处理回调函数
