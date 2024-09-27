@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     nh.param<float>("agent_height", agent_height, 1.0f);
     // 【参数】从参数服务器获取智能体编号，默认为1
     nh.param<int>("agent_id", agent_id, 1);
-    // 【参数】从参数服务器获取智能体编号，默认为1
+    // 【参数】从参数服务器获取智能画圆时间，默认为10
     nh.param<int>("agent_time", agent_time, 10);
 
     // 构造用于发布控制命令的完整话题名称
@@ -69,6 +69,8 @@ int main(int argc, char **argv)
         // 检查是否接收到开始命令
         if (received_start_cmd)
         {
+            
+            
             // 创建控制命令消息对象
             sunray_msgs::agent_cmd cmd;
             // 发送开始画圆信息
@@ -79,7 +81,10 @@ int main(int argc, char **argv)
             // 发布信息
             text_info_pub.publish(start_info);
             // 移动到起始位置
-            cmd.agent_id = 1;                                        // 指定智能体编号
+            cmd.agent_id = 1;
+            // 设置为起飞状态
+            cmd.control_state = 11;
+            ros::Duration(3.0).sleep(); // 等待3秒以确保起飞                                   // 指定智能体编号
             cmd.cmd_source = "rmtt_circle";                          // 指定命令来源为当前节点
             cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL; // 设置控制模式为位置控制
             cmd.desired_pos.x = circle_radius;                       // 设置x坐标为圆周半径
@@ -113,6 +118,10 @@ int main(int argc, char **argv)
             }
             // 圆周运动完成后，重置开始命令标志
             received_start_cmd = false; // 完成后重置命令
+
+            // 设置为降落状态
+            cmd.control_state = 12;
+            agent_cmd_pub.publish(cmd);
             std_msgs::String end_info;
             end_info.data = "ending circle";
             // 终端打印信息

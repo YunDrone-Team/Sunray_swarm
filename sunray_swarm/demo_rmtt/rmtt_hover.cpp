@@ -66,7 +66,7 @@ int main(int argc, char **argv)
             // 设置控制指令为POS_CONTROL
             cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
             // 设置指令来源
-            cmd.cmd_source = "single_hover";
+            cmd.cmd_source = "rmtt_hover";
             // 设置目标位置为接收到的位置
             cmd.desired_pos = position_hover;
             // 可以设置偏航角，这里设置为0
@@ -93,22 +93,22 @@ int main(int argc, char **argv)
             text_info_pub.publish(end_info);
         }
         // 检查是否需要降落(15秒无操作降落)
-        if (ros::Time::now() - last_command_time > ros::Duration(15.0))
-        {
-            // 发送降落命令
-            sunray_msgs::agent_cmd cmd;
-            cmd.agent_id = agent_id;
-            cmd.control_state = 12; // 设置为降落状态
+        // if (ros::Time::now() - last_command_time > ros::Duration(15.0))
+        // {
+        //     // 发送降落命令
+        //     sunray_msgs::agent_cmd cmd;
+        //     cmd.agent_id = agent_id;
+        //     cmd.control_state = 12; // 设置为降落状态
 
-            agent_cmd_pub.publish(cmd); // 发布降落命令
+        //     agent_cmd_pub.publish(cmd); // 发布降落命令
 
-            std_msgs::String end_info;
-            end_info.data = "ending hover";
-            cout << GREEN << "ending hover" << TAIL << endl;
-            text_info_pub.publish(end_info);
+        //     std_msgs::String end_info;
+        //     end_info.data = "ending hover";
+        //     cout << GREEN << "ending hover" << TAIL << endl;
+        //     text_info_pub.publish(end_info);
 
-            break; // 退出循环
-        }
+        //     break; // 退出循环
+        // }
 
         // 处理回调函数
         ros::spinOnce();

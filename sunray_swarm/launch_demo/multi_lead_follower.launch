@@ -1,5 +1,0 @@
-<launch>
-	<node pkg="sunray_swarm" name="leader_follower" type="leader_follower" output="screen">
-		<rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params.yaml" />
-	</node>
-</launch>

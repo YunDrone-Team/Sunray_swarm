@@ -1,5 +1,0 @@
-<launch>
-	<node pkg="sunray_swarm" name="formation_nokov" type="formation_nokov" output="screen">
-		<rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params.yaml" />
-	</node>
-</launch>

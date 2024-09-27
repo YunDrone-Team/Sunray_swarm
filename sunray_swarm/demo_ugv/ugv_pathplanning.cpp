@@ -99,10 +99,14 @@ int main(int argc, char **argv)
     setupObstacles();
     // 定义并初始化z轴位置变量
     float z = 0;
+    // 创建控制命令对象
+    sunray_msgs::agent_cmd cmd;
     while (ros::ok())
     {     
         if(received_start_cmd)
         {
+            // 设置为起飞状态
+            cmd.control_state = 11;
             // 发送开始画圆信息
             std_msgs::String start_info;
             start_info.data = "Start Moving";
@@ -110,8 +114,7 @@ int main(int argc, char **argv)
             cout << GREEN << "Start Moving" << TAIL << endl;
             // 发布信息
             text_info_pub.publish(start_info);
-            // 创建控制命令对象
-            sunray_msgs::agent_cmd cmd;
+            
             // 从参数服务器获取z
             target.z = agent_height;
             // 依据代理类型设置的ID

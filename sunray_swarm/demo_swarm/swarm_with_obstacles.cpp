@@ -5,59 +5,64 @@
 #include "math_utils.h"
 #include "ros_msg_utils.h"
 
-#define MAX_AGENT_NUM 10   
+#define MAX_AGENT_NUM 10
 using namespace std;
 
-int agent_type;
-int agent_num;
-float agent_height;
-string node_name;   
-sunray_msgs::orca_cmd orca_cmd;
-sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];
-sunray_msgs::orca_state orca_state[MAX_AGENT_NUM];
-geometry_msgs::Point goal_N[MAX_AGENT_NUM];
-geometry_msgs::Point goal_O[MAX_AGENT_NUM];
-geometry_msgs::Point goal_K[MAX_AGENT_NUM];
-geometry_msgs::Point goal_V[MAX_AGENT_NUM];
+int agent_type;                                    // 智能体类型
+int agent_num;                                     // 智能体数量
+float agent_height;                                // 智能体高度
+string node_name;                                  // 节点名称
+sunray_msgs::orca_cmd orca_cmd;                    // ORCA指令
+sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];   // 智能体指令
+sunray_msgs::orca_state orca_state[MAX_AGENT_NUM]; // ORCA状态
+geometry_msgs::Point goal_N[MAX_AGENT_NUM];        // N形目标点
+geometry_msgs::Point goal_O[MAX_AGENT_NUM];        // O形目标点
+geometry_msgs::Point goal_K[MAX_AGENT_NUM];        // K形目标点
+geometry_msgs::Point goal_V[MAX_AGENT_NUM];        // V形目标点
 
 // 执行状态
 enum FORMATION_STATE
 {
-    INIT = 0,               // 初始模式
-    N = 1,              
-    O = 2,     
-    K = 3,    
-    O2 = 4,        
-    V = 5,
-    RETURN_HOME = 6,
+    INIT = 0,        // 初始模式
+    N = 1,           // N形队形
+    O = 2,           // O形队形
+    K = 3,           // K形队形
+    O2 = 4,          // 第二次O形队形
+    V = 5,           // V形队形
+    RETURN_HOME = 6, // 返回初始点
 };
-FORMATION_STATE formation_state;
+FORMATION_STATE formation_state; // 当前队形状态
 
-ros::Publisher text_info_pub;
-ros::Publisher orca_cmd_pub;
-ros::Subscriber start_cmd_sub;
-ros::Subscriber orca_state_sub[MAX_AGENT_NUM];
-ros::Publisher orca_goal_pub[MAX_AGENT_NUM];
+ros::Publisher text_info_pub;                  // 文字提示消息发布器
+ros::Publisher orca_cmd_pub;                   // ORCA指令发布器
+ros::Subscriber start_cmd_sub;                 // 启动指令订阅器
+ros::Subscriber orca_state_sub[MAX_AGENT_NUM]; // ORCA状态订阅器
+ros::Publisher orca_goal_pub[MAX_AGENT_NUM];   // 智能体目标点发布器
 
+// 信号处理函数
 void mySigintHandler(int sig)
 {
     ROS_INFO("[swarm_with_obstacles] exit...");
     ros::shutdown();
 }
-void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg, int i)
+// ORCA状态回调函数
+void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr &msg, int i)
 {
-    orca_state[i] = *msg;
+    orca_state[i] = *msg; // 更新指定智能体的ORCA状态
 }
+// 定时器回调函数
 void timercb_show(const ros::TimerEvent &e)
 {
-    
 }
-void start_cmd_cb(const std_msgs::BoolConstPtr& msg)
+// 启动命令回调函数
+void start_cmd_cb(const std_msgs::BoolConstPtr &msg)
 {
-    formation_state = FORMATION_STATE::N;
+    formation_state = FORMATION_STATE::N; // 更新队形状态为N形
 }
+// 目标点设置函数声明
 void setup_show_goals();
 
+// 打印参数
 void printf_params()
 {
     cout << GREEN << "agent_type    : " << agent_type << "" << TAIL << endl;
@@ -65,13 +70,14 @@ void printf_params()
     cout << GREEN << "agent_height   : " << agent_height << "" << TAIL << endl;
 }
 
+// 设置障碍物
 void setup_obstacles()
 {
     orca_cmd.cmd_source = "demo";
     orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SETUP_OBS;
-	// 障碍物示例：中心在原点，边长为2的正方体
+    // 障碍物示例：中心在原点，边长为2的正方体
 
-    geometry_msgs::Point Point1,Point2,Point3,Point4;
+    geometry_msgs::Point Point1, Point2, Point3, Point4;
     Point1.x = 1.0;
     Point1.y = 1.0;
     Point2.x = -1.0;
@@ -81,21 +87,28 @@ void setup_obstacles()
     Point4.x = 1.0;
     Point4.y = -1.0;
 
+    // 将顶点添加到障碍物指令中
     orca_cmd.obs_point.push_back(Point1);
     orca_cmd.obs_point.push_back(Point2);
     orca_cmd.obs_point.push_back(Point3);
     orca_cmd.obs_point.push_back(Point4);
 
+    // 发布设置障碍物指令
     orca_cmd_pub.publish(orca_cmd);
+    // 输出设置障碍物完成信息
     cout << GREEN << "setup_obstacles" << TAIL << endl;
 
     // 发布RVIZ
 }
 int main(int argc, char **argv)
 {
+    // 初始化ROS节点
     ros::init(argc, argv, "swarm_with_obstacles");
+    // 创建节点句柄
     ros::NodeHandle nh("~");
+    // 设置循环频率为20Hz
     ros::Rate rate(20.0);
+    // 获取节点名称
     node_name = ros::this_node::getName();
 
     // 【参数】智能体类型
@@ -104,22 +117,29 @@ int main(int argc, char **argv)
     nh.param<int>("agent_num", agent_num, 8);
     // 【参数】agent_height
     nh.param<float>("agent_height", agent_height, 0.0f);
+    // 队形转换时间
     float formation_time = 5.0;
 
-    printf_params();
-    string agent_name;
-    string agent_prefix;
+    printf_params();     // 打印参数
+    string agent_name;   // 智能体名称
+    string agent_prefix; // 智能体前缀
 
-    if(agent_type == sunray_msgs::agent_state::RMTT)
+    // 根据智能体类型设置前缀
+    if (agent_type == sunray_msgs::agent_state::RMTT)
     {
         agent_prefix = "rmtt_";
-    }else if(agent_type == sunray_msgs::agent_state::UGV)
+    }
+    else if (agent_type == sunray_msgs::agent_state::UGV)
     {
-        agent_prefix = "ugv_";
-    }else if(agent_type == sunray_msgs::agent_state::SIKONG)
+        agent_prefix = "ugv_";pub_goal_once = true; // 设置目标点已发布
+                    orca_state[0].arrived_all_goal = false; // 初始化到达标志
+                    sleep(1.0); // 暂停1秒
+    }
+    else if (agent_type == sunray_msgs::agent_state::SIKONG)
     {
         agent_prefix = "sikong_";
-    }else
+    }
+    else
     {
         agent_prefix = "unkonown_";
     }
@@ -131,23 +151,27 @@ int main(int argc, char **argv)
     // 【订阅】程序触发指令
     start_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/swarm_with_obstacles", 1, start_cmd_cb);
 
-    for(int i = 0; i < agent_num; i++) 
+    // 为每个智能体设置发布和订阅
+    for (int i = 0; i < agent_num; i++)
     {
-        agent_name = "/" + agent_prefix + std::to_string(i+1);
+        // 创建智能体名称
+        agent_name = "/" + agent_prefix + std::to_string(i + 1);
         // 【发布】无人机的目标点
         orca_goal_pub[i] = nh.advertise<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 1);
         // 【订阅】无人机orca状态
-		orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb,_1,i));
+        orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb, _1, i));
     }
 
+    // 创建定时器
     ros::Timer timer_show = nh.createTimer(ros::Duration(3.0), timercb_show);
 
-    sleep(1.0);
-    setup_obstacles();
-    setup_show_goals();
+    sleep(1.0);         // 暂停1秒
+    setup_obstacles();  // 设置障碍物
+    setup_show_goals(); // 设置目标点
 
+    // 初始化队形状态
     formation_state = FORMATION_STATE::INIT;
-
+    // 发布目标点的标志
     bool pub_goal_once = false;
 
     // 主循环
@@ -156,151 +180,146 @@ int main(int argc, char **argv)
         // 回调函数
         ros::spinOnce();
 
-        switch(formation_state)
+        switch (formation_state)
         {
-            case FORMATION_STATE::INIT:
-
+        case FORMATION_STATE::INIT:
+            // 初始状态，等待启动命令
             break;
 
-            case FORMATION_STATE::N:
-                // N形队形
-                if(!pub_goal_once)
-                {
-                    cout << BLUE << node_name << " ORCA: SET_HOME" << TAIL << endl;
+        case FORMATION_STATE::N:
+            // N形队形
+            if (!pub_goal_once)
+            {
+                cout << BLUE << node_name << " ORCA: SET_HOME" << TAIL << endl;
 
-                    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
-                    orca_cmd_pub.publish(orca_cmd);
-                    sleep(0.5);
+                orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME; // 设置HOME指令
+                orca_cmd_pub.publish(orca_cmd);                      // 发布HOME指令
+                sleep(0.5);                                          // 暂停0.5秒
 
-                    cout << BLUE << node_name << " Formation: N" << TAIL << endl;
-                    for(int i = 0; i < agent_num; i++) 
-                    {
-                        orca_goal_pub[i].publish(goal_N[i]);
-                        sleep(0.1);
-                    }
-                    pub_goal_once = true;
-                    orca_state[0].arrived_all_goal = false;
-                    sleep(1.0);
+                cout << BLUE << node_name << " Formation: N" << TAIL << endl;
+                for (int i = 0; i < agent_num; i++)
+                {
+                    orca_goal_pub[i].publish(goal_N[i]); // 发布N形目标点
+                    sleep(0.1);                          // 暂停0.1秒
                 }
+                pub_goal_once = true;                   // 设置目标点已发布
+                orca_state[0].arrived_all_goal = false; // 初始化到达标志
+                sleep(1.0);                             // 暂停1秒
+            }
 
-                if(pub_goal_once && orca_state[0].arrived_all_goal)
+            if (pub_goal_once && orca_state[0].arrived_all_goal)
+            {
+                sleep(formation_time);
+                formation_state = FORMATION_STATE::O; // 切换到O形队形
+                pub_goal_once = false;                // 重置发布标志
+            }
+            break;
+        case FORMATION_STATE::O:
+            // O形队形
+            if (!pub_goal_once)
+            {
+                cout << BLUE << node_name << " Formation: O" << TAIL << endl;
+                for (int i = 0; i < agent_num; i++)
                 {
-                    sleep(formation_time);
-                    formation_state = FORMATION_STATE::O;
-                    // set flag
-                    pub_goal_once = false;
+                    orca_goal_pub[i].publish(goal_O[i]); // 发布O形目标点
+                    sleep(0.1);                          // 暂停0.1秒
                 }
-                break;
-            case FORMATION_STATE::O:
-                // O形队形
-                if(!pub_goal_once)
-                {
-                    cout << BLUE << node_name << " Formation: O" << TAIL << endl;
-                    for(int i = 0; i < agent_num; i++) 
-                    {
-                        orca_goal_pub[i].publish(goal_O[i]);
-                        sleep(0.1);
-                    }
-                    pub_goal_once = true;
-                    orca_state[0].arrived_all_goal = false;
-                    sleep(1.0);
-                }
+                pub_goal_once = true;                   // 设置目标点已发布
+                orca_state[0].arrived_all_goal = false; // 初始化到达标志
+                sleep(1.0);                             // 暂停1秒
+            }
 
-                if(pub_goal_once && orca_state[0].arrived_all_goal)
+            if (pub_goal_once && orca_state[0].arrived_all_goal)
+            {
+                sleep(formation_time);
+                formation_state = FORMATION_STATE::K; // 切换到K形队形
+                pub_goal_once = false;                // 重置发布标志
+            }
+            break;
+        case FORMATION_STATE::K:
+            // K形队形
+            if (!pub_goal_once)
+            {
+                cout << BLUE << node_name << " Formation: K" << TAIL << endl;
+                for (int i = 0; i < agent_num; i++)
                 {
-                    sleep(formation_time);
-                    formation_state = FORMATION_STATE::K;
-                    // set flag
-                    pub_goal_once = false;
+                    orca_goal_pub[i].publish(goal_K[i]); // 发布K形目标点
+                    sleep(0.1);                          // 暂停0.1秒
                 }
-                break;
-            case FORMATION_STATE::K:
-                // K形队形
-                if(!pub_goal_once)
-                {
-                    cout << BLUE << node_name << " Formation: K" << TAIL << endl;
-                    for(int i = 0; i < agent_num; i++) 
-                    {
-                        orca_goal_pub[i].publish(goal_K[i]);
-                        sleep(0.1);
-                    }
-                    pub_goal_once = true;
-                    orca_state[0].arrived_all_goal = false;
-                    sleep(1.0);
-                }
+                pub_goal_once = true;
+                orca_state[0].arrived_all_goal = false;
+                sleep(1.0);
+            }
 
-                if(pub_goal_once && orca_state[0].arrived_all_goal)
+            if (pub_goal_once && orca_state[0].arrived_all_goal)
+            {
+                sleep(formation_time);
+                formation_state = FORMATION_STATE::O2; // 切换到第二次O形队形
+                pub_goal_once = false;                 // 重置发布标志
+            }
+            break;
+        case FORMATION_STATE::O2:
+            // O形队形
+            if (!pub_goal_once)
+            {
+                cout << BLUE << node_name << " Formation: O" << TAIL << endl;
+                for (int i = 0; i < agent_num; i++)
                 {
-                    sleep(formation_time);
-                    formation_state = FORMATION_STATE::O2;
-                    // set flag
-                    pub_goal_once = false;
+                    orca_goal_pub[i].publish(goal_O[i]); // 发布O形目标点
+                    sleep(0.1);                          // 暂停0.1秒
                 }
-                break;
-            case FORMATION_STATE::O2:
-                // O形队形
-                if(!pub_goal_once)
-                {
-                    cout << BLUE << node_name << " Formation: O" << TAIL << endl;
-                    for(int i = 0; i < agent_num; i++) 
-                    {
-                        orca_goal_pub[i].publish(goal_O[i]);
-                        sleep(0.1);
-                    }
-                    pub_goal_once = true;
-                    orca_state[0].arrived_all_goal = false;
-                    sleep(1.0);
-                }
+                pub_goal_once = true;                   // 设置目标点已发布
+                orca_state[0].arrived_all_goal = false; // 初始化到达标志
+                sleep(1.0);                             // 暂停1秒
+            }
 
-                if(pub_goal_once && orca_state[0].arrived_all_goal)
+            if (pub_goal_once && orca_state[0].arrived_all_goal)
+            {
+                sleep(formation_time);
+                formation_state = FORMATION_STATE::V; // 切换到V形队形
+                pub_goal_once = false;                // 重置发布标志
+            }
+            break;
+        case FORMATION_STATE::V:
+            // V形队形
+            if (!pub_goal_once)
+            {
+                cout << BLUE << node_name << " Formation: V" << TAIL << endl;
+                for (int i = 0; i < agent_num; i++)
                 {
-                    sleep(formation_time);
-                    formation_state = FORMATION_STATE::V;
-                    // set flag
-                    pub_goal_once = false;
+                    orca_goal_pub[i].publish(goal_V[i]); // 发布V形目标点
+                    sleep(0.1);                          // 暂停0.1秒
                 }
-                break;
-            case FORMATION_STATE::V:
-                // V形队形
-                if(!pub_goal_once)
-                {
-                    cout << BLUE << node_name << " Formation: V" << TAIL << endl;
-                    for(int i = 0; i < agent_num; i++) 
-                    {
-                        orca_goal_pub[i].publish(goal_V[i]);
-                        sleep(0.1);
-                    }
-                    pub_goal_once = true;
-                    orca_state[0].arrived_all_goal = false;
-                    sleep(1.0);
-                }
+                pub_goal_once = true;                   // 设置目标点已发布
+                orca_state[0].arrived_all_goal = false; // 初始化到达标志
+                sleep(1.0);                             // 暂停1秒
+            }
 
-                if(pub_goal_once && orca_state[0].arrived_all_goal)
-                {
-                    sleep(formation_time);
-                    formation_state = FORMATION_STATE::RETURN_HOME;
-                    // set flag
-                    pub_goal_once = false;
-                }
-                break;
-            case FORMATION_STATE::RETURN_HOME:
-                // Return
-                if(!pub_goal_once)
-                {
-                    cout << BLUE << node_name << " ORCA: RETURN_HOME" << TAIL << endl;
+            if (pub_goal_once && orca_state[0].arrived_all_goal)
+            {
+                sleep(formation_time);
+                formation_state = FORMATION_STATE::RETURN_HOME; // 切换到返回家
+                pub_goal_once = false;                          // 重置发布标志
+            }
+            break;
+        case FORMATION_STATE::RETURN_HOME:
+            // Return
+            if (!pub_goal_once)
+            {
+                cout << BLUE << node_name << " ORCA: RETURN_HOME" << TAIL << endl;
 
-                    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME;
-                    orca_cmd_pub.publish(orca_cmd);
-                    pub_goal_once = true;
-                    orca_state[0].arrived_all_goal = false;
-                    sleep(1.0);
-                }
-
-                if(pub_goal_once && orca_state[0].arrived_all_goal)
-                {
-                    return 0;
-                }
-                break;
+                orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME;     // 设置ORCA命令为返回起点
+                    orca_cmd_pub.publish(orca_cmd);                         // 发布命令
+                    pub_goal_once = true;                                   // 标志设置为已发布
+                    orca_state[0].arrived_all_goal = false;                 // 重置到达目标状态
+                    sleep(1.0);                                             // 延迟
+            }
+            // 检查所有智能体是否到达目标点
+            if (pub_goal_once && orca_state[0].arrived_all_goal)
+            {
+                return 0;
+            }
+            break;
         }
 
         // sleep
@@ -308,7 +327,6 @@ int main(int argc, char **argv)
     }
 
     return 0;
-
 }
 
 void setup_show_goals()
@@ -351,46 +369,75 @@ void setup_show_goals()
     // goal_V[6].x = 3.2; goal_V[6].y = -4.3;  // 顶部右端
     // goal_V[7].x = -2.0; goal_V[7].y = -4.3; // 底部右端
 
-
-
-        // 字母 N
-    goal_N[0].x = -1.0; goal_N[0].y = 1.5;   // 顶部左端
-    goal_N[1].x = 1.2; goal_N[1].y = 1.5;  // 底部左端
-    goal_N[2].x = 0.1; goal_N[2].y = 0.15;   // 中部交点
-    goal_N[3].x = 1.2; goal_N[3].y = -1.3;  // 顶部右端
-    goal_N[4].x = -1.0; goal_N[4].y = -1.3; // 底部右端
-    goal_N[5].x = 3.0; goal_N[5].y = 4.15;   // 中部交点
-    goal_N[6].x = 3.2; goal_N[6].y = -4.3;  // 顶部右端
-    goal_N[7].x = -2.0; goal_N[7].y = -4.3; // 底部右端
+    // 字母 N
+    goal_N[0].x = -1.0;
+    goal_N[0].y = 1.5; // 顶部左端
+    goal_N[1].x = 1.2;
+    goal_N[1].y = 1.5; // 底部左端
+    goal_N[2].x = 0.1;
+    goal_N[2].y = 0.15; // 中部交点
+    goal_N[3].x = 1.2;
+    goal_N[3].y = -1.3; // 顶部右端
+    goal_N[4].x = -1.0;
+    goal_N[4].y = -1.3; // 底部右端
+    goal_N[5].x = 3.0;
+    goal_N[5].y = 4.15; // 中部交点
+    goal_N[6].x = 3.2;
+    goal_N[6].y = -4.3; // 顶部右端
+    goal_N[7].x = -2.0;
+    goal_N[7].y = -4.3; // 底部右端
 
     // 字母 O
-    goal_O[0].x = 0.1;  goal_O[0].y = 1.5;  // 上部中点
-    goal_O[1].x = 1.4;  goal_O[1].y = 0.5; // 下部中点
-    goal_O[2].x = -0.8; goal_O[2].y = 0.0;  // 上部边点
-    goal_O[3].x = 1.4; goal_O[3].y = -0.5; // 下部边点
-    goal_O[4].x = 0.1;  goal_O[4].y = -1.5;  // 中心点
-    goal_O[5].x = 3.0; goal_O[5].y = 4.15;   // 中部交点
-    goal_O[6].x = 3.2; goal_O[6].y = -4.3;  // 顶部右端
-    goal_O[7].x = -2.0; goal_O[7].y = -4.3; // 底部右端
+    goal_O[0].x = 0.1;
+    goal_O[0].y = 1.5; // 上部中点
+    goal_O[1].x = 1.4;
+    goal_O[1].y = 0.5; // 下部中点
+    goal_O[2].x = -0.8;
+    goal_O[2].y = 0.0; // 上部边点
+    goal_O[3].x = 1.4;
+    goal_O[3].y = -0.5; // 下部边点
+    goal_O[4].x = 0.1;
+    goal_O[4].y = -1.5; // 中心点
+    goal_O[5].x = 3.0;
+    goal_O[5].y = 4.15; // 中部交点
+    goal_O[6].x = 3.2;
+    goal_O[6].y = -4.3; // 顶部右端
+    goal_O[7].x = -2.0;
+    goal_O[7].y = -4.3; // 底部右端
     // 字母 K
-    goal_K[0].x = 0.1; goal_K[0].y = 0.9;  // 上部交点
-    goal_K[1].x = 1.2; goal_K[1].y = 0.9; // 下部交点
-    goal_K[2].x = -0.8; goal_K[2].y = 0.9;  // 中部竖线
-    goal_K[3].x = 1.2; goal_K[3].y = -0.9;  // 斜线上端
-    goal_K[4].x = -0.8; goal_K[4].y = -0.9; // 斜线下端
-    goal_K[5].x = 3.0; goal_K[5].y = 4.15;   // 中部交点
-    goal_K[6].x = 3.2; goal_K[6].y = -4.3;  // 顶部右端
-    goal_K[7].x = -2.0; goal_K[7].y = -4.3; // 底部右端
+    goal_K[0].x = 0.1;
+    goal_K[0].y = 0.9; // 上部交点
+    goal_K[1].x = 1.2;
+    goal_K[1].y = 0.9; // 下部交点
+    goal_K[2].x = -0.8;
+    goal_K[2].y = 0.9; // 中部竖线
+    goal_K[3].x = 1.2;
+    goal_K[3].y = -0.9; // 斜线上端
+    goal_K[4].x = -0.8;
+    goal_K[4].y = -0.9; // 斜线下端
+    goal_K[5].x = 3.0;
+    goal_K[5].y = 4.15; // 中部交点
+    goal_K[6].x = 3.2;
+    goal_K[6].y = -4.3; // 顶部右端
+    goal_K[7].x = -2.0;
+    goal_K[7].y = -4.3; // 底部右端
     // 字母 V
-    goal_V[0].x = 0.1;  goal_V[0].y = 0.6;  // 左上点
-    goal_V[1].x = 1.1;  goal_V[1].y = 1.1; // 右上点
-    goal_V[2].x = -0.7;  goal_V[2].y = 0.0;  // 底部点
-    goal_V[3].x = 1.1;  goal_V[3].y = -1.1;  // 左下点
-    goal_V[4].x = 0.1;  goal_V[4].y = -0.6; // 右下点
-    goal_V[5].x = 3.0; goal_V[5].y = 4.15;   // 中部交点
-    goal_V[6].x = 3.2; goal_V[6].y = -4.3;  // 顶部右端
-    goal_V[7].x = -2.0; goal_V[7].y = -4.3; // 底部右端
+    goal_V[0].x = 0.1;
+    goal_V[0].y = 0.6; // 左上点
+    goal_V[1].x = 1.1;
+    goal_V[1].y = 1.1; // 右上点
+    goal_V[2].x = -0.7;
+    goal_V[2].y = 0.0; // 底部点
+    goal_V[3].x = 1.1;
+    goal_V[3].y = -1.1; // 左下点
+    goal_V[4].x = 0.1;
+    goal_V[4].y = -0.6; // 右下点
+    goal_V[5].x = 3.0;
+    goal_V[5].y = 4.15; // 中部交点
+    goal_V[6].x = 3.2;
+    goal_V[6].y = -4.3; // 顶部右端
+    goal_V[7].x = -2.0;
+    goal_V[7].y = -4.3; // 底部右端
 
     cout << GREEN << "setup_show_goals" << TAIL << endl;
-
 }

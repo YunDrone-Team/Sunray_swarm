@@ -62,12 +62,17 @@ int main(int argc, char **argv)
     rmtt_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/single_circle", 1, rmtt_circle_cb);
     // 【发布】文字提示消息  本节点 -> 地面站  初始化地面站信息发布者，用于发送文本信息到地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
-    
+
+
+    // 创建控制命令消息对象
+    sunray_msgs::agent_cmd cmd;
     while (ros::ok())
     {   
         // 检查是否接收到开始命令
         if (received_start_cmd)
         {
+            // 设置为起飞状态
+            cmd.control_state = 11;
             // 发送开始画圆信息
             std_msgs::String start_info;
             start_info.data = "Start Circle";
@@ -75,8 +80,7 @@ int main(int argc, char **argv)
             cout << GREEN << "Start Circle" << TAIL << endl;
             // 发布信息
             text_info_pub.publish(start_info);
-            // 创建控制命令消息对象
-            sunray_msgs::agent_cmd cmd;
+            
             // 移动到起始位置
             cmd.agent_id = 1;   // 指定智能体编号
             cmd.cmd_source = "ugv_circle";  // 指定命令来源为当前节点

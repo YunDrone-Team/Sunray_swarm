@@ -1,112 +1,62 @@
 #include <ros/ros.h>
-#include <signal.h>
-#include <vector>
-#include "std_msgs/String.h"
-#include "geometry_msgs/Point.h"
-#include "sunray_msgs/agent_cmd.h"
+#include "printf_utils.h"
 #include "math_utils.h"
 
 #define MAX_AGENT_NUM 10   
-
 using namespace std;
 
-int agent_num;
-float agent_height;
-ros::Publisher agent_cmd_pub[MAX_AGENT_NUM];
-ros::Publisher text_info_pub;
-std::vector<geometry_msgs::Point> triangle_formation;
-std::vector<geometry_msgs::Point> line_formation;
-ros::Subscriber agent_cmd_sub;//触发条件
+int agent_num;                                          //智能体数量
+float agent_height;                                     //智能体飞行高度
+ros::Publisher agent_cmd_pub[MAX_AGENT_NUM];            //存储每个智能体的控制指令发布者
+ros::Publisher text_info_pub;                           //文字提示消息发布者
+std::vector<geometry_msgs::Point> triangle_formation;   //三角形队形的坐标
+std::vector<geometry_msgs::Point> line_formation;       //一字型队形的坐标
+ros::Subscriber swarm_formation_cmd_sub;                //触发条件的订阅者
+bool received_start_cmd = false;                        //标记是否接收到开始命令
 
-int agent_type; // 代理类型，用于区分无人机和无人车
+int agent_type;                                         // 代理类型，用于区分无人机和无人车
 
-
+// 定义队形状态的枚举类型
 enum FORMATION_STATE
 {
-    TRIANGLE = 0,
-    LINE = 1,
+    TRIANGLE = 0, // 三角形队形
+    LINE = 1,     // 一字型队形
 };
-FORMATION_STATE formation_state;
+FORMATION_STATE formation_state;// 当前队形状态
 
-void mySigintHandler(int sig)
+// 处理队形切换命令的回调函数
+void swarm_formation_cb(const std_msgs::Bool::ConstPtr& msg) 
 {
-    ROS_INFO("[formation_control] exit...");
-    ros::shutdown();
+    // 设置接收到的开始命令
+    received_start_cmd = msg->data; // 设置接收到的开始命令
 }
-
-void printf_params()
-{
-    cout << "Agent number  : " << agent_num << endl;
-    cout << "Agent height  : " << agent_height << endl;
-}
-
-void setup_formations()
-{
-    // 设置三角形队形
-    triangle_formation.resize(agent_num);
-    triangle_formation[0].x = 0.1; triangle_formation[0].y = -1.0;
-    triangle_formation[2].x = 1.0; triangle_formation[2].y = 1.0;
-    triangle_formation[1].x = -1.0; triangle_formation[1].y = 1.0;
-    // 更多无人机可以根据需要设置
-
-    // 设置一字型队形
-    line_formation.resize(agent_num);
-    for(int i = 1; i < agent_num; i++) 
-    {
-        line_formation[i].x = i * 1.0;
-        line_formation[i].y = 0.0;
-
-        line_formation[0].x = 0;line_formation[0].y = -0.2;
-    }
-}
-
+// 切换队形的函数
 void switch_formation(FORMATION_STATE state)
 {
+    // 存储控制命令的数组
     sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];
+    // 用于存储当前队形的坐标
     std::vector<geometry_msgs::Point> formation;
-
+    // 根据当前队形状态选择队形
     if (state == FORMATION_STATE::TRIANGLE)
     {
+        // 选择三角形队形
         formation = triangle_formation;
-        ROS_INFO("Switching to TRIANGLE formation");
     }
     else if (state == FORMATION_STATE::LINE)
     {
+        // 选择一字型队形
         formation = line_formation;
-        ROS_INFO("Switching to LINE formation");
     }
-
+    // 发布每个智能体的控制命令
     for(int i = 0; i < agent_num; i++) 
     {
-        agent_cmd[i].agent_id = i+1;
-        agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-        agent_cmd[i].desired_pos.x = formation[i].x;
-        agent_cmd[i].desired_pos.y = formation[i].y;
-        agent_cmd[i].desired_pos.z = agent_height;
-        agent_cmd_pub[i].publish(agent_cmd[i]);
-    }
-}
-
-
-void startCmdCallback(const std_msgs::Bool::ConstPtr& msg) {
-    if (msg->data) {
-        ros::Rate rate(10.0);
-        formation_state = FORMATION_STATE::TRIANGLE;
-
-        while (ros::ok()) {
-
-            // 在三角形和一字型队形之间切换
-            switch_formation(formation_state);
-
-            // 模拟在两种队形之间切换
-            formation_state = (formation_state == FORMATION_STATE::TRIANGLE) ? FORMATION_STATE::LINE : FORMATION_STATE::TRIANGLE;
-
-            ros::Duration(8.0).sleep();  // 每8秒切换一次
-        }
-    } else {
-        // 如果接收到的消息是false，也执行一些操作
-        ROS_INFO("Received false signal, executing alternative task.");
-        // 这里可以添加执行其他任务的代码
+        agent_cmd[i].agent_id = i+1; // 设置智能体ID
+        agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL; // 设置控制状态为位置控制
+        agent_cmd[i].desired_pos.x = formation[i].x; // 设置目标X坐标
+        agent_cmd[i].desired_pos.y = formation[i].y; // 设置目标Y坐标
+        agent_cmd[i].desired_pos.z = agent_height; // 设置目标Z坐标
+        agent_cmd_pub[i].publish(agent_cmd[i]); // 发布控制命令
     }
 }
 
@@ -114,14 +64,34 @@ void startCmdCallback(const std_msgs::Bool::ConstPtr& msg) {
 
 int main(int argc, char **argv)
 {
+    // 初始化ROS节点
     ros::init(argc, argv, "formation_control");
+    // 创建节点句柄
     ros::NodeHandle nh("~");
+    // 设置节点的执行频率为10Hz
+    ros::Rate rate(10);
+    // 【参数】智能体数量 默认3台无人机/车
+    nh.param<int>("agent_num", agent_num, 3); 
+    // 【参数】智能体高度 默认飞行高度1米
+    nh.param<float>("agent_height", agent_height, 1.0f); 
+    // 【参数】智能体类型 默认rmtt
+    nh.param<int>("agent_type", agent_type, 0);  
 
-    nh.param<int>("agent_num", agent_num, 3);  // 默认3台无人机/车
-    nh.param<float>("agent_height", agent_height, 1.0f);  // 默认飞行高度1米
-    nh.param<int>("agent_type", agent_type, 2);  // 默认飞行高度1米
-    printf_params();
-    setup_formations();
+    // 设置三角形队形
+    triangle_formation.resize(agent_num);                           // 调整三角形队形的大小
+    triangle_formation[0].x = 0.1; triangle_formation[0].y = -1.0;  // 第一个智能体的位置
+    triangle_formation[2].x = 1.0; triangle_formation[2].y = 1.0;   // 第三个智能体的位置
+    triangle_formation[1].x = -1.0; triangle_formation[1].y = 1.0;  // 第二个智能体的位置
+    // 更多无人机可以根据需要设置
+
+    // 设置一字型队形
+    line_formation.resize(agent_num);                               // 调整一字型队形的大小
+    for(int i = 1; i < agent_num; i++) 
+    {
+        line_formation[i].x = i * 1.0;                              // 设置每个智能体在X轴上的位置
+        line_formation[i].y = 0.0;                                  // Y轴坐标为0
+        line_formation[0].x = 0; line_formation[0].y = -0.2;        // 设置第一个智能体的位置
+    }
 
     // 定义一个字符串变量，用于存储代理前缀
     string agent_prefix;
@@ -140,29 +110,32 @@ int main(int argc, char **argv)
             break;
     }
 
-
+    // 初始化每个智能体的控制命令发布者
     string agent_name;
     for(int i = 0; i < agent_num; i++) 
     {
+        // 生成智能体名称
         agent_name = "/" + agent_prefix + std::to_string(i+1);
         // 【发布】无人车控制指令
         agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
     // [订阅]触发条件
-    agent_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/formation_control", 1, startCmdCallback);
-    ros::Rate rate(10.0);
-    // formation_state = FORMATION_STATE::TRIANGLE;
-
-
+    swarm_formation_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/formation_control", 1, swarm_formation_cb);
+    // 初始化队形状态为三角形
+    formation_state = FORMATION_STATE::TRIANGLE;
+    // 主循环
     while (ros::ok())
     {
-        // // 在三角形和一字型队形之间切换
-        // switch_formation(formation_state);
-
-        // // 模拟在两种队形之间切换
-        // formation_state = (formation_state == FORMATION_STATE::TRIANGLE) ? FORMATION_STATE::LINE : FORMATION_STATE::TRIANGLE;
-
-        // ros::Duration(8.0).sleep();  // 每8秒切换一次
+        // 检查是否接收到开始命令
+        if(received_start_cmd)
+        {
+            // 在三角形和一字型队形之间切换
+            switch_formation(formation_state);
+            // 模拟在两种队形之间切换
+            formation_state = (formation_state == FORMATION_STATE::TRIANGLE) ? FORMATION_STATE::LINE : FORMATION_STATE::TRIANGLE;
+            // 每8秒切换一次
+            ros::Duration(8.0).sleep();  
+        }
         ros::spinOnce();
         // 休眠0.1秒
         ros::Duration(0.1).sleep();

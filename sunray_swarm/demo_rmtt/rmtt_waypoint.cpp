@@ -72,11 +72,17 @@ int main(int argc, char **argv)
             for (auto &waypoint : waypoints)
             {
                 sunray_msgs::agent_cmd cmd;
-                cmd.agent_id = agent_id;
+                // 发送起飞指令
+                cmd.control_state = 11; // 起飞状态
+                cmd.agent_id = agent_id; // 设置智能体编号
+                cmd.desired_pos.z = agent_height; // 设置高度
+                agent_cmd_pub.publish(cmd); // 发布起飞控制命令
+                // 等待起飞完成（可以根据具体情况调整时间）
+                ros::Duration(5.0).sleep();
                 cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
                 cmd.cmd_source = "rmtt_waypoint";
                 cmd.desired_pos = waypoint;
-                cmd.desired_yaw = 0.0; // 偏航角通常在导航过程中另行计算
+                cmd.desired_yaw = 0.0; // 偏航角
 
                 agent_cmd_pub.publish(cmd); // 发布控制命令
 
@@ -88,7 +94,13 @@ int main(int argc, char **argv)
                 // 等待模拟到达该点，这里使用暂停6秒
                 ros::Duration(6.0).sleep();
             }
-            received_start_cmd = false; // 重置开始命令状态
+            sunray_msgs::agent_cmd cmd;
+            // 重置开始命令状态
+            received_start_cmd = false; 
+            // 发送降落指令
+            cmd.control_state = 12; 
+            // 发布降落控制命令
+            agent_cmd_pub.publish(cmd); 
             // 打印信息
             std_msgs::String end_info;
             end_info.data = "ending Moving";

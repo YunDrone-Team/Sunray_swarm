@@ -20,6 +20,7 @@ ros::Publisher text_info_pub;            // 发布文字提示消息
 ros::Subscriber single_trackMission_sub; // 订阅轨迹任务触发信号
 
 bool received_start_cmd = false; // 接收到开始命令
+bool mission_completed = false;   // 任务是否完成
 
 // 轨迹任务触发信号回调函数
 void single_trackMission_cb(const std_msgs::Bool::ConstPtr &msg)
@@ -72,15 +73,23 @@ int main(int argc, char **argv)
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
     sleep(1.0);
-
+    sunray_msgs::agent_cmd cmd;
     // 主循环
     while (ros::ok())
     {
         // 检查是否接收到开始命令
-        if (received_start_cmd)
+        if (received_start_cmd && !mission_completed)
         {
+            // 设置为起飞状态
+            cmd.control_state = 11;
             // 设置智能体编号
             agent_cmd.agent_id = 1;
+            // 设置目标高度
+            agent_cmd.desired_pos.z = agent_height;
+            // 发布控制命令
+            agent_cmd_pub.publish(agent_cmd);
+            // 等待3秒确保起飞
+            ros::Duration(3.0).sleep(); 
             // 设置控制模式为位置控制
             agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
             // 指定命令来源为轨迹任务来源
@@ -89,18 +98,29 @@ int main(int argc, char **argv)
             // agent_cmd.desired_pos.x = target_pos.pose.position.x;
             // agent_cmd.desired_pos.y = target_pos.pose.position.y;
             agent_cmd.desired_pos = target_pos.pose.position;
-            // 设置目标高度
-            agent_cmd.desired_pos.z = agent_height;
+
+            // 等待目标到达
+            ros::Duration(2.0).sleep(); // 根据实际需求调整
+            
             // 设置目标偏航角
             agent_cmd.desired_yaw = target_yaw;
-            // 发布控制命令
+            
             agent_cmd_pub.publish(agent_cmd);
             // 创建文本信息对象
             std_msgs::String text_info;
             // 发布提示消息
             text_info.data = "Agent driving to target: x=" + to_string(target_pos.pose.position.x) + " y=" + to_string(target_pos.pose.position.y) + " z=" + to_string(agent_height);
+
+            // 等待15秒后发布降落指令
+            ros::Duration(15.0).sleep();
+            // 降落状态
+            agent_cmd.control_state = 12;
+            // 发布控制命令 
+            agent_cmd_pub.publish(agent_cmd);
+            cout << GREEN << "Landing command sent." << TAIL << endl;
             // 重置命令状态
             received_start_cmd = false;
+            mission_completed = true;    // 标记任务已完成
         }
         
         // 回调函数,timer开始运行

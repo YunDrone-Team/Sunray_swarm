@@ -97,10 +97,23 @@ int main(int argc, char **argv)
     setupObstacles();
     // 定义并初始化z轴位置变量
     float z = 0;
+    // 创建控制命令对象
+    sunray_msgs::agent_cmd cmd;
+    // 依据代理类型设置的ID
+    cmd.agent_id = 1;
     while (ros::ok())
     {
         if (received_start_cmd)
         {
+            // 设置为起飞状态
+            cmd.control_state = 11;
+            //设置飞行高度
+            cmd.desired_pos.z = agent_height;
+            // 发布起飞控制命令
+            agent_cmd_pub.publish(cmd);
+            // 等待3秒以确保起飞
+            ros::Duration(2.0).sleep();
+
             // 发送开始画圆信息
             std_msgs::String start_info;
             start_info.data = "Start Moving";
@@ -108,12 +121,10 @@ int main(int argc, char **argv)
             cout << GREEN << "Start Moving" << TAIL << endl;
             // 发布信息
             text_info_pub.publish(start_info);
-            // 创建控制命令对象
-            sunray_msgs::agent_cmd cmd;
+
+            
             // 从参数服务器获取z
             target.z = agent_height;
-            // 依据代理类型设置的ID
-            cmd.agent_id = 1;
             // 设置控制状态为位置控制模式
             cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
             // 设置指令来源
@@ -124,6 +135,17 @@ int main(int argc, char **argv)
             cmd.desired_yaw = 0.0;
             // 发布控制命令
             agent_cmd_pub.publish(cmd);
+
+            // 等待目标到达，模拟时间
+            ros::Duration(5.0).sleep(); // 根据实际需要调整
+
+            // 等待15秒后发布降落指令
+            ros::Duration(15.0).sleep();
+            cmd.control_state = 12; // 降落状态
+            agent_cmd_pub.publish(cmd);
+            cout << GREEN << "Landing command sent." << TAIL << endl;
+
+
             // 打印目标信息
             std_msgs::String end_info;
             end_info.data = "ending Moving";

@@ -57,12 +57,14 @@ int main(int argc, char **argv) {
         waypoints[i].z = agent_height; // 高度使用智能体设置的高度
     }
 
-
+    sunray_msgs::agent_cmd cmd;
     // 从用户输入获取航点位置
     while (ros::ok()) 
     {
         if(received_start_cmd)
         {
+            // 设置为起飞状态
+            cmd.control_state = 11;
             // 发送开始导航信息
             std_msgs::String start_info;
             start_info.data = "Start Moving";
@@ -72,7 +74,7 @@ int main(int argc, char **argv) {
             text_info_pub.publish(start_info);
             // 向每个航点发送导航命令
             for (auto &waypoint : waypoints) {
-                sunray_msgs::agent_cmd cmd;
+                
                 cmd.agent_id = agent_id;
                 cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
                 cmd.cmd_source = "ugv_waypoint";
