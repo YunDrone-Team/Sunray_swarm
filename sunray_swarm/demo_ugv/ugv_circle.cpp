@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     // 【发布】控制指令 本节点 -> 控制节点 初始化命令发布者，话题名称根据智能体类型和编号动态生成
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【订阅】触发指令 外部-> 本节点  初始化开始命令的订阅者，监听特定的触发信号
-    rmtt_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/single_circle", 1, rmtt_circle_cb);
+    rmtt_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/ugv_circle", 1, rmtt_circle_cb);
     // 【发布】文字提示消息  本节点 -> 地面站  初始化地面站信息发布者，用于发送文本信息到地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 

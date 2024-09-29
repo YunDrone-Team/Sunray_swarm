@@ -53,14 +53,14 @@ int main(int argc, char **argv)
     // 【参数】从参数服务器获取智能体编号，默认为1
     nh.param<int>("agent_id", agent_id, 1);
     // 【参数】从参数服务器获取智能画圆时间，默认为10
-    nh.param<int>("agent_time", agent_time, 10);
+    nh.param<int>("agent_time", agent_time, 20);
 
     // 构造用于发布控制命令的完整话题名称
     string agent_name = "/rmtt_" + std::to_string(agent_id);
     // 【发布】控制指令 本节点 -> 控制节点 初始化命令发布者，话题名称根据智能体类型和编号动态生成
-    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
+    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     // 【订阅】触发指令 外部-> 本节点  初始化开始命令的订阅者，监听特定的触发信号
-    rmtt_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/single_circle", 1, rmtt_circle_cb);
+    rmtt_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/rmtt_circle", 1, rmtt_circle_cb);
     // 【发布】文字提示消息  本节点 -> 地面站  初始化地面站信息发布者，用于发送文本信息到地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
             cmd.agent_id = 1;
             // 设置为起飞状态
             cmd.control_state = 11;
-            ros::Duration(3.0).sleep(); // 等待3秒以确保起飞                                   // 指定智能体编号
+            ros::Duration(3.0).sleep();                              // 等待3秒以确保起飞                                   
             cmd.cmd_source = "rmtt_circle";                          // 指定命令来源为当前节点
             cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL; // 设置控制模式为位置控制
             cmd.desired_pos.x = circle_radius;                       // 设置x坐标为圆周半径
@@ -118,6 +118,7 @@ int main(int argc, char **argv)
             }
             // 圆周运动完成后，重置开始命令标志
             received_start_cmd = false; // 完成后重置命令
+            ros::Duration(10.0).sleep(); // 等待3秒以确保到达起始位置
 
             // 设置为降落状态
             cmd.control_state = 12;

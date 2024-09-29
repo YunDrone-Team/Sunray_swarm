@@ -131,9 +131,7 @@ int main(int argc, char **argv)
     }
     else if (agent_type == sunray_msgs::agent_state::UGV)
     {
-        agent_prefix = "ugv_";pub_goal_once = true; // 设置目标点已发布
-                    orca_state[0].arrived_all_goal = false; // 初始化到达标志
-                    sleep(1.0); // 暂停1秒
+        agent_prefix = "ugv_";
     }
     else if (agent_type == sunray_msgs::agent_state::SIKONG)
     {
@@ -149,7 +147,7 @@ int main(int argc, char **argv)
     // 【发布】文字提示消息（回传至地面站显示）
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 【订阅】程序触发指令
-    start_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/swarm_with_obstacles", 1, start_cmd_cb);
+    start_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/swarm_with_obstacles", 1, start_cmd_cb);
 
     // 为每个智能体设置发布和订阅
     for (int i = 0; i < agent_num; i++)

@@ -120,7 +120,7 @@ int main(int argc, char **argv)
         agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
     // [订阅]触发条件
-    swarm_formation_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/formation_control", 1, swarm_formation_cb);
+    swarm_formation_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/swarm_formation_control", 1, swarm_formation_cb);
     // 初始化队形状态为三角形
     formation_state = FORMATION_STATE::TRIANGLE;
     // 主循环

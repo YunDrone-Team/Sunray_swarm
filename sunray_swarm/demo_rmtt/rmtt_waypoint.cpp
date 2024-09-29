@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     string agent_name;
     agent_name = "/rmtt_" + std::to_string(agent_id);
     // 【订阅】触发指令 外部 -> 本节点
-    single_waypoint_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/single_waypoint", 1, single_waypoint_cb);
+    single_waypoint_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/rmtt_waypoint", 1, single_waypoint_cb);
     // 【发布】控制指令 本节点 -> 控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站

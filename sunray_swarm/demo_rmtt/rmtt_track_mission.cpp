@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     // 【订阅】外部 -> 本节点目标位置
     target_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node" + target_name + "/pose", 1, boost::bind(&target_pos_cb, _1, 1));
     // 【订阅】触发指令 外部 -> 本节点 ——TODO设置为BOOL值变量
-    single_trackMission_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/single_trackMission", 1, single_trackMission_cb);
+    single_trackMission_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/rmtt_trackMission", 1, single_trackMission_cb);
     // 【发布】控制指令 本节点 -> 控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     // 【发布】文字提示消息  本节点 -> 地面站

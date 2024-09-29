@@ -1,5 +1,5 @@
 <launch>
-	<node pkg="sunray_swarm" name="circle_trajectory" type="circle_trajectory" output="screen">
+	<node pkg="sunray_swarm" name="swarm_circle" type="swarm_circle" output="screen">
 		<rosparam command="load" file="$(find sunray_swarm)/launch_demo/ugv_params.yaml" />
 	</node>
 </launch>

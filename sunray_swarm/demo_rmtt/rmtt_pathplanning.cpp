@@ -86,7 +86,7 @@ int main(int argc, char **argv)
     // 构造用于发布控制命令话题名称
     agent_name = "/rmtt_" + std::to_string(agent_id);
     // 【订阅】触发指令 外部 -> 本节点
-    single_pathPlanning_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/single_pathPlanning", 1, single_pathPlanning_cb);
+    single_pathPlanning_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/rmtt_pathPlanning", 1, single_pathPlanning_cb);
     // 【发布】控制指令 本节点 -> 控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
             // 发布信息
             text_info_pub.publish(start_info);
 
-            
+                        
             // 从参数服务器获取z
             target.z = agent_height;
             // 设置控制状态为位置控制模式

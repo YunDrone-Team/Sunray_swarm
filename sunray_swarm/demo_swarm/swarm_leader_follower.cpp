@@ -78,7 +78,7 @@ int main(int argc, char **argv)
         agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     }
     // [订阅]地面站 ->  本节点  触发条件
-    swarm_leader_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/leader_follower", 1, swarm_leader_cmd_cb);
+    swarm_leader_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/swarm_leader_follower", 1, swarm_leader_cmd_cb);
     // 定义开始时间
     ros::Time start_time;
     // 如果启动命令已接收

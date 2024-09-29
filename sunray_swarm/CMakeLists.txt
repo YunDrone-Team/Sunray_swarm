@@ -146,7 +146,7 @@ add_executable(swarm_nokov demo_swarm/swarm_nokov.cpp)
 add_dependencies(swarm_nokov sunray_swarm_gencpp)
 target_link_libraries(swarm_nokov ${catkin_LIBRARIES})
 ## SWARM_DEMO - 避障
-add_executable(swarm_with_obstacles demo_swarm/swarm_nokov.cpp)
+add_executable(swarm_with_obstacles demo_swarm/swarm_with_obstacles.cpp)
 add_dependencies(swarm_with_obstacles sunray_swarm_gencpp)
 target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
 

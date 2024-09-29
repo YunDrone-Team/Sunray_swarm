@@ -30,8 +30,8 @@ int main(int argc, char **argv)
     // 【参数】智能体编号
     nh.param<int>("agent_id", agent_id, 1);
     // 【参数】目标点位置——TODO：从参数服务器获取位置x、y、z、yaw偏航角
-    nh.param<double>("hover_x", position_hover.x, 0.0);
-    nh.param<double>("hover_y", position_hover.y, 0.0f);
+    nh.param<double>("hover_x", position_hover.x, 1.0);
+    nh.param<double>("hover_y", position_hover.y, 2.0f);
     nh.param<double>("hover_z", position_hover.z, 0.0f);
     nh.param<float>("hover_yaw", hover_yaw, 0.0f);
 
@@ -63,27 +63,42 @@ int main(int argc, char **argv)
             cmd.agent_id = agent_id;
             // 设置为起飞状态
             cmd.control_state = 11; 
+            // 等待3秒以确保无人机起飞
+            ros::Duration(3.0).sleep(); 
             // 设置控制指令为POS_CONTROL
             cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
             // 设置指令来源
             cmd.cmd_source = "rmtt_hover";
-            // 设置目标位置为接收到的位置
-            cmd.desired_pos = position_hover;
-            // 可以设置偏航角，这里设置为0
-            cmd.desired_yaw = hover_yaw;
-            // 发布话题
-            agent_cmd_pub.publish(cmd);
-            // 记录命令时间,用于判断15无操作降落时间
-            last_command_time = ros::Time::now(); 
-            // 地面站打印
-            std_msgs::String text_info;
-            text_info.data = node_name + ": send a new hover position!";
-            text_info_pub.publish(text_info);
-            // 控制台打印
-            cout << GREEN << "POS_REF [X Y Z] : " << cmd.desired_pos.x << " [ m ] " << cmd.desired_pos.y << " [ m ] " << cmd.desired_pos.z << " [ m ] " << TAIL << endl;
 
+            //TODO——需要做一个判断到达目标点(当前点与目标点)
+            // while ()
+            {
+                // 设置目标位置为接收到的位置
+                cmd.desired_pos = position_hover;
+                // 可以设置偏航角，这里设置为0
+                cmd.desired_yaw = hover_yaw;
+                // 发布话题
+                agent_cmd_pub.publish(cmd);
+                // 记录命令时间,用于判断15无操作降落时间
+                last_command_time = ros::Time::now(); 
+                // 地面站打印
+                std_msgs::String text_info;
+                text_info.data = node_name + ": send a new hover position!";
+                text_info_pub.publish(text_info);
+                // 控制台打印
+                cout << GREEN << "POS_REF [X Y Z] : " << cmd.desired_pos.x << " [ m ] " << cmd.desired_pos.y << " [ m ] " << cmd.desired_pos.z << " [ m ] " << TAIL << endl;
+            }
+            
+        
             // 重置标志
             received_start_cmd = false;
+            // 等待15秒无操作以确保无人机降落
+            ros::Duration(15.0).sleep(); 
+            // 设置为起飞状态
+            cmd.control_state = 12;
+            // 发布话题
+            agent_cmd_pub.publish(cmd);
+
             std_msgs::String end_info;
             // 结束消息打印
             end_info.data = "ending hover";
