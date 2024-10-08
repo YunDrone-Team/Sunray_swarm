@@ -132,6 +132,9 @@ add_dependencies(swarm_with_obstacles sunray_swarm_gencpp)
 target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
 
 
+add_executable(rmtt_show demo_neu/rmtt_show.cpp)
+add_dependencies(rmtt_show sunray_rmtt_gencpp)
+target_link_libraries(rmtt_show ${catkin_LIBRARIES})
 
 #DEMO 自主降落
 # add_executable(autonomous_landing demo/multi_autonomous_landing.cpp)
