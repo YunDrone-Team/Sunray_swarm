@@ -1,5 +1,0 @@
-<launch>
-	<node pkg="sunray_swarm" name="ugv_waypoint" type="ugv_waypoint" output="screen">
-		<rosparam command="load" file="$(find sunray_swarm)/launch_demo/ugv_params.yaml" />
-	</node>
-</launch>

@@ -56,12 +56,6 @@ include_directories(
 ##      声明可执行cpp文件     ##
 ###############################
 
-## 无人车控制
-add_executable(ugv_control_node
-  agent_control/ugv_control_node.cpp
-  agent_control/ugv_control.cpp	
-)
-target_link_libraries(ugv_control_node ${catkin_LIBRARIES})
 
 ## RMTT控制
 add_executable(rmtt_control_node
@@ -113,19 +107,6 @@ target_link_libraries(rmtt_pathplanning ${catkin_LIBRARIES})
 add_executable(rmtt_track_mission demo_rmtt/rmtt_track_mission.cpp)
 add_dependencies(rmtt_track_mission sunray_swarm_gencpp)
 target_link_libraries(rmtt_track_mission ${catkin_LIBRARIES})
-
-# UGV_DEMO - 无人车绕圆
-add_executable(ugv_circle demo_ugv/ugv_circle.cpp)
-add_dependencies(ugv_circle sunray_swarm_gencpp)
-target_link_libraries(ugv_circle ${catkin_LIBRARIES})
-# UGV_DEMO - 无人车路径规划
-add_executable(ugv_pathplanning demo_ugv/ugv_pathplanning.cpp)
-add_dependencies(ugv_pathplanning sunray_swarm_gencpp)
-target_link_libraries(ugv_pathplanning ${catkin_LIBRARIES})
-# UGV_DEMO - 无人车航点
-add_executable(ugv_waypoint demo_ugv/ugv_waypoint.cpp)
-add_dependencies(ugv_waypoint sunray_swarm_gencpp)
-target_link_libraries(ugv_waypoint ${catkin_LIBRARIES})
 
 
 
