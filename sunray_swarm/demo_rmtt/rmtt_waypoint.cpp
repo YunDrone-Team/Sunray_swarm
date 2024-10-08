@@ -12,6 +12,11 @@ bool received_start_cmd = false;        // 标记是否接收到开始命令
 ros::Publisher text_info_pub;           // 发布文字提示消息
 ros::Subscriber single_waypoint_sub;    // 订阅路径规划触发信号
 string node_name;
+ros::Publisher takeoff_pub;
+ros::Publisher land_pub;
+
+std_msgs::Empty takeoff;
+std_msgs::Empty land;
 
 // 触发信号的回调函数，处理接收到的位置
 void single_waypoint_cb(const std_msgs::Bool::ConstPtr &msg)
@@ -40,6 +45,12 @@ int main(int argc, char **argv)
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
+    // 【发布】无人机起飞指令 本节点 -> rmtt_driver
+    takeoff_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/takeoff", 1); 
+    // 【发布】无人机降落指令 本节点 -> rmtt_driver
+    land_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/land", 1); 
+    
+    
 
     // 设置航点列表
     // 提取存储的航点数
@@ -56,6 +67,21 @@ int main(int argc, char **argv)
         waypoints[i].z = agent_height; // 高度使用智能体设置的高度
     }
 
+    // 创建控制命令对象
+    sunray_msgs::agent_cmd cmd;
+    // 依据代理类型设置的ID
+    cmd.agent_id = 1;
+    // 设置为起飞状态
+    sunray_msgs::agent_cmd::TAKEOFF;
+    //发布起飞命令
+    takeoff_pub.publish(takeoff);
+    // 设置指令来源
+    cmd.cmd_source = "ugv_pathplaning";
+    // 发布话题
+    agent_cmd_pub.publish(cmd);
+    // 等待3秒以确保无人机起飞
+    ros::Duration(3.0).sleep(); 
+
     // 从用户输入获取航点位置
     while (ros::ok())
     {
@@ -71,10 +97,6 @@ int main(int argc, char **argv)
             // 向每个航点发送导航命令
             for (auto &waypoint : waypoints)
             {
-                sunray_msgs::agent_cmd cmd;
-                // 发送起飞指令
-                cmd.control_state = 11; // 起飞状态
-                cmd.agent_id = agent_id; // 设置智能体编号
                 cmd.desired_pos.z = agent_height; // 设置高度
                 agent_cmd_pub.publish(cmd); // 发布起飞控制命令
                 // 等待起飞完成（可以根据具体情况调整时间）
@@ -94,20 +116,8 @@ int main(int argc, char **argv)
                 // 等待模拟到达该点，这里使用暂停6秒
                 ros::Duration(6.0).sleep();
             }
-            sunray_msgs::agent_cmd cmd;
             // 重置开始命令状态
             received_start_cmd = false; 
-            // 发送降落指令
-            cmd.control_state = 12; 
-            // 发布降落控制命令
-            agent_cmd_pub.publish(cmd); 
-            // 打印信息
-            std_msgs::String end_info;
-            end_info.data = "ending Moving";
-            // 终端打印信息
-            cout << GREEN << "ending Moving" << TAIL << endl;
-            // 发布信息
-            text_info_pub.publish(end_info);
         }
         // 处理一次回调函数
         ros::spinOnce();

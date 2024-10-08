@@ -10,6 +10,12 @@ ros::Publisher marker_pub;               // 发布RVIZ标记，用于显示障�
 ros::Publisher text_info_pub;            // 发布文字提示消息
 ros::Subscriber single_pathPlanning_sub; // 订阅单个路径规划触发信号
 
+ros::Publisher takeoff_pub;
+ros::Publisher land_pub;
+
+std_msgs::Empty takeoff;
+std_msgs::Empty land;
+
 bool received_start_cmd = false; // 标记是否接收到开始命令
 geometry_msgs::Point target;     // 存储目标位置
 int agent_id;                    // 设置智能体编号
@@ -93,6 +99,10 @@ int main(int argc, char **argv)
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 【发布】 初始化marker_pub发布者，发布RVIZ标记
     marker_pub = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 10);
+    // 【发布】无人机起飞指令 本节点 -> rmtt_driver
+    takeoff_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/takeoff", 1); 
+    // 【发布】无人机降落指令 本节点 -> rmtt_driver
+    land_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/land", 1); 
     // 调用setupObstacles函数设置障碍物并发布到RVIZ
     setupObstacles();
     // 定义并初始化z轴位置变量
@@ -101,12 +111,23 @@ int main(int argc, char **argv)
     sunray_msgs::agent_cmd cmd;
     // 依据代理类型设置的ID
     cmd.agent_id = 1;
+    // 设置为起飞状态
+    sunray_msgs::agent_cmd::TAKEOFF;
+    //发布起飞命令
+    takeoff_pub.publish(takeoff);
+    // 设置指令来源
+    cmd.cmd_source = "ugv_pathplaning";
+    // 发布话题
+    agent_cmd_pub.publish(cmd);
+    // 等待3秒以确保无人机起飞
+    ros::Duration(3.0).sleep(); 
+
+
+
     while (ros::ok())
     {
         if (received_start_cmd)
         {
-            // 设置为起飞状态
-            cmd.control_state = 11;
             //设置飞行高度
             cmd.desired_pos.z = agent_height;
             // 发布起飞控制命令
@@ -127,8 +148,7 @@ int main(int argc, char **argv)
             target.z = agent_height;
             // 设置控制状态为位置控制模式
             cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-            // 设置指令来源
-            cmd.cmd_source = "ugv_pathplaning";
+            
             // 将目标位置赋值给消息的desired_pos字段
             cmd.desired_pos = target;
             // 设置默认的朝向角度为0.0
@@ -139,20 +159,14 @@ int main(int argc, char **argv)
             // 等待目标到达，模拟时间
             ros::Duration(5.0).sleep(); // 根据实际需要调整
 
+            // 重置标志
+            received_start_cmd = false;
+
             // 等待15秒后发布降落指令
             ros::Duration(15.0).sleep();
             cmd.control_state = 12; // 降落状态
             agent_cmd_pub.publish(cmd);
             cout << GREEN << "Landing command sent." << TAIL << endl;
-
-
-            // 打印目标信息
-            std_msgs::String end_info;
-            end_info.data = "ending Moving";
-            // 终端打印信息
-            cout << GREEN << "ending Moving" << TAIL << endl;
-            // 发布信息
-            text_info_pub.publish(end_info);
         }
         // 处理回调函数
         ros::spinOnce();

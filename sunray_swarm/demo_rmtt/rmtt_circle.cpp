@@ -8,6 +8,10 @@ ros::Publisher agent_cmd_pub;        // 发布控制命令
 ros::Subscriber rmtt_circle_cmd_sub; // 订阅开始命令
 ros::Publisher text_info_pub;        // 发布信息到地面站
 
+ros::Publisher takeoff_pub;
+ros::Publisher land_pub;
+
+
 float desired_yaw;               // 期望的偏航角
 float circle_radius;             // 圆周轨迹的半径
 float linear_vel;                // 线速度
@@ -19,11 +23,21 @@ float agent_height;              // 设置无人机高度
 string node_name;                // 节点名称
 int agent_time;                  // 设置循环时间
 
+std_msgs::Empty takeoff;
+std_msgs::Empty land;
+
 void mySigintHandler(int sig)
 {
     ROS_INFO("[circle_trajectory] exit...");
     ros::shutdown();
 }
+//TODO——起飞悬停设置
+// void set_desired_position()
+// {
+//     desired_pos.x = agent_state.pos[0];
+//     desired_pos.y = agent_state.pos[1];
+//     desired_pos.z = agent_height;
+// }
 
 void rmtt_circle_cb(const std_msgs::Bool::ConstPtr &msg)
 {
@@ -64,15 +78,33 @@ int main(int argc, char **argv)
     // 【发布】文字提示消息  本节点 -> 地面站  初始化地面站信息发布者，用于发送文本信息到地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
+    // 【发布】无人机起飞指令 本节点 -> rmtt_driver
+    takeoff_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/takeoff", 1); 
+    // 【发布】无人机降落指令 本节点 -> rmtt_driver
+    land_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/land", 1); 
+
+
+    // 创建控制命令消息对象
+    sunray_msgs::agent_cmd cmd;
+    // 设置agent_id
+    cmd.agent_id = agent_id;
+    // 设置为起飞状态
+    sunray_msgs::agent_cmd::TAKEOFF;
+    //发布起飞命令
+    takeoff_pub.publish(takeoff);
+    // 设置指令来源
+    cmd.cmd_source = "rmtt_circle";
+    // 发布话题
+    agent_cmd_pub.publish(cmd);
+    // 等待3秒以确保无人机起飞
+    ros::Duration(3.0).sleep();
+
+
     while (ros::ok())
     {
         // 检查是否接收到开始命令
         if (received_start_cmd)
         {
-            
-            
-            // 创建控制命令消息对象
-            sunray_msgs::agent_cmd cmd;
             // 发送开始画圆信息
             std_msgs::String start_info;
             start_info.data = "start circle";
@@ -80,11 +112,8 @@ int main(int argc, char **argv)
             cout << GREEN << "start circle" << TAIL << endl;
             // 发布信息
             text_info_pub.publish(start_info);
-            // 移动到起始位置
-            cmd.agent_id = 1;
-            // 设置为起飞状态
-            cmd.control_state = 11;
             ros::Duration(3.0).sleep();                              // 等待3秒以确保起飞                                   
+            // 移动到起始位置
             cmd.cmd_source = "rmtt_circle";                          // 指定命令来源为当前节点
             cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL; // 设置控制模式为位置控制
             cmd.desired_pos.x = circle_radius;                       // 设置x坐标为圆周半径

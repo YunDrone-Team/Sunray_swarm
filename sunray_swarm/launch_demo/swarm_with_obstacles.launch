@@ -1,5 +1,5 @@
 <launch>
 	<node pkg="sunray_swarm" name="swarm_with_obstacles" type="swarm_with_obstacles" output="screen">
-		<rosparam command="load" file="$(find sunray_swarm)/launch_demo/ugv_params.yaml" />
+		<rosparam command="load" file="$(find sunray_swarm)/launch_demo/rmtt_params.yaml" />
 	</node>
 </launch>

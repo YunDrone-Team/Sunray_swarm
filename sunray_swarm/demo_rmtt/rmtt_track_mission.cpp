@@ -19,6 +19,12 @@ ros::Publisher agent_cmd_pub;            // 发布控制命令
 ros::Publisher text_info_pub;            // 发布文字提示消息
 ros::Subscriber single_trackMission_sub; // 订阅轨迹任务触发信号
 
+ros::Publisher takeoff_pub;
+ros::Publisher land_pub;
+
+std_msgs::Empty takeoff;
+std_msgs::Empty land;
+
 bool received_start_cmd = false; // 接收到开始命令
 bool mission_completed = false;   // 任务是否完成
 
@@ -71,25 +77,38 @@ int main(int argc, char **argv)
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
+    // 【发布】无人机起飞指令 本节点 -> rmtt_driver
+    takeoff_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/takeoff", 1); 
+    // 【发布】无人机降落指令 本节点 -> rmtt_driver
+    land_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/land", 1); 
 
-    sleep(1.0);
+    // 创建控制命令对象
     sunray_msgs::agent_cmd cmd;
+    // 依据代理类型设置的ID
+    cmd.agent_id = 1;
+    // 设置为起飞状态
+    sunray_msgs::agent_cmd::TAKEOFF;
+    //发布起飞命令
+    takeoff_pub.publish(takeoff);
+    // 设置指令来源
+    cmd.cmd_source = "ugv_pathplaning";
+    // 发布话题
+    agent_cmd_pub.publish(cmd);
+    // 等待3秒以确保无人机起飞
+    ros::Duration(3.0).sleep(); 
+
     // 主循环
     while (ros::ok())
     {
         // 检查是否接收到开始命令
         if (received_start_cmd && !mission_completed)
         {
-            // 设置为起飞状态
-            cmd.control_state = 11;
-            // 设置智能体编号
-            agent_cmd.agent_id = 1;
             // 设置目标高度
             agent_cmd.desired_pos.z = agent_height;
             // 发布控制命令
             agent_cmd_pub.publish(agent_cmd);
             // 等待3秒确保起飞
-            ros::Duration(3.0).sleep(); 
+            // ros::Duration(3.0).sleep(); 
             // 设置控制模式为位置控制
             agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
             // 指定命令来源为轨迹任务来源
@@ -100,7 +119,7 @@ int main(int argc, char **argv)
             agent_cmd.desired_pos = target_pos.pose.position;
 
             // 等待目标到达
-            ros::Duration(2.0).sleep(); // 根据实际需求调整
+            // ros::Duration(2.0).sleep(); // 根据实际需求调整
             
             // 设置目标偏航角
             agent_cmd.desired_yaw = target_yaw;
@@ -111,16 +130,10 @@ int main(int argc, char **argv)
             // 发布提示消息
             text_info.data = "Agent driving to target: x=" + to_string(target_pos.pose.position.x) + " y=" + to_string(target_pos.pose.position.y) + " z=" + to_string(agent_height);
 
-            // 等待15秒后发布降落指令
-            ros::Duration(15.0).sleep();
-            // 降落状态
-            agent_cmd.control_state = 12;
-            // 发布控制命令 
-            agent_cmd_pub.publish(agent_cmd);
             cout << GREEN << "Landing command sent." << TAIL << endl;
             // 重置命令状态
             received_start_cmd = false;
-            mission_completed = true;    // 标记任务已完成
+            // mission_completed = true;    // 标记任务已完成
         }
         
         // 回调函数,timer开始运行

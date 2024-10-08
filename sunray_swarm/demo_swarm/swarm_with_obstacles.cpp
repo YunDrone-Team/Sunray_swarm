@@ -94,7 +94,7 @@ void setup_obstacles()
     orca_cmd.obs_point.push_back(Point4);
 
     // 发布设置障碍物指令
-    orca_cmd_pub.publish(orca_cmd);
+    // orca_cmd_pub.publish(orca_cmd);
     // 输出设置障碍物完成信息
     cout << GREEN << "setup_obstacles" << TAIL << endl;
 
