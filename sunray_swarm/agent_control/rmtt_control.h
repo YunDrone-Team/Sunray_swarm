@@ -67,6 +67,21 @@ class RMTT_CONTROL
         };
         geo_fence rmtt_geo_fence;
 
+        enum CONTROL_STATE
+        {
+             INIT = 0,
+             HOLD = 1,
+            //  POS_CONTROL = 2
+            //  VEL_CONTROL_BODY = 3
+            //  VEL_CONTROL_ENU = 4
+             ORCA_SETUP = 4,
+             ORCA_RUN = 5,
+             RETURN_HOME = 6,
+             TAKEOFF = 11,
+             LAND = 12,
+        };
+        CONTROL_STATE control_state;
+
         // 悬停控制参数
         struct control_param
         {

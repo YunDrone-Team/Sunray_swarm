@@ -9,6 +9,8 @@ uint8 orca_cmd
 ## 障碍物顶点，4个点围成一个凸体,针对SETUP_OBS模式
 geometry_msgs/Point[] obs_point    ## [m]
 
+geometry_msgs/Point[] goal_point    ## [m]
+
 ## orca_cmd枚举
 uint8 SET_HOME = 0            ##必须要先发送SET_HOME指令才能开始ORCA算法运行
 uint8 RETURN_HOME = 1         ##返航至初始点
