@@ -29,20 +29,7 @@ void ORCA::init(ros::NodeHandle& nh)
     goal_reached_printed.resize(agent_num, false);  
 
     string agent_name;
-    if(agent_type == sunray_msgs::agent_state::RMTT)
-    {
-        agent_prefix = "/rmtt_";
-    }else if(agent_type == sunray_msgs::agent_state::UGV)
-    {
-        agent_prefix = "/ugv_";
-    }else if(agent_type == sunray_msgs::agent_state::SIKONG)
-    {
-        agent_prefix = "/sikong_";
-    }else
-    {
-        agent_prefix = "/unkonown_";
-    }
-
+    string agent_prefix = "/rmtt_" ;
     // 【订阅】ORCA指令 外部 -> 本节点
     orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm" + agent_prefix + "/orca_cmd", 10, &ORCA::orca_cmd_cb, this);
 

@@ -2,14 +2,13 @@
 #include "printf_utils.h"
 #include "math_utils.h"
 #include "ros_msg_utils.h"
-#include "rmtt_control.h"
 
 #define MAX_AGENT_NUM 10
 
 
 using namespace std;
 
-// int rmtt_num = 8;
+int rmtt_num = 8;
 int agent_id;
 string node_name;
 bool pub_goal1_flag{false};
@@ -37,6 +36,19 @@ ros::Subscriber rmtt_goal_sub;
 ros::Publisher goal_id_pub;
 
 // bool all_uavs_finished[MAX_AGENT_NUM] = {false};//跟踪每架无人机任务点
+
+enum CONTROL_STATE
+{
+    INIT = 0,
+    HOLD = 1,
+    POS_CONTROL = 2,
+    VEL_CONTROL_BODY = 3,
+    VEL_CONTROL_ENU = 4,
+    TAKEOFF = 11,
+    LAND = 12,
+    ORCA_CMD = 99,
+};
+CONTROL_STATE control_state;
 
 int goal_id{1};
 //无人机任务点完成情况
@@ -94,7 +106,7 @@ void mySigintHandler(int sig)
 }
 void station_cmd_cb(const sunray_msgs::agent_cmdConstPtr &msg)
 {
-    if (msg->control_state == 1 && msg->agent_id == 99)
+    if (msg->control_state == sunray_msgs::agent_cmd::TAKEOFF && msg->agent_id == 99)
     {
         pub_goal1_flag = true;
         cout << BLUE << node_name << " start..." << TAIL << endl;
@@ -133,8 +145,9 @@ int main(int argc, char **argv)
     nh.param<int>("agent_id", agent_id, 1);
 
     string agent_name = "/rmtt_" + std::to_string(agent_id);
+    // string agent_name;
     // 【订阅】地面站指令
-    station_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/agent_cmd", 1, station_cmd_cb);
+    station_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm"+ agent_name + "/agent_cmd", 1, station_cmd_cb);
     // 【订阅】无人机状态数据
     rmtt_state_sub = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm" + agent_name + "/agent_state", 1, rmtt_state_cb);
     // 【订阅】无人机orca状态 回传地面站
@@ -192,7 +205,7 @@ void timercb_show(const ros::TimerEvent &e)
         sleep(1.0);
 
         // orca_run
-        station_cmd.control_state = 5;
+        // station_cmd.control_state =99;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
 
@@ -205,31 +218,35 @@ void timercb_show(const ros::TimerEvent &e)
         rmtt_orca_state.arrived_goal = false;
         goal_id = 1;
         publish_goal_id(goal_id);
+
+        cout<<"pub_goal1_flag"<<endl;
     }
 
     // rmtt1 抵达初始目标点,先降落，然后起飞，然后发送下一个目标点
-    if (pub_goal2_flag && rmtt_orca_state.arrived_goal && abs(rmtt_orca_state.goal[0] - goal[1].x)<thres && abs(rmtt_orca_state.goal[1] - goal[1].y)<thres)
+    // if (pub_goal2_flag && rmtt_orca_state.arrived_goal && abs(rmtt_orca_state.goal[0] - goal[1].x)<thres && abs(rmtt_orca_state.goal[1] - goal[1].y)<thres)
+    if (pub_goal2_flag && rmtt_orca_state.arrived_goal)
     {
-
         sleep(0.5);
         // land
-        station_cmd.control_state = 2;
+        station_cmd.control_state = sunray_msgs::agent_cmd::LAND;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
-        sleep(6.0);
+        // 等待15秒后发布降落指令
+        ros::Duration(6.0).sleep();
 
         // takeoff
-        station_cmd.control_state = 1;
+        station_cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF ;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
-        sleep(6.0);
+        // 等待15秒后发布降落指令
+        ros::Duration(6.0).sleep();
 
         // pub_new
         rmtt_goal_pub.publish(goal[2]);
         cout << BLUE << node_name << " pub_goal2..." << TAIL << endl;
 
         // orca_run
-        station_cmd.control_state = 5;
+        // station_cmd.control_state = 99;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
 
@@ -242,21 +259,22 @@ void timercb_show(const ros::TimerEvent &e)
         rmtt_orca_state.arrived_goal = false;
         goal_id = 2;
         publish_goal_id(goal_id);
+        cout<<"pub_goal2_flag"<<endl;
     }
 
-    if (pub_goal3_flag && rmtt_orca_state.arrived_goal && abs(rmtt_orca_state.goal[0] - goal[2].x)<thres  && abs(rmtt_orca_state.goal[1] - goal[2].y)<thres )
+    if (pub_goal3_flag && !rmtt_orca_state.arrived_goal )
     {
         // cout << " pub_goal1..." << goal[2].x<< goal[1].y << endl;
         // cout << " pub_goal1..." << rmtt_orca_state.goal[0]<< rmtt_orca_state.goal[1] << endl;
         // land
         sleep(0.5);
-        station_cmd.control_state = 2;
+        station_cmd.control_state = LAND;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
         sleep(6.0);
 
         // takeoff
-        station_cmd.control_state = 1;
+        station_cmd.control_state = TAKEOFF;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
         sleep(6.0);
@@ -266,7 +284,7 @@ void timercb_show(const ros::TimerEvent &e)
         cout << BLUE << node_name << " pub_goal3..." << TAIL << endl;
 
         // orca_run
-        station_cmd.control_state = 5;
+        // station_cmd.control_state = 99;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
 
@@ -279,18 +297,19 @@ void timercb_show(const ros::TimerEvent &e)
         rmtt_orca_state.arrived_goal = false;
         goal_id = 3;
         publish_goal_id(goal_id);
+        cout<<"pub_goal3_flag"<<endl;
     }
 
-    if (pub_goal4_flag && rmtt_orca_state.arrived_goal && abs(rmtt_orca_state.goal[0] - goal[3].x)<thres  && abs(rmtt_orca_state.goal[1] - goal[3].y)<thres )
+    if (pub_goal4_flag && !rmtt_orca_state.arrived_goal )
     {
         // land
-        station_cmd.control_state = 2;
+        station_cmd.control_state == sunray_msgs::agent_cmd::LAND;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
         sleep(6.0);
 
         // takeoff
-        station_cmd.control_state = 1;
+        station_cmd.control_state == sunray_msgs::agent_cmd::TAKEOFF;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
         sleep(6.0);
@@ -300,7 +319,7 @@ void timercb_show(const ros::TimerEvent &e)
         cout << BLUE << node_name << " pub_goal4..." << TAIL << endl;
 
         // orca_run
-        station_cmd.control_state = 5;
+        // station_cmd.control_state = 99;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
 
@@ -309,40 +328,18 @@ void timercb_show(const ros::TimerEvent &e)
         pub_goal2_flag = false;
         pub_goal3_flag = false;
         pub_goal4_flag = false;
-        pub_return = true;
+        pub_return = false;
         rmtt_orca_state.arrived_goal = false;
         goal_id = 4;
         publish_goal_id(goal_id);
+        cout<<"pub_goal4_flag"<<endl;
     }
 
-    // if (pub_return && rmtt_orca_state.arrived_goal && abs(rmtt_orca_state.goal[0] - goal[4].x)<thres  && abs(rmtt_orca_state.goal[1] - goal[4].y)<thres )
-    // {
-
-    //     // takeoff
-    //     station_cmd.control_state = 1;
-    //     station_cmd.agent_id = agent_id;
-    //     station_cmd_pub.publish(station_cmd);
-    //     sleep(6.0);
-
-    //     // takeoff
-    //     station_cmd.control_state = 6;
-    //     station_cmd.agent_id = agent_id;
-    //     station_cmd_pub.publish(station_cmd);
-    //     sleep(6.0);
-
-
-
-    //     pub_goal1_flag = false;
-    //     pub_goal2_flag = false;
-    //     pub_goal3_flag = false;
-    //     pub_goal4_flag = false;
-    //     pub_return = false;
-    // }
-    if (pub_return && rmtt_orca_state.arrived_goal && abs(rmtt_orca_state.goal[0] - goal[3].x)<thres  && abs(rmtt_orca_state.goal[1] - goal[3].y)<thres )
+    if (pub_return && !rmtt_orca_state.arrived_goal)
     {
 
-        // takeoff
-        station_cmd.control_state = 6;
+        // land
+        station_cmd.control_state == sunray_msgs::agent_cmd::LAND;
         station_cmd.agent_id = agent_id;
         station_cmd_pub.publish(station_cmd);
         sleep(6.0);
