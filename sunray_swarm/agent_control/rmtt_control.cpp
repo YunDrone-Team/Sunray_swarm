@@ -332,6 +332,62 @@ void RMTT_CONTROL::agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
     current_agent_cmd = *msg; 
 }
 
+
+//display
+void RMTT_CONTROL::station_cmd_cb2(const sunray_msgs::agent_cmd::ConstPtr& msg)
+{
+    if(msg->agent_id != agent_id && msg->agent_id != 99)
+    {
+        return;
+    }
+
+    switch(msg->control_state) 
+    {
+        case sunray_msgs::agent_cmd::INIT:
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: INIT!";
+            cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::HOLD:
+            set_desired_position();
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: HOLD!";
+            cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::POS_CONTROL:
+            desired_position.x = msg->desired_pos.x;
+            desired_position.y = msg->desired_pos.y;
+            desired_position.z = agent_height;
+            desired_yaw = msg->desired_yaw;
+            // text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: POS_CONTROL!";
+            // cout << BLUE << "POS_REF [X Y Z] : " << desired_position.x   << " [ m ] " << desired_position.y   << " [ m ] " << desired_position.z   << " [ m ] " << TAIL << endl;
+            // cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:
+            // text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_BODY!";
+            // cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::VEL_CONTROL_ENU:
+            // text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_ENU!";
+            // cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::TAKEOFF:
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: TAKEOFF!";
+            cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::LAND:
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: LAND!";
+            cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        default:
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: Wrong!";
+            cout << RED << text_info.data << TAIL << endl;
+            return;
+            break;
+    }
+    text_info_pub.publish(text_info);
+
+    current_agent_cmd = *msg; 
+}
+
 void RMTT_CONTROL::rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg)
 {
     rmtt_orca_state = *msg;

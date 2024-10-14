@@ -490,20 +490,23 @@ string node_name;                                       // 节点名称
 sunray_msgs::orca_cmd orca_cmd;                         // ORCA指令
 sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM];        // 智能体控制指令
 sunray_msgs::orca_state orca_state[MAX_AGENT_NUM];      // ORCA状态
-geometry_msgs::Point goal_N[MAX_AGENT_NUM];             // N形队形目标点
-geometry_msgs::Point goal_O[MAX_AGENT_NUM];             // O形队形目标点
-geometry_msgs::Point goal_K[MAX_AGENT_NUM];             // L形队形目标点
-geometry_msgs::Point goal_V[MAX_AGENT_NUM];             // V形队形目标点
+geometry_msgs::Point goal_1[MAX_AGENT_NUM];             // 1形队形目标点
+geometry_msgs::Point goal_2[MAX_AGENT_NUM];             // 2形队形目标点
+geometry_msgs::Point goal_3[MAX_AGENT_NUM];             // 3形队形目标点
+geometry_msgs::Point goal_4[MAX_AGENT_NUM];             // 4形队形目标点
+geometry_msgs::Point goal_5[MAX_AGENT_NUM];             // 5形队形目标点
+geometry_msgs::Point goal_6[MAX_AGENT_NUM];             // 6形队形目标点
 
 // 执行状态
 enum FORMATION_STATE
 {
     INIT = 0,               // 初始模式
-    N = 1,                  // N形队形
-    O = 2,                  // O形队形
-    K = 3,                  // K形队形
-    O2 = 4,                 // O形队形（第二次）
-    V = 5,                  // V形队形
+    GOAL_1 = 1,                  // 1形队形
+    GOAL_2 = 2,                  // 2形队形
+    GOAL_3 = 3,                  // 3形队形
+    GOAL_4 = 4,                 // 4形队形
+    GOAL_5 = 5,                 // 5形队形
+    GOAL_6 = 6,                 // 6形队形
     RETURN_HOME = 6,        // 返回起点
 };
 FORMATION_STATE formation_state;        // 当前队形状态
@@ -535,7 +538,7 @@ void timercb_show(const ros::TimerEvent &e)
 // 启动指令回调
 void start_cmd_cb(const std_msgs::BoolConstPtr& msg)
 {
-    formation_state = FORMATION_STATE::N;// 设置队形状态为N
+    formation_state = FORMATION_STATE::GOAL_1;// 设置队形状态为goal_1
     // rmtt_state = *msg;
 }
 // 函数声明，用于设置目标点
@@ -647,7 +650,7 @@ int main(int argc, char **argv)
             // 初始状态逻辑
             break;
 
-            case FORMATION_STATE::N:
+            case FORMATION_STATE::GOAL_1:
                 // N形队形
                 if(!pub_goal_once)
                 {
@@ -670,7 +673,7 @@ int main(int argc, char **argv)
                         send_takeoff_and_land_cmd(i + 1, true);
                         sleep(6.0);  // 模拟起飞过程
 
-                        orca_goal_pub[i].publish(goal_N[i]);    // 发布N形队形目标点
+                        orca_goal_pub[i].publish(goal_1[i]);    // 发布N形队形目标点
                         sleep(0.1);                             // 延迟
                     }
                     pub_goal_once = true;                       // 标志设置为已发布
@@ -681,11 +684,11 @@ int main(int argc, char **argv)
                 if(pub_goal_once && orca_state[0].arrived_all_goal)
                 {
                     sleep(formation_time);                      // 等待队形时间
-                    formation_state = FORMATION_STATE::O;       // 转换到O形队形
+                    formation_state = FORMATION_STATE::GOAL_2;       // 转换到O形队形
                     pub_goal_once = false;                      // 重置标志
                 }
                 break;
-            case FORMATION_STATE::O:
+            case FORMATION_STATE::GOAL_2:
                 // O形队形
                 if(!pub_goal_once)
                 {
@@ -699,7 +702,7 @@ int main(int argc, char **argv)
                         // 起飞并发布目标点
                         send_takeoff_and_land_cmd(i + 1, true);
                         sleep(6.0);  // 模拟起飞过程
-                        orca_goal_pub[i].publish(goal_O[i]);    // 发布O形队形目标点
+                        orca_goal_pub[i].publish(goal_2[i]);    // 发布O形队形目标点
                         sleep(0.1);                             // 延迟
                     }
                     pub_goal_once = true;                       // 标志设置为已发布
@@ -710,11 +713,11 @@ int main(int argc, char **argv)
                 if(pub_goal_once && orca_state[0].arrived_all_goal)
                 {
                     sleep(formation_time);                      // 等待队形时间
-                    formation_state = FORMATION_STATE::K;       // 转换到K形队形
+                    formation_state = FORMATION_STATE::GOAL_3;       // 转换到K形队形
                     pub_goal_once = false;                      // 重置标志
                 }
                 break;
-            case FORMATION_STATE::K:
+            case FORMATION_STATE::GOAL_3:
                 // K形队形
                 if(!pub_goal_once)
                 {
@@ -728,7 +731,7 @@ int main(int argc, char **argv)
                         // 起飞并发布目标点
                         send_takeoff_and_land_cmd(i + 1, true);
                         sleep(6.0);  // 模拟起飞过程
-                        orca_goal_pub[i].publish(goal_K[i]);    // 发布K形队形目标点
+                        orca_goal_pub[i].publish(goal_3[i]);    // 发布K形队形目标点
                         sleep(0.1);                             // 延迟
                     }
                     pub_goal_once = true;                       // 标志设置为已发布
@@ -739,11 +742,11 @@ int main(int argc, char **argv)
                 if(pub_goal_once && orca_state[0].arrived_all_goal)
                 {
                     sleep(formation_time);                      // 等待队形时间
-                    formation_state = FORMATION_STATE::O2;      // 转换到O2形队形
+                    formation_state = FORMATION_STATE::GOAL_4;      // 转换到O2形队形
                     pub_goal_once = false;                      // 重置标志
                 }
                 break;
-            case FORMATION_STATE::O2:
+            case FORMATION_STATE::GOAL_4:
                 // O形队形
                 if(!pub_goal_once)
                 {
@@ -757,7 +760,7 @@ int main(int argc, char **argv)
                         // 起飞并发布目标点
                         send_takeoff_and_land_cmd(i + 1, true);
                         sleep(6.0);  // 模拟起飞过程
-                        orca_goal_pub[i].publish(goal_O[i]);    // 发布O2形队形目标点
+                        orca_goal_pub[i].publish(goal_2[i]);    // 发布O2形队形目标点
                         sleep(0.1);                             // 延迟
                     }
                     pub_goal_once = true;                       // 标志设置为已发布
@@ -768,11 +771,11 @@ int main(int argc, char **argv)
                 if(pub_goal_once && orca_state[0].arrived_all_goal)
                 {
                     sleep(formation_time);                      // 等待队形时间
-                    formation_state = FORMATION_STATE::V;       // 转换到V形队形
+                    formation_state = FORMATION_STATE::GOAL_5;       // 转换到V形队形
                     pub_goal_once = false;                      // 重置标志
                 }
                 break;
-            case FORMATION_STATE::V:
+            case FORMATION_STATE::GOAL_5:
                 // V形队形
                 if(!pub_goal_once)
                 {
@@ -786,7 +789,7 @@ int main(int argc, char **argv)
                         // 起飞并发布目标点
                         send_takeoff_and_land_cmd(i + 1, true);
                         sleep(6.0);  // 模拟起飞过程
-                        orca_goal_pub[i].publish(goal_V[i]);    // 发布V形队形目标点
+                        orca_goal_pub[i].publish(goal_5[i]);    // 发布V形队形目标点
                         sleep(0.1);                             // 延迟
                     }
                     pub_goal_once = true;                       // 标志设置为已发布
@@ -816,11 +819,20 @@ int main(int argc, char **argv)
                 // 检查所有智能体是否到达目标
                 if(pub_goal_once && orca_state[0].arrived_all_goal)
                 {
-                    return 0;
+                    formation_state = FORMATION_STATE::INIT;
+                    pub_goal_once = false;
+                    for(int i = 0; i < agent_num; i++) 
+                    {
+                        // 先让无人机降落
+                        send_takeoff_and_land_cmd(i + 1, false);
+                        sleep(6.0);  // 模拟降落的过程
+                    }
+
+                    // return 0;
                 }
                 break;
         }
-
+        ros::spinOnce();
         // sleep
         rate.sleep();
     }
@@ -832,40 +844,40 @@ int main(int argc, char **argv)
 void setup_show_goals()
 {
     // 字母 N
-    goal_N[0].x = -1.0; goal_N[0].y = 1.5;   // 顶部左端
-    goal_N[1].x = 1.2; goal_N[1].y = 1.5;  // 底部左端
-    goal_N[2].x = 0.1; goal_N[2].y = 0.15;   // 中部交点
-    goal_N[3].x = 1.2; goal_N[3].y = -1.3;  // 顶部右端
-    goal_N[4].x = -1.0; goal_N[4].y = -1.3; // 底部右端
-    goal_N[5].x = 3.0; goal_N[5].y = 4.15;   // 中部交点
-    goal_N[6].x = 3.2; goal_N[6].y = -4.3;  // 顶部右端
-    goal_N[7].x = -2.0; goal_N[7].y = -4.3; // 底部右端
+    goal_1[0].x = -1.0; goal_1[0].y = 1.5;   // 顶部左端
+    goal_1[1].x = 1.2; goal_1[1].y = 1.5;  // 底部左端
+    goal_1[2].x = 0.1; goal_1[2].y = 0.15;   // 中部交点
+    goal_1[3].x = 1.2; goal_1[3].y = -1.3;  // 顶部右端
+    goal_1[4].x = -1.0; goal_1[4].y = -1.3; // 底部右端
+    goal_1[5].x = 3.0; goal_1[5].y = 4.15;   // 中部交点
+    goal_1[6].x = 3.2; goal_1[6].y = -4.3;  // 顶部右端
+    goal_1[7].x = -2.0; goal_1[7].y = -4.3; // 底部右端
 
     // 字母 O
-    goal_O[0].x = 0.1;  goal_O[0].y = 1.5;  // 上部中点
-    goal_O[1].x = 1.4;  goal_O[1].y = 0.5; // 下部中点
-    goal_O[2].x = -0.8; goal_O[2].y = 0.0;  // 上部边点
-    goal_O[3].x = 1.4; goal_O[3].y = -0.5; // 下部边点
-    goal_O[4].x = 0.1;  goal_O[4].y = -1.5;  // 中心点
-    goal_O[5].x = 3.0; goal_O[5].y = 4.15;   // 中部交点
-    goal_O[6].x = 3.2; goal_O[6].y = -4.3;  // 顶部右端
-    goal_O[7].x = -2.0; goal_O[7].y = -4.3; // 底部右端
+    goal_2[0].x = 0.1;  goal_2[0].y = 1.5;  // 上部中点
+    goal_2[1].x = 1.4;  goal_2[1].y = 0.5; // 下部中点
+    goal_2[2].x = -0.8; goal_2[2].y = 0.0;  // 上部边点
+    goal_2[3].x = 1.4; goal_2[3].y = -0.5; // 下部边点
+    goal_2[4].x = 0.1;  goal_2[4].y = -1.5;  // 中心点
+    goal_2[5].x = 3.0; goal_2[5].y = 4.15;   // 中部交点
+    goal_2[6].x = 3.2; goal_2[6].y = -4.3;  // 顶部右端
+    goal_2[7].x = -2.0; goal_2[7].y = -4.3; // 底部右端
     // 字母 K
-    goal_K[0].x = 0.1; goal_K[0].y = 0.9;  // 上部交点
-    goal_K[1].x = 1.2; goal_K[1].y = 0.9; // 下部交点
-    goal_K[2].x = -0.8; goal_K[2].y = 0.9;  // 中部竖线
-    goal_K[3].x = 1.2; goal_K[3].y = -0.9;  // 斜线上端
-    goal_K[4].x = -0.8; goal_K[4].y = -0.9; // 斜线下端
-    goal_K[5].x = 3.0; goal_K[5].y = 4.15;   // 中部交点
-    goal_K[6].x = 3.2; goal_K[6].y = -4.3;  // 顶部右端
-    goal_K[7].x = -2.0; goal_K[7].y = -4.3; // 底部右端
+    goal_3[0].x = 0.1; goal_3[0].y = 0.9;  // 上部交点
+    goal_3[1].x = 1.2; goal_3[1].y = 0.9; // 下部交点
+    goal_3[2].x = -0.8; goal_3[2].y = 0.9;  // 中部竖线
+    goal_3[3].x = 1.2; goal_3[3].y = -0.9;  // 斜线上端
+    goal_3[4].x = -0.8; goal_3[4].y = -0.9; // 斜线下端
+    goal_3[5].x = 3.0; goal_3[5].y = 4.15;   // 中部交点
+    goal_3[6].x = 3.2; goal_3[6].y = -4.3;  // 顶部右端
+    goal_3[7].x = -2.0; goal_3[7].y = -4.3; // 底部右端
     // 字母 V
-    goal_V[0].x = 0.1;  goal_V[0].y = 0.6;  // 左上点
-    goal_V[1].x = 1.1;  goal_V[1].y = 1.1; // 右上点
-    goal_V[2].x = -0.7;  goal_V[2].y = 0.0;  // 底部点
-    goal_V[3].x = 1.1;  goal_V[3].y = -1.1;  // 左下点
-    goal_V[4].x = 0.1;  goal_V[4].y = -0.6; // 右下点
-    goal_V[5].x = 3.0; goal_V[5].y = 4.15;   // 中部交点
-    goal_V[6].x = 3.2; goal_V[6].y = -4.3;  // 顶部右端
-    goal_V[7].x = -2.0; goal_V[7].y = -4.3; // 底部右端
+    goal_5[0].x = 0.1;  goal_5[0].y = 0.6;  // 左上点
+    goal_5[1].x = 1.1;  goal_5[1].y = 1.1; // 右上点
+    goal_5[2].x = -0.7;  goal_5[2].y = 0.0;  // 底部点
+    goal_5[3].x = 1.1;  goal_5[3].y = -1.1;  // 左下点
+    goal_5[4].x = 0.1;  goal_5[4].y = -0.6; // 右下点
+    goal_5[5].x = 3.0; goal_5[5].y = 4.15;   // 中部交点
+    goal_5[6].x = 3.2; goal_5[6].y = -4.3;  // 顶部右端
+    goal_5[7].x = -2.0; goal_5[7].y = -4.3; // 底部右端
 }
