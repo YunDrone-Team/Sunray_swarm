@@ -132,7 +132,7 @@ add_dependencies(swarm_with_obstacles sunray_swarm_gencpp)
 target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
 
 
-add_executable(rmtt_show demo_neu/rmtt_show.cpp)
+add_executable(rmtt_show demo_neu/neu_display.cpp)
 add_dependencies(rmtt_show sunray_rmtt_gencpp)
 target_link_libraries(rmtt_show ${catkin_LIBRARIES})
 
