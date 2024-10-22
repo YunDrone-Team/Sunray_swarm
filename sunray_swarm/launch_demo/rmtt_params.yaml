@@ -2,7 +2,6 @@
 agent_type : 0
 agent_num : 1
 agent_height : 1.0
-agent_id : 1
 sim_mode : false
 flag_printf : true
 desired_yaw : 0.0

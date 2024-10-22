@@ -2,17 +2,18 @@
     <!-- 启动rmtt_show -->
     <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_1" output="screen">
         <param name="agent_id" value="1" />
+        <rosparam command="load" file="$(find sunray_swarm)/launch_demo/rmtt_params.yaml" />
     </node>
 
     <!-- 启动rmtt_show -->
-    <!-- <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_2" output="screen">
+    <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_2" output="screen">
         <param name="agent_id" value="2" />
-    </node> -->
+    </node>
 
     <!-- 启动rmtt_show -->
-    <!-- <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_3" output="screen">
+    <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_3" output="screen">
         <param name="agent_id" value="3" />
-    </node> -->
+    </node>
 
     <!-- 启动rmtt_show -->
     <!-- <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_4" output="screen">

@@ -136,10 +136,7 @@ add_executable(rmtt_show demo_neu/neu_display.cpp)
 add_dependencies(rmtt_show sunray_rmtt_gencpp)
 target_link_libraries(rmtt_show ${catkin_LIBRARIES})
 
-#DEMO 自主降落
-# add_executable(autonomous_landing demo/multi_autonomous_landing.cpp)
-# add_dependencies(autonomous_landing sunray_swarm_gencpp)
-# target_link_libraries(autonomous_landing ${catkin_LIBRARIES})
+
 
 
 ## Mark cpp header files for installation
