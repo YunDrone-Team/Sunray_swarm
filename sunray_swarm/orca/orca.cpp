@@ -46,6 +46,14 @@ void ORCA::init(ros::NodeHandle& nh)
 		agent_orca_state_pub[i] = nh.advertise<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1);
         // 【发布】目标点marker 本节点 -> RVIZ
         goal_point_pub[i] = nh.advertise<visualization_msgs::Marker>("/sunray_swarm" + agent_name + "/goal_point_rviz", 1);   
+
+        // 【订阅】程序触发指令起飞降落
+        // takeoff_and_land_pub[i] = nh.subscribe<std_msgs::Bool>("/sunray_swarm" + agent_name + "/takeoff_land", 1, &ORCA::agent_cmd_land_takeoff, this);
+
+        // // 【发布】无人机起飞指令 本节点 -> rmtt_driver
+        // takeoff_pub[i] = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/takeoff", 1); 
+        // // 【发布】无人机降落指令 本节点 -> rmtt_driver
+        // land_pub[i] = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/land", 1);
     }
 
     // 打印定时器
@@ -71,6 +79,33 @@ void ORCA::init(ros::NodeHandle& nh)
     text_info.data = node_name + ": ORCA init!";
     text_info_pub.publish(text_info);
     cout << BLUE << text_info.data << TAIL << endl;
+}
+
+void ORCA::agent_cmd_land_takeoff(const std_msgs::Bool::ConstPtr& msg)
+{
+    ROS_INFO("Agent takeoff triggered.");
+    if (msg->data) {
+        // 发布所有无人机的起飞命令
+        for (int i = 0; i < agent_num; i++) {
+            if(arrived_goal[i]){
+                agent_cmd[i].control_state = sunray_msgs::agent_cmd::TAKEOFF;
+                agent_cmd_pub[i].publish(agent_cmd[i]);
+                ROS_INFO("Agent %d takeoff triggered." ,i);
+                should_takeoff[i] = true;
+            }
+        }
+    } else {
+        // 发布所有无人机的降落命令
+        for (int i = 0; i < agent_num; i++) {
+            if(should_takeoff[i]){
+                agent_cmd[i].control_state = sunray_msgs::agent_cmd::LAND;
+                agent_cmd_pub[i].publish(agent_cmd[i]);
+                ROS_INFO("Agent land triggered.");
+                should_takeoff[i] = false;
+            }
+            
+        }
+    }
 }
 
 bool ORCA::orca_run()
@@ -114,6 +149,9 @@ bool ORCA::orca_run()
             agent_cmd[i].desired_pos.z = agent_height; 
             agent_cmd[i].desired_yaw = 0.0;
             agent_cmd_pub[i].publish(agent_cmd[i]);
+
+                  
+
             if (!goal_reached_printed[i])
             {
                 cout << BLUE << node_name << agent_prefix << i+1 << " Arrived." << TAIL << endl;
@@ -308,6 +346,7 @@ void ORCA::agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg, int i)
 
 void ORCA::agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i)
 {
+    should_takeoff[i] = false;
     arrived_goal[i] = false;
     arrived_all_goal = false;    
     agent_goal[i] = *msg;

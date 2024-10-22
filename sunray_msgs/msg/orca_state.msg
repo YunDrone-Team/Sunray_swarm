@@ -6,6 +6,7 @@ uint8 agent_num
 uint8 agent_id               
 ## 当前智能体是否到达目标点
 bool arrived_goal
+bool should_takeoff
 ## 全部智能体是否到达目标点
 bool arrived_all_goal
 ## 目标位置

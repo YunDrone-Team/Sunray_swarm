@@ -59,6 +59,9 @@ class ORCA
         bool arrived_all_goal = false;      // 是否到达目标点
         sunray_msgs::orca_state agent_orca_state[MAX_NUM];
         std_msgs::String text_info;
+
+        bool should_takeoff[MAX_NUM];         // 是否到达目标点起飞
+        ros::Subscriber takeoff_and_land_pub[MAX_NUM]; //起飞降落话题
         
         // 订阅话题
         ros::Subscriber agent_state_sub[MAX_NUM];
@@ -88,5 +91,13 @@ class ORCA
         bool reachedGoal(int i);
         void printf_param();
         void setup_color();
+
+        std_msgs::Empty takeoff;
+        std_msgs::Empty land;
+
+        ros::Publisher takeoff_pub[MAX_NUM];
+        ros::Publisher land_pub[MAX_NUM];
+
+        void agent_cmd_land_takeoff(const std_msgs::Bool::ConstPtr& msg);
 };
 #endif

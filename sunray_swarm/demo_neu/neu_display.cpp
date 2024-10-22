@@ -56,11 +56,10 @@ ros::Subscriber agent_goal_sub;                   // 订阅地面站目标点
 ros::Publisher agent_cmd_pub;                     // 新增发布起飞和降落命令的发布者
 bool agent_reached_goal[MAX_AGENT_NUM] = {false}; // 每个无人机的到达状态
 
-
 ros::Publisher takeoff_pub;
-        ros::Publisher land_pub;
-        std_msgs::Empty takeoff;
-        std_msgs::Empty land;
+ros::Publisher land_pub;
+std_msgs::Empty takeoff;
+std_msgs::Empty land;
 
 // std::vector<std::vector<geometry_msgs::Point>> agent_goals(MAX_AGENT_NUM);
 ros::Subscriber goals_sub[MAX_AGENT_NUM];
@@ -74,6 +73,8 @@ std::vector<std::vector<geometry_msgs::Point>> agent_goals(MAX_AGENT_NUM);
 // 起飞和降落的控制函数
 void send_takeoff_and_land_cmd(int agent_id, bool is_takeoff);
 void publish_next_goal(int agent_id);
+ros::Subscriber takeoff_and_land_sub; // 订阅地面站起飞降落
+void agent_cmd_land_takeoff();
 
 // 信号处理函数
 void mySigintHandler(int sig)
@@ -90,13 +91,13 @@ void update_goal(int i);
 // 初始化函数
 void init_goals()
 {
-    // cout << BLUE << node_name << " ORCA: SET_HOME" << TAIL << endl;
-    // // 设置ORCA命令为HOME
-    // orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
-    // // 发布命令
-    // orca_cmd_pub.publish(orca_cmd);
-    // // 设置延迟
-    // sleep(1.0);
+    cout << BLUE << node_name << " ORCA: SET_HOME" << TAIL << endl;
+    // 设置ORCA命令为HOME
+    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
+    // 发布命令
+    orca_cmd_pub.publish(orca_cmd);
+    // 设置延迟
+    sleep(1.0);
     // 初始化无人机的目标点数据和状态
     current_goal_id = 1;                // 所有无人机初始目标ID设为1
     reached_goal[agent_id - 1] = false; // 到达状态设为false
@@ -175,7 +176,7 @@ void agent_state_cb(const sunray_msgs::agent_stateConstPtr &msg)
     agent_state = *msg;
 }
 
-// 检查并更新目标点函数
+// 检查并更新目标点函数takeoff_and_land_sub
 void check_and_update_goal(int i)
 {
 
@@ -186,7 +187,7 @@ void check_and_update_goal(int i)
     {
         // 如果到达目标点，更新目标ID，并设置到达状态为true
         reached_goal[i] = true;
-        send_takeoff_and_land_cmd(i, false);
+        agent_cmd_land_takeoff();
         update_goal(i); // 更新下一个目标点
 
         current_goal_id++; // 目标ID递增
@@ -207,17 +208,16 @@ void setup_show_goals();
 // 启动指令回调
 void start_cmd_cb(const std_msgs::BoolConstPtr &msg)
 {
-    // init_goals();
-    cout << BLUE << node_name << " ORCA: SET_HOME" << TAIL << endl;
-    // 设置ORCA命令为HOME
-    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
-    // 发布命令
-    orca_cmd_pub.publish(orca_cmd);
+    // // init_goals();
+    // cout << BLUE << node_name << " ORCA: SET_HOME" << TAIL << endl;
+    // // 设置ORCA命令为HOME
+    // orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
+    // // 发布命令
+    // orca_cmd_pub.publish(orca_cmd);
     // 设置延迟
     sleep(0.5);
     pub_goal_once = false; // 设置队形状态为goal_1
     init_goals();
-
 }
 
 // 打印参数函数
@@ -230,25 +230,40 @@ void printf_params()
 
 void send_takeoff_and_land_cmd(int agent_id, bool is_takeoff)
 {
-    cmd.agent_id = agent_id - 1;
+    // cmd.agent_id = agent_id - 1;
 
-    cmd.control_state = 1;      // 降落命令
-    agent_cmd_pub.publish(cmd); // 发布起飞/降落命令
-    sleep(1.0);
+    // cmd.control_state = sunray_msgs::agent_cmd::HOLD; // 降落命令
+    // agent_cmd_pub.publish(cmd);
+    // sleep(1.0);
 
-    cmd.control_state = 11;     // 降落命令
-    agent_cmd_pub.publish(cmd); // 发布起飞/降落命令
-    cout << BLUE << node_name << " takeoff" << TAIL << endl;
+    // cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF; // 降落命令
+    // agent_cmd_pub.publish(cmd);
+    // cout << BLUE << node_name << " takeoff" << TAIL << endl;
+    // sleep(5.0);
+
+    // cmd.control_state = sunray_msgs::agent_cmd::LAND; // 降落命令
+    // agent_cmd_pub.publish(cmd);
+    // cout << BLUE << node_name << " land" << TAIL << endl;
+    // sleep(5.0);
+
+    // cmd.control_state = sunray_msgs::agent_cmd::HOLD;
+    // ; // 降落命令
+    // agent_cmd_pub.publish(cmd);
+    // sleep(1.0);
+    cmd.agent_id = agent_id;
+    cmd.control_state = sunray_msgs::agent_cmd::LAND;
+    agent_cmd_pub.publish(cmd);
+    ROS_INFO("Agent %d land triggered.", agent_id);
     sleep(5.0);
 
-    cmd.control_state = 12;     // 降落命令
-    agent_cmd_pub.publish(cmd); // 发布起飞/降落命令
-    cout << BLUE << node_name << " land" << TAIL << endl;
+    sunray_msgs::agent_cmd cmd;
+    cmd.agent_id = agent_id;
+    cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
+    agent_cmd_pub.publish(cmd);
+    ROS_INFO("Agent %d takeoff triggered.", agent_id);
     sleep(5.0);
 
-    cmd.control_state = 1;      // 降落命令
-    agent_cmd_pub.publish(cmd); // 发布起飞/降落命令
-    sleep(1.0);
+    
 }
 
 // 订阅地面站回调TODO
@@ -258,14 +273,12 @@ void send_takeoff_and_land_cmd(int agent_id, bool is_takeoff)
 void agent_goal_cb(const sunray_msgs::orca_cmdConstPtr &msg)
 {
 
+    cout << "agent_goal_cb  " << agent_id << "    " << msg->goal_point.size() << endl;
     geometry_msgs::Point Point1, Point2, Point3, Point4;
 
     if (msg->goal_point.size() < 6)
     {
 
-        return;
-    }
-    if (agent_id<1||agent_id>agent_num){
         return;
     }
 
@@ -275,10 +288,26 @@ void agent_goal_cb(const sunray_msgs::orca_cmdConstPtr &msg)
     goal_4[agent_id - 1] = msg->goal_point[3];
     goal_5[agent_id - 1] = msg->goal_point[4];
     goal_6[agent_id - 1] = msg->goal_point[5];
+}
 
+// TODO：触发起飞降落，true是起飞，false是降落
+void agent_cmd_land_takeoff()
+{
 
+    sleep(1.0);
+    sunray_msgs::agent_cmd cmd;
+    cmd.agent_id = agent_id ;
+    cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
+    agent_cmd_pub.publish(cmd);
+    ROS_INFO("Agent %d takeoff triggered.", agent_id);
 
-   
+    sleep(5.0);
+
+    cmd.agent_id = agent_id;
+    cmd.control_state = sunray_msgs::agent_cmd::LAND;
+    agent_cmd_pub.publish(cmd);
+    ROS_INFO("Agent %d land triggered.", agent_id);
+    sleep(5.0);
 }
 
 // 主函数
@@ -296,7 +325,7 @@ int main(int argc, char **argv)
     // 【参数】智能体类型 获取智能体类型参数
     nh.param<int>("agent_type", agent_type, 0);
     // 【参数】智能体编号 获取智能体数量参数
-    nh.param<int>("agent_num", agent_num, 3);
+    nh.param<int>("agent_num", agent_num, 6);
     // 【参数】agent_height 获取智能体高度参数
     nh.param<float>("agent_height", agent_height, 1.0f);
     nh.param<int>("agent_id", agent_id, 1);
@@ -331,13 +360,11 @@ int main(int argc, char **argv)
     // 【订阅】无人机orca状态 agent_state_sub
     agent_state_sub = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm" + agent_name + "/agent_state", 1, boost::bind(&agent_state_cb, _1));
 
+    // 【订阅】程序触发指令
+    // takeoff_and_land_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm" + agent_name + "/takeoff_land", 1, agent_cmd_land_takeoff);
+
     // 【发布】起飞和降落命令
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
-
-    // 【发布】无人机起飞指令 本节点 -> rmtt_driver
-    takeoff_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/takeoff", 1); 
-    // 【发布】无人机降落指令 本节点 -> rmtt_driver
-    land_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/land", 1); 
 
     // 创建定时器
     ros::Timer timer_show = nh.createTimer(ros::Duration(3.0), timercb_show);
@@ -346,13 +373,12 @@ int main(int argc, char **argv)
     // 初始化队形状态
     formation_state = FORMATION_STATE::INIT;
 
-
     switch (cmd.control_state)
     {
-   
+
     case sunray_msgs::agent_cmd::TAKEOFF:
         // 起飞
-        takeoff_pub.publish(takeoff); 
+        takeoff_pub.publish(takeoff);
         // 等待飞机起飞，此时不能发送其他指令
         sleep(5.0);
         // 起飞后进入悬停状态，并设定起飞点上方为悬停点
@@ -362,7 +388,7 @@ int main(int argc, char **argv)
         // 降落
         land_pub.publish(land);
         // 等待飞机降落，此时不能发送其他指令
-        sleep(5.0); 
+        sleep(5.0);
         break;
 
     default:
@@ -404,9 +430,9 @@ void setup_show_goals()
     goal_1[7].y = -4.3; // 底部右端
 
     // 字母 O
-    goal_2[0].y = -0.5; // 下部边点
-    goal_2[0].x = 0.1;
-    goal_2[1].y = -1.5; // 中心点
+    goal_2[0].x = -0.5; // 下部边点
+    goal_2[0].y = 0.1;
+    goal_2[1].x = -1.5; // 中心点
     goal_2[1].y = 0.5;  // 下部中点
     goal_2[2].x = -0.8;
     goal_2[2].y = 0.0; // 上部边点

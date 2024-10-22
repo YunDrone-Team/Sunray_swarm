@@ -115,6 +115,7 @@ bool AGENT_SIM::mainloop()
         agent_pos.pose.position.z = agent_height;
         agent_pos.pose.orientation = ros_quaternion_from_rpy(0.0, 0.0, agent_yaw);
         mocap_pos_pub.publish(agent_pos);
+        sleep(5.0);
         break;
 
     case sunray_msgs::agent_cmd::LAND:
@@ -125,6 +126,7 @@ bool AGENT_SIM::mainloop()
         agent_pos.pose.position.z = 0.05;
         agent_pos.pose.orientation = ros_quaternion_from_rpy(0.0, 0.0, agent_yaw);
         mocap_pos_pub.publish(agent_pos);
+        sleep(5.0);
         break;
     default:
         break;
