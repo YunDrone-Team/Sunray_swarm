@@ -61,7 +61,7 @@ ros::Publisher takeoff_pub;
 ros::Publisher land_pub;
 std_msgs::Empty takeoff;
 std_msgs::Empty land;
-
+bool updataPoint[MAX_AGENT_NUM]={false};
 // std::vector<std::vector<geometry_msgs::Point>> agent_goals(MAX_AGENT_NUM);
 ros::Subscriber goals_sub[MAX_AGENT_NUM];
 // std::vector<int> current_goal_index(MAX_AGENT_NUM, 0); // 目前的目标索引
@@ -76,6 +76,8 @@ void send_takeoff_and_land_cmd(int agent_id, bool is_takeoff);
 void publish_next_goal(int agent_id);
 ros::Subscriber takeoff_and_land_sub; // 订阅地面站起飞降落
 void agent_cmd_land_takeoff();
+
+void timercb_show(const ros::TimerEvent &e);
 
 // 信号处理函数
 void mySigintHandler(int sig)
@@ -144,18 +146,62 @@ void update_goal(int i)
         // orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME; // 设置ORCA命令为返回起点
         orca_goal_pub.publish(set_home[i]); 
         // orca_cmd_pub.publish(orca_cmd);                         // 发布命令
-        sleep(5);
         break;
-    case 7:
+    default:
         pub_goal_once = true;
-        cmd.control_state = sunray_msgs::agent_cmd::HOLD; // 降落命令
+        cmd.control_state = sunray_msgs::agent_cmd::LAND; // 降落命令
         agent_cmd_pub.publish(cmd);
         sleep(1.0);
         break;
+    }
+}
+
+
+void sendNowGoal(int id)
+{
+    switch (current_goal_id)
+    {
+    case 1:
+        orca_goal_pub.publish(goal_1[id]); // 发布N形队形目标点
+        cout << BLUE << "UAV  " << id + 1 << " Time moving to goal 1 " << goal_1[id] << " " << TAIL << endl;
+        break;        
+
+    case 2:
+        orca_goal_pub.publish(goal_2[id]); // 发布N形队形目标点
+        cout << BLUE << "UAV " << id + 1 << " Time moving to goal 2 " << goal_2[id] << " " << TAIL << endl;
+        break;
+    case 3:
+        orca_goal_pub.publish(goal_3[id]); // 发布O形队形目标点
+        cout << BLUE << "UAV " << id + 1 << " Time moving to goal 3 " << goal_3[id] << " " << TAIL << endl;
+
+        break;
+    case 4:
+        orca_goal_pub.publish(goal_4[id]); // 发布K形队形目标点
+        cout << BLUE << "UAV " << id + 1 << " Time moving to goal 4 " << goal_4[id] << " " << TAIL << endl;
+        break;
+    case 5:
+        orca_goal_pub.publish(goal_5[id]); // 发布K形队形目标点
+
+        cout << BLUE << "UAV " << id + 1 << " Time moving to goal 5 " << goal_5[id] << " " << TAIL << endl;
+        break;
+    case 6:
+        orca_goal_pub.publish(goal_6[id]); // 发布K形队形目标点
+        cout << BLUE << "UAV " << id + 1 << " Time moving to goal 6 " << goal_5[id] << " " << TAIL << endl;
+        break;
+
+    case 7:
+        cout << RED << "UAV " << id + 1 << " Time reached final goal" << TAIL << endl;
+        orca_goal_pub.publish(set_home[id]); 
+        break;
     default:
+        pub_goal_once = true;
+        cmd.control_state = sunray_msgs::agent_cmd::LAND; // 降落命令
+        agent_cmd_pub.publish(cmd);
+        sleep(1.0);
         break;
     }
 }
+
 
 geometry_msgs::Point getNowGoal(int i)
 {
@@ -201,30 +247,32 @@ void agent_state_cb(const sunray_msgs::agent_stateConstPtr &msg)
 // 检查并更新目标点函数takeoff_and_land_sub
 void check_and_update_goal(int i)
 {
-
+    updataPoint[i]=true;
     float dist_x = abs(agent_state.pos[0] - getNowGoal(i).x);
     float dist_y = abs(agent_state.pos[1] - getNowGoal(i).y);
 
     if (dist_x < thres && dist_y < thres && !reached_goal[i])
     {
         // 如果到达目标点，更新目标ID，并设置到达状态为true
+        updataPoint[i]=false;
+
         reached_goal[i] = true;
         agent_cmd_land_takeoff();
         update_goal(i); // 更新下一个目标点
 
         current_goal_id++; // 目标ID递增
+        updataPoint[i]=true;
+
     }
     else if (reached_goal[i]) // 如果无人机已到达目标，检查是否需要重置状态
     {
         // 重置到达状态以便可以继续下一个目标
         reached_goal[i] = false;
     }
+
 }
 
-// 定时器回调（用于显示目标点）
-void timercb_show(const ros::TimerEvent &e)
-{
-}
+
 // 函数声明
 void setup_show_goals();
 // 启动指令回调
@@ -323,6 +371,7 @@ void agent_cmd_land_takeoff()
     ROS_INFO("Agent %d land triggered.", agent_id);
     if(current_goal_id == 7)
     {
+        updataPoint[agent_id-1]=false;
         return;
     }
     sleep(7.0);
@@ -391,7 +440,7 @@ int main(int argc, char **argv)
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
 
     // 创建定时器
-    ros::Timer timer_show = nh.createTimer(ros::Duration(3.0), timercb_show);
+    ros::Timer timer_show = nh.createTimer(ros::Duration(1.0), timercb_show);
     // 设置目标点
     setup_show_goals();
     // 初始化队形状态
@@ -410,6 +459,16 @@ int main(int argc, char **argv)
     }
     return 0;
 }
+
+// 定时器回调（用于显示目标点）
+void timercb_show(const ros::TimerEvent &e)
+{
+    cout<<"timercb_show"<<endl;
+    if(updataPoint[agent_id-1])
+        sendNowGoal(agent_id-1);
+
+}
+
 
 void setup_show_goals()
 {
