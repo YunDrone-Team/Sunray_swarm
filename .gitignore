@@ -41,6 +41,5 @@ devel/
 *.exe
 *.out
 *.app
-RMTT/
 sunray_swarm/demo_neu/neu_display copy.cpp
 sunray_swarm/demo_neu/neu_display_copy_2.cpp

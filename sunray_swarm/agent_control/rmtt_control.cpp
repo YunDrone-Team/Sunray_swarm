@@ -327,25 +327,23 @@ void RMTT_CONTROL::agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
         //     cout << BLUE << "land" << TAIL << endl;
         //     break;
         case sunray_msgs::agent_cmd::TAKEOFF:
-        // 起飞
-        takeoff_pub.publish(takeoff); 
-        cout << RED << "TAKEOFF" << TAIL << endl;
-        // 等待飞机起飞，此时不能发送其他指令
-        sleep(3.0);
-        // 起飞后进入悬停状态，并设定起飞点上方为悬停点
-        set_desired_position();
-        current_agent_cmd.control_state = sunray_msgs::agent_cmd::HOLD;
-        break;
+            // 起飞
+            takeoff_pub.publish(takeoff); 
+            // 等待飞机起飞，此时不能发送其他指令
+            sleep(3.0);
+            // 起飞后进入悬停状态，并设定起飞点上方为悬停点
+            set_desired_position();
+            current_agent_cmd.control_state = sunray_msgs::agent_cmd::HOLD;
+            break;
 
-    case sunray_msgs::agent_cmd::LAND:
-        // 降落
-        land_pub.publish(land);
-        cout << RED << "LAND" << TAIL << endl;
-        // 等待飞机降落，此时不能发送其他指令
-        sleep(3.0); 
-        // 降落后进入INIT
-        current_agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
-        break;
+        case sunray_msgs::agent_cmd::LAND:
+            // 降落
+            land_pub.publish(land);
+            // 等待飞机降落，此时不能发送其他指令
+            sleep(3.0); 
+            // 降落后进入INIT
+            current_agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
+            break;
         default:
             // text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: Wrong!";
             cout << RED << text_info.data << TAIL << endl;
