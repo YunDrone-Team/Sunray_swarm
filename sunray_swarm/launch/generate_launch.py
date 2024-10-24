@@ -23,7 +23,7 @@ import re
 
 # SN_LIST = ["0TQZM43CNT035Y", "0TQZM3QCNT00ZF", "0TQZM43CNT03JP", "0TQZM48CNT06MZ", "0TQZM48CNT06MY", "0TQZM48CNT06N4", "0TQZM48CNT06LS", "0TQZM47CNT0482"]
 SN_LIST = ["0TQZM47CNT046P", "0TQZM48CNT06PF", "0TQZM48CNT06PY", "0TQZJADCNT18QU", "0TQZM43CNT03UU", "0TQZM43CNT03FC", "0TQZM43CNT03RR", "0TQZJADCNT1A6Z"]
-local_ip = "192.168.31.162"
+local_ip = "192.168.25.42"
 
 if __name__ == '__main__':
     help_str ='rmtt_scan_ip.py -n <num of drones>' 
@@ -108,9 +108,9 @@ if __name__ == '__main__':
             f.write(f'\t\t</node>\n')
             f.write(f'\t\t<!-- 启动rmtt_control_node -->\n')
             f.write(f'\t\t<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_{idx+1}" output="screen">\n')
-            f.write(f'\t\t\t<param name="uav_id" value="{idx+1}" />\n')
+            f.write(f'\t\t\t<param name="agent_id" value="{idx+1}" />\n')
             f.write(f'\t\t\t<param name="uav_ip" value="{ip}" />\n')
-            f.write(f'\t\t\t<rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />\n')
+            f.write(f'\t\t\t<rosparam command="load" file="$(find sunray_swarm)/launch_sim/rmtt_params.yaml" />\n')
             f.write(f'\t\t</node>\n')
             f.write(f'\t</group>\n')
             f.write('\n')

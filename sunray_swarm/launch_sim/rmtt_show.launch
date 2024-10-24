@@ -16,19 +16,19 @@
     </node>
 
     <!-- 启动rmtt_show -->
-    <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_4" output="screen">
+    <!-- <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_4" output="screen">
         <param name="agent_id" value="4" />
-    </node>
+    </node> -->
 
     <!-- 启动rmtt_show -->
-    <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_5" output="screen">
+    <!-- <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_5" output="screen">
         <param name="agent_id" value="5" />
-    </node>
+    </node> -->
 
     <!-- 启动rmtt_show -->
-    <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_6" output="screen">
+    <!-- <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_6" output="screen">
         <param name="agent_id" value="6" />
-    </node>
+    </node> -->
 
     <!-- 启动rmtt_show -->
     <!-- <node pkg="sunray_swarm" type="rmtt_show" name="rmtt_show_7" output="screen">
