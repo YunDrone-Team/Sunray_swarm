@@ -150,7 +150,7 @@ bool ORCA::orca_run()
             agent_cmd[i].desired_yaw = 0.0;
             agent_cmd_pub[i].publish(agent_cmd[i]);
 
-                  
+            
 
             if (!goal_reached_printed[i])
             {
@@ -346,7 +346,10 @@ void ORCA::agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg, int i)
 
 void ORCA::agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i)
 {
-    should_takeoff[i] = false;
+    if(should_return_home[i])
+    {
+        return;
+    }
     arrived_goal[i] = false;
     arrived_all_goal = false;    
     agent_goal[i] = *msg;
@@ -373,7 +376,16 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
             home_point[i].x = agent_state[i].pos[0];
             home_point[i].y = agent_state[i].pos[1];
             home_point[i].z = agent_height;
+
         }
+        for (int i = 0; i < 8; i++)
+        {
+            should_return_home[i] = false;
+
+        }
+        
+        
+        
         // ORCA算法初始化 - 添加当前为目标点（意味着起飞后无人机已经抵达对应目标点）
         setup_init_goals();
         text_info.data = "Get orca_cmd: SET_HOME, ORCA start!"; 
@@ -389,10 +401,15 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         }
         arrived_all_goal = false;
 
+        for (int i = 0; i < 8; i++)
+        {
+            should_return_home[i] = true;
+            // should_return_home_land[i] = true;
+        }
         // 将home点设置为目标点
         goals.clear();
-        for (int i = 0; i < agent_num; i++)  
-        {  
+        for (int i = 0; i < agent_num; i++)
+        {
             goals.push_back(RVO::Vector2(home_point[i].x, home_point[i].y));
         }
 

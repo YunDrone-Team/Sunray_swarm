@@ -41,5 +41,4 @@ devel/
 *.exe
 *.out
 *.app
-sunray_swarm/demo_neu/neu_display copy.cpp
-sunray_swarm/demo_neu/neu_display_copy_2.cpp
+sunray_swarm/launch/rmtt_all_drone.launch

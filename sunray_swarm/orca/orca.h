@@ -61,6 +61,9 @@ class ORCA
         std_msgs::String text_info;
 
         bool should_takeoff[MAX_NUM];         // 是否到达目标点起飞
+
+        bool should_return_home[MAX_NUM];         // 是否到达目标点起飞
+        bool should_return_home_land[MAX_NUM];         // 是否到达目标点起飞
         ros::Subscriber takeoff_and_land_pub[MAX_NUM]; //起飞降落话题
         
         // 订阅话题

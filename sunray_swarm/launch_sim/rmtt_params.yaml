@@ -35,7 +35,7 @@ orca_params:
   ## 数字越大，无人机响应障碍物的碰撞越快，但速度可选的自由度越小
   timeHorizonObst : 2.0
   ## 无人机体积半径
-  radius : 0.3
+  radius : 0.27
   ## 无人机最大速度
   maxSpeed : 0.3
   ## 时间步长 不确定有啥用
