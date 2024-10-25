@@ -38,6 +38,7 @@ ros::Publisher orca_cmd_pub;                        // 发布ORCA指令
 ros::Subscriber start_cmd_sub;                      // 订阅启动指令
 ros::Subscriber orca_state_sub[MAX_AGENT_NUM];      // 订阅ORCA状态
 ros::Publisher orca_goal_pub[MAX_AGENT_NUM];        // 发布ORCA目标点
+ros::Publisher agent_cmd_pub[MAX_AGENT_NUM];        // 发布ORCA目标点
 
 // 信号处理函数
 void mySigintHandler(int sig)
@@ -60,6 +61,12 @@ void timercb_show(const ros::TimerEvent &e)
 void start_cmd_cb(const std_msgs::BoolConstPtr& msg)
 {
     formation_state = FORMATION_STATE::N;// 设置队形状态为N
+    sunray_msgs::agent_cmd agent_cmd;
+    agent_cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
+    for (int i = 0; i < agent_num; i++)
+    {
+        agent_cmd_pub[i].publish(agent_cmd);
+    }
 }
 // 函数声明，用于设置目标点
 void setup_show_goals();
@@ -125,6 +132,10 @@ int main(int argc, char **argv)
         orca_goal_pub[i] = nh.advertise<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 1);
         // 【订阅】无人机orca状态
 		orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb,_1,i));
+
+        agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
+
+
     }
     // 创建定时器
     ros::Timer timer_show = nh.createTimer(ros::Duration(3.0), timercb_show);
