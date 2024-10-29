@@ -24,9 +24,9 @@ sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM]; // 智能体控制指令
 geometry_msgs::Point goal_1[MAX_AGENT_NUM];      // 1形队形目标点
 geometry_msgs::Point goal_2[MAX_AGENT_NUM];      // 2形队形目标点
 geometry_msgs::Point goal_3[MAX_AGENT_NUM];      // 3形队形目标点
-geometry_msgs::Point goal_4[MAX_AGENT_NUM];      // 4形队形目标点
-geometry_msgs::Point goal_5[MAX_AGENT_NUM];      // 5形队形目标点
-geometry_msgs::Point goal_6[MAX_AGENT_NUM];      // 6形队形目标点
+// geometry_msgs::Point goal_4[MAX_AGENT_NUM];      // 4形队形目标点
+// geometry_msgs::Point goal_5[MAX_AGENT_NUM];      // 5形队形目标点
+// geometry_msgs::Point goal_6[MAX_AGENT_NUM];      // 6形队形目标点
 sunray_msgs::agent_state agent_state;            // 智能体状态
 
 // ROS相关的发布者、订阅者
@@ -64,6 +64,8 @@ int current_goal_id;                // 当前智能体的目标点ID
 bool reached_goal[MAX_AGENT_NUM];   // 标志位，表示每个智能体是否到达目标点
 float thres = 0.08;                  // 距离阈值，控制是否到达目标点的判断依据
 bool pub_goal_once = true;          // 标志位，控制目标点是否只发布一次
+bool orca_return_home = true;       //发布return标志位
+
 
 // 信号处理函数
 void mySigintHandler(int sig)
@@ -107,14 +109,17 @@ void agent_state_cb(const sunray_msgs::agent_stateConstPtr &msg)
 // 启动指令回调
 void start_cmd_cb(const std_msgs::BoolConstPtr &msg)
 {
-    // 设置延迟0.5秒，等待指令的处理
-    sleep(0.5);
-    
-    // 设置标志位为false，表示不再只发布一次目标点
-    pub_goal_once = false;
-    
-    // 初始化目标点
-    init_goals();
+    if(orca_return_home)
+    {
+        // 设置延迟0.5秒，等待指令的处理
+        sleep(0.5);
+        
+        // 设置标志位为false，表示不再只发布一次目标点
+        pub_goal_once = false;
+        
+        // 初始化目标点
+        init_goals();
+    }
 }
 
 // 打印参数函数
@@ -143,6 +148,7 @@ int main(int argc, char **argv)
     nh.param<int>("agent_num", agent_num, 6);
     // 【参数】agent_height 获取智能体高度参数
     nh.param<float>("agent_height", agent_height, 1.0f);
+
     nh.param<int>("agent_id", agent_id, 1);
 
     // 为每个智能体分配目标点数组
@@ -188,6 +194,7 @@ int main(int argc, char **argv)
         if (!pub_goal_once)
         {
             check_and_update_goal(agent_id - 1);
+            orca_return_home = false;
         }
         rate.sleep();
     }
@@ -214,7 +221,7 @@ void agent_cmd_land_takeoff()
     cmd.control_state = sunray_msgs::agent_cmd::LAND;
     agent_cmd_pub.publish(cmd);
     // 如果当前目标ID为7，表示完成所有任务，返回起飞点
-    if (current_goal_id == 7)
+    if (current_goal_id == 4)
     {
         updataPoint[agent_id - 1] = false;
         return;
@@ -236,7 +243,7 @@ void agent_cmd_land_takeoff()
 void agent_goal_cb(const sunray_msgs::orca_cmdConstPtr &msg)
 {
     // 检查接收到的目标点是否少于6个，若不足，则退出回调
-    if (msg->goal_point.size() < 6)
+    if (msg->goal_point.size() < 3)
     {
         return;
     }
@@ -244,9 +251,9 @@ void agent_goal_cb(const sunray_msgs::orca_cmdConstPtr &msg)
     goal_1[agent_id - 1] = msg->goal_point[0];
     goal_2[agent_id - 1] = msg->goal_point[1];
     goal_3[agent_id - 1] = msg->goal_point[2];
-    goal_4[agent_id - 1] = msg->goal_point[3];
-    goal_5[agent_id - 1] = msg->goal_point[4];
-    goal_6[agent_id - 1] = msg->goal_point[5];
+    // goal_4[agent_id - 1] = msg->goal_point[3];
+    // goal_5[agent_id - 1] = msg->goal_point[4];
+    // goal_6[agent_id - 1] = msg->goal_point[5];
 }
 
 // 更新智能体目标点的函数
@@ -261,17 +268,22 @@ void update_goal(int i)
     case 2:
         orca_goal_pub.publish(goal_3[i]); // 发布3形队形目标点
         break;
+    // case 3:
+        //设置当输入点为99时跳过目标点
+        // if(goal_4[i].x = 99)
+        // {
+        //      ;
+        //     orca_goal_pub.publish(set_home[i]); 
+        // }
+    //     orca_goal_pub.publish(goal_4[i]); // 发布4形队形目标点
+    //     break;
+    // case 4:
+    //     orca_goal_pub.publish(goal_5[i]); // 发布5形队形目标点
+    //     break;
+    // case 5:
+    //     orca_goal_pub.publish(goal_6[i]); // 发布6形队形目标点
+    //     break;
     case 3:
-        orca_goal_pub.publish(goal_4[i]); // 发布4形队形目标点
-        break;
-    case 4:
-        orca_goal_pub.publish(goal_5[i]); // 发布5形队形目标点
-        break;
-    case 5:
-        orca_goal_pub.publish(goal_6[i]); // 发布6形队形目标点
-        break;
-
-    case 6:
         // orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME; // 设置ORCA命令为返回起点
         orca_goal_pub.publish(set_home[i]);
         // orca_cmd_pub.publish(orca_cmd);                         // 发布命令
@@ -306,26 +318,27 @@ void sendNowGoal(int id)
         cout << BLUE << "RMTT_" << id + 1 << ": Time moving to goal 3 at [" << goal_3[id].x << "," << goal_3[id].y << "]" << TAIL << endl;
 
         break;
-    case 4:
-        orca_goal_pub.publish(goal_4[id]); // 发布4形队形目标点
-        cout << BLUE << "RMTT_" << id + 1 << ": Time moving to goal 4 at [" << goal_4[id].x << "," << goal_4[id].y << "]" << TAIL << endl;
-        break;
-    case 5:
-        orca_goal_pub.publish(goal_5[id]); // 发布5形队形目标点
-        cout << BLUE << "RMTT_" << id + 1 << ": Time moving to goal 5 at [" << goal_5[id].x << "," << goal_5[id].y << "]" << TAIL << endl;
-        break;
-    case 6:
-        orca_goal_pub.publish(goal_6[id]); // 发布6形队形目标点
-        cout << BLUE << "RMTT_" << id + 1 << ": Time moving to goal 6 at [" << goal_6[id].x << "," << goal_6[id].y << "]" << TAIL << endl;
-        break;
+    // case 4:
+    //     orca_goal_pub.publish(goal_4[id]); // 发布4形队形目标点
+    //     cout << BLUE << "RMTT_" << id + 1 << ": Time moving to goal 4 at [" << goal_4[id].x << "," << goal_4[id].y << "]" << TAIL << endl;
+    //     break;
+    // case 5:
+    //     orca_goal_pub.publish(goal_5[id]); // 发布5形队形目标点
+    //     cout << BLUE << "RMTT_" << id + 1 << ": Time moving to goal 5 at [" << goal_5[id].x << "," << goal_5[id].y << "]" << TAIL << endl;
+    //     break;
+    // case 6:
+    //     orca_goal_pub.publish(goal_6[id]); // 发布6形队形目标点
+    //     cout << BLUE << "RMTT_" << id + 1 << ": Time moving to goal 6 at [" << goal_6[id].x << "," << goal_6[id].y << "]" << TAIL << endl;
+    //     break;
 
-    case 7:
+    case 4:
         // 所有目标点完成，返回起飞点
         cout << BLUE << "RMTT_" << id + 1 << ": reached final goal" << TAIL << endl;
         orca_goal_pub.publish(set_home[id]);
         break;
     default:
         pub_goal_once = true;
+        orca_return_home = true;
         cmd.control_state = sunray_msgs::agent_cmd::LAND; // 降落命令
         agent_cmd_pub.publish(cmd);
         sleep(1.0);
@@ -350,17 +363,20 @@ geometry_msgs::Point getNowGoal(int i)
         return goal_3[i];
         break;
     case 4:
-        return goal_4[i];
-        break;
-    case 5:
-        return goal_5[i];
-        break;
-    case 6:
-        return goal_6[i];
-        break;
-    case 7:
         return set_home[i];
         break;
+    // case 4:
+    //     return goal_4[i];
+    //     break;
+    // case 5:
+    //     return goal_5[i];
+    //     break;
+    // case 6:
+    //     return goal_6[i];
+    //     break;
+    // case 7:
+    //     return set_home[i];
+    //     break;
     default:
         break;
     }
