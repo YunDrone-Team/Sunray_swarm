@@ -4,6 +4,7 @@ project(sunray_swarm)
 find_package(catkin REQUIRED COMPONENTS
   message_generation  
   roscpp
+  rospy
   geometry_msgs
   nav_msgs
   sensor_msgs
@@ -138,7 +139,7 @@ add_executable(swarm_formation_control demo_swarm/swarm_formation_control.cpp)
 add_dependencies(swarm_formation_control sunray_swarm_gencpp)
 target_link_libraries(swarm_formation_control ${catkin_LIBRARIES})
 ## SWARM_DEMO - 智能体跟随
-add_executable(swarm_leader_follower demo_swarm/swarm_leader_follower.cpp)
+add_executable(swarm_leader_follower demo_swarm/swarm_leader_follower_orca.cpp)
 add_dependencies(swarm_leader_follower sunray_swarm_gencpp)
 target_link_libraries(swarm_leader_follower ${catkin_LIBRARIES})
 ## SWARM_DEMO - NOKOV队形变换

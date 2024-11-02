@@ -110,9 +110,9 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     printf_param();
 
     node_name = ros::this_node::getName();
-    text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " init!";
-    text_info_pub.publish(text_info);
-    cout << BLUE << text_info.data << TAIL << endl;
+    // text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " init!";
+    // text_info_pub.publish(text_info);
+    // cout << BLUE << text_info.data << TAIL << endl;
 }
 
 void RMTT_CONTROL::mainloop()
