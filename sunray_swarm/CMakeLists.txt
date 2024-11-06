@@ -131,11 +131,11 @@ target_link_libraries(ugv_waypoint ${catkin_LIBRARIES})
 
 
 ## SWARM_DEMO - 三智能体绕圈
-add_executable(swarm_circle demo_swarm/swarm_circle.cpp)
+add_executable(swarm_circle demo_swarm/swarm_circle_orca.cpp)
 add_dependencies(swarm_circle sunray_swarm_gencpp)
 target_link_libraries(swarm_circle ${catkin_LIBRARIES})
 ## SWARM_DEMO 编队控制，三角形、一自行转换
-add_executable(swarm_formation_control demo_swarm/swarm_formation_control.cpp)
+add_executable(swarm_formation_control demo_swarm/swarm_formation_control_orca.cpp)
 add_dependencies(swarm_formation_control sunray_swarm_gencpp)
 target_link_libraries(swarm_formation_control ${catkin_LIBRARIES})
 ## SWARM_DEMO - 智能体跟随
