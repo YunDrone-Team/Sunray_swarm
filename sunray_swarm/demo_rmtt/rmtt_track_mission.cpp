@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     // 【参数】从参数服务器获取智能体高度
     nh.param<float>("agent_height", agent_height, 1.0f);
     // 【参数】目标名称
-    nh.param<string>("target_name", target_name, "none");
+    nh.param<string>("target_name", target_name, "ugv");
     // 【参数】从参数服务器获取智能体编号
     nh.param("agent_id", agent_id, 1);
     // 打印智能体高度、目标名称
@@ -65,6 +65,7 @@ int main(int argc, char **argv)
     cout << GREEN << "target_name   : " << target_name << "" << TAIL << endl;
     // 声明字符串以存储代理名称
     string agent_name;
+    agent_id = 1;
     // 构造代理名称
     agent_name = "/rmtt_" + std::to_string(agent_id);
     // 构造目标名称
@@ -74,7 +75,7 @@ int main(int argc, char **argv)
     // 【订阅】触发指令 外部 -> 本节点 ——TODO设置为BOOL值变量
     single_trackMission_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/rmtt_trackMission", 1, single_trackMission_cb);
     // 【发布】控制指令 本节点 -> 控制节点
-    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
+    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 【发布】无人机起飞指令 本节点 -> rmtt_driver
@@ -106,7 +107,8 @@ int main(int argc, char **argv)
             // 设置目标高度
             agent_cmd.desired_pos.z = agent_height;
             // 发布控制命令
-            agent_cmd_pub.publish(agent_cmd);
+            // agent_cmd_pub.publish(agent_cmd);
+            agent_cmd.agent_id = agent_id;
             // 等待3秒确保起飞
             // ros::Duration(3.0).sleep(); 
             // 设置控制模式为位置控制
@@ -114,15 +116,15 @@ int main(int argc, char **argv)
             // 指定命令来源为轨迹任务来源
             agent_cmd.cmd_source = "track_mission";
             // 设置目标位置
-            // agent_cmd.desired_pos.x = target_pos.pose.position.x;
-            // agent_cmd.desired_pos.y = target_pos.pose.position.y;
-            agent_cmd.desired_pos = target_pos.pose.position;
+            agent_cmd.desired_pos.x = target_pos.pose.position.x;
+            agent_cmd.desired_pos.y = target_pos.pose.position.y;
+            // agent_cmd.desired_pos = target_pos.pose.position;
 
             // 等待目标到达
             // ros::Duration(2.0).sleep(); // 根据实际需求调整
             
             // 设置目标偏航角
-            agent_cmd.desired_yaw = target_yaw;
+            // agent_cmd.desired_yaw = target_yaw;
             
             agent_cmd_pub.publish(agent_cmd);
             // 创建文本信息对象
@@ -130,9 +132,9 @@ int main(int argc, char **argv)
             // 发布提示消息
             text_info.data = "Agent driving to target: x=" + to_string(target_pos.pose.position.x) + " y=" + to_string(target_pos.pose.position.y) + " z=" + to_string(agent_height);
 
-            cout << GREEN << "Landing command sent." << TAIL << endl;
+            cout << GREEN << "cmd command sent." << TAIL << endl;
             // 重置命令状态
-            received_start_cmd = false;
+            // received_start_cmd = false;
             // mission_completed = true;    // 标记任务已完成
         }
         

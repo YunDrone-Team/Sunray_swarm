@@ -44,3 +44,4 @@ devel/
 sunray_swarm/launch_sim/ugv_control_mode_copy.launch
 sunray_swarm/launch/rmtt_all_drone.launch
 sunray_swarm/launch/drone_params.yaml
+sunray_swarm/scripts/KeyBoardControl.py
