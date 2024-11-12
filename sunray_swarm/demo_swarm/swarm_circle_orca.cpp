@@ -139,6 +139,7 @@ int main(int argc, char **argv)
         orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb, _1, i));
     }
     swarm_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/swarm_circle", 1, swarm_circle_cb);
+    // swarm_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/rmtt_demo/swarm_circle", 1, swarm_circle_cb);
 
     while (ros::ok()) {
         if (received_start_cmd) {

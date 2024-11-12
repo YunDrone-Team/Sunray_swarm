@@ -152,6 +152,12 @@ add_dependencies(swarm_with_obstacles sunray_swarm_gencpp)
 target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
 
 
+add_executable(my_publisher sunray_video/my_publisher.cpp)  
+target_link_libraries(my_publisher ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})  
+ 
+# add the subscriber example  
+add_executable(my_subscriber sunray_video/my_subscriber.cpp)  
+target_link_libraries(my_subscriber ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}) 
 
 #DEMO 自主降落
 # add_executable(autonomous_landing demo/multi_autonomous_landing.cpp)
