@@ -16,6 +16,19 @@ float omega;                                     // 角速度
 bool received_start_cmd = false;                 // 标记是否接收到开始命令
 sunray_msgs::orca_cmd orca_cmd;                         // ORCA指令
 
+float time_trajectory = 0.0;                     // 当前轨迹时间
+float trajectory_total_time;                     // 轨迹总时间
+sunray_msgs::agent_cmd agent_cmd[MAX_AGENT_NUM]; // 智能体控制命令数组
+float angle[MAX_AGENT_NUM];                      // 存储每个智能体的当前角度
+float cos_angle;                                 // 当前角度的余弦值
+float sin_angle;                                 // 当前角度的正弦值
+float linear_vel;                                // 线速度
+float direction;                                 // 方向，1或-1
+int agent_time;                                  // 每次画圆的持续时间
+
+
+
+
 ros::Publisher orca_goal_pub[MAX_AGENT_NUM];     // 目标点发布者
 ros::Subscriber orca_state_sub[MAX_AGENT_NUM];   // ORCA状态订阅者
 ros::Subscriber swarm_circle_cmd_sub;            // 画圈命令的订阅者
@@ -43,19 +56,80 @@ void swarm_circle_cb(const std_msgs::Bool::ConstPtr &msg) {
     orca_cmd_pub.publish(orca_cmd);
 }
 
-int main(int argc, char **argv) {
+// 打印参数值的函数
+void printf_params()
+{
+    cout << GREEN << "agent_type    : " << agent_type << "" << TAIL << endl;
+    cout << GREEN << "agent_num     : " << agent_num << "" << TAIL << endl;
+    cout << GREEN << "desired_yaw   : " << desired_yaw << "" << TAIL << endl;
+    cout << GREEN << "circle_center_x : " << circle_center[0] << "" << TAIL << endl;
+    cout << GREEN << "circle_center_y : " << circle_center[1] << TAIL << endl;
+    cout << GREEN << "agent_height  : " << circle_center[2] << "" << TAIL << endl;
+    cout << GREEN << "circle_radius : " << circle_radius << "" << TAIL << endl;
+    cout << GREEN << "linear_vel    : " << linear_vel << "" << TAIL << endl;
+    cout << GREEN << "direction     : " << direction << "" << TAIL << endl;
+    cout << GREEN << "omega         : " << omega << "" << TAIL << endl;
+}
+
+int main(int argc, char **argv) 
+{
+    // 初始化ROS节点
     ros::init(argc, argv, "circle_trajectory");
+    // 创建节点句柄
     ros::NodeHandle nh("~");
+    // 设置循环频率为100Hz
     ros::Rate rate(100.0);
 
+    // 【参数】智能体类型 智能体类型，默认为0
+    nh.param<int>("agent_type", agent_type, 0);
+    // 【参数】智能体编号 智能体数量，默认为8
     nh.param<int>("agent_num", agent_num, 8);
+    // 【参数】desired_yaw 期望偏航角，默认为0
+    nh.param<float>("desired_yaw", desired_yaw, 0.0f);
+    // 【参数】圆心X 圆心X坐标
     nh.param<float>("circle_center_x", circle_center[0], 0.0f);
+    // 【参数】圆心Y 圆心Y坐标
     nh.param<float>("circle_center_y", circle_center[1], 0.0f);
+    // 【参数】智能体高度
     nh.param<float>("agent_height", circle_center[2], 1.0f);
+    // 【参数】半径
     nh.param<float>("circle_radius", circle_radius, 1.0f);
+    // 【参数】线速度
+    nh.param<float>("linear_vel", linear_vel, 0.3f);
+    // 【参数】圆的方向 1或-1
+    nh.param<float>("direction", direction, 1.0f);
+    // 【参数】从参数服务器获取智能画圆时间，默认为10
+    nh.param<int>("agent_time", agent_time, 20);
 
-    // 订阅ORCA状态，发布目标点
-    string agent_prefix = "rmtt_";
+    // 计算角速度
+    if (circle_radius != 0)
+    {
+        omega = direction * fabs(float(linear_vel / circle_radius));
+    }
+    else
+    {
+        // 半径为0时，角速度为0
+        omega = 0.0;
+    }
+
+    // 根据智能体类型设置名称前缀
+    string agent_prefix;
+    if (agent_type == sunray_msgs::agent_state::RMTT)
+    {
+        agent_prefix = "rmtt_";
+    }
+    else if (agent_type == sunray_msgs::agent_state::UGV)
+    {
+        agent_prefix = "ugv_";
+    }
+    else if (agent_type == sunray_msgs::agent_state::SIKONG)
+    {
+        agent_prefix = "sikong_";
+    }
+    else
+    {
+        agent_prefix = "unkonown_";
+    }
     // 【发布】ORCA指令 本节点 ->  ORCA
     orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm/" + agent_prefix + "/orca_cmd", 1);
     string agent_name;
@@ -68,6 +142,17 @@ int main(int argc, char **argv) {
 
     while (ros::ok()) {
         if (received_start_cmd) {
+            // 重置轨迹时间
+            time_trajectory = 0.0;
+            // 计算第一个智能体的初始角度
+            angle[0] = time_trajectory * omega;
+            // 初始化各个智能体的角度
+            for (int i = 1; i < agent_num; i++)
+            {
+                // 计算每个智能体的初始角度
+                angle[i] = angle[0] - i * 2 * M_PI / agent_num;
+            }
+            // 发布初始控制命令
             for (int i = 0; i < agent_num; i++) {
                 float angle = i * 2 * M_PI / agent_num;
                 geometry_msgs::Point goal_point;
@@ -75,6 +160,22 @@ int main(int argc, char **argv) {
                 goal_point.y = circle_center[1] + circle_radius * sin(angle);
                 goal_point.z = circle_center[2];
                 orca_goal_pub[i].publish(goal_point);
+
+            }
+            sleep(10);
+            ros::Time start_time;
+            start_time = ros::Time::now(); // 记录开始时间
+            while ((ros::Time::now() - start_time).toSec() < agent_time) {
+                for (int i = 0; i < agent_num; i++) {
+                    float angle = omega * (ros::Time::now() - start_time).toSec() + i * 2 * M_PI / agent_num;
+                    geometry_msgs::Point goal_point;
+                    goal_point.x = circle_center[0] + circle_radius * cos(angle);
+                    goal_point.y = circle_center[1] + circle_radius * sin(angle);
+                    goal_point.z = circle_center[2];
+                    orca_goal_pub[i].publish(goal_point);
+                }
+                ros::spinOnce();
+                rate.sleep();
             }
             received_start_cmd = false;
         }
@@ -83,3 +184,4 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
+
