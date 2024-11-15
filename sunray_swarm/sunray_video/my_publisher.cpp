@@ -26,27 +26,9 @@ int main(int argc, char** argv)
     }
     int agent_type;  
     // 智能体名称前缀
-    string agent_prefix;
-    // 根据智能体类型设置名称前缀
 
-    if (agent_type == sunray_msgs::agent_state::RMTT)
-    {
-        agent_prefix = "rmtt_";
-    }
-    else if (agent_type == sunray_msgs::agent_state::UGV)
-    {
-        agent_prefix = "ugv_";
-    }
-    else if (agent_type == sunray_msgs::agent_state::SIKONG)
-    {
-        agent_prefix = "sikong_";
-    }
-    else
-    {
-        agent_prefix = "unkonown_";
-    }
     // 生成智能体名称
-    string agent_name = "/" + agent_prefix + std::to_string(agent_id);
+    string agent_name = "/ugv_" + std::to_string(agent_id);
 
 
     image_transport::ImageTransport it(nh);  

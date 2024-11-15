@@ -11,11 +11,6 @@
         <rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params_wheeltec.yaml" />
     </node>
 
-    <!-- 启动ugv_control_node -->
-    <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_3" output="screen">
-        <param name="agent_id" value="3" />
-        <rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params_wheeltec.yaml" />
-    </node>
 
 
     <!-- Rviz config -->

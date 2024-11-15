@@ -331,8 +331,8 @@ void ORCA::agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i)
 
     sim->setAgentGoal(i, RVO::Vector2(agent_goal[i].x, agent_goal[i].y));
     cout << BLUE << node_name << ": Set agents_" << i+1 << " goal at [" << agent_goal[i].x << "," << agent_goal[i].y << "]"<< TAIL << endl;
-    text_info.data = "[ORCA] Set agents_"+std::to_string(i+1)+" goal";
-    text_info_pub.publish(text_info);
+    // text_info.data = "[ORCA] Set agents_"+std::to_string(i+1)+" goal";
+    // text_info_pub.publish(text_info);
 }
 
 void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)

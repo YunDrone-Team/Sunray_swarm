@@ -48,7 +48,7 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
     mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &RMTT_CONTROL::mocap_vel_cb, this);
     // 【订阅】地面站指令 地面站 -> 本节点
-    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 1, &RMTT_CONTROL::agent_cmd_cb, this);
+    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &RMTT_CONTROL::agent_cmd_cb, this);
     // 【订阅】rmtt电池的数据 rmtt_driver -> 本节点
     battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm/" + agent_name + "/battery", 1, &RMTT_CONTROL::battery_cb, this);  
     

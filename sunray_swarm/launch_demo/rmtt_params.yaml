@@ -15,6 +15,8 @@ hover_y: 4.0
 target.x: 3.0
 target.y: 2.0
 
+circle_radius: 1.5
+
 ## 控制参数
 rmtt_control_param:
   Kp_xy : 1.4
