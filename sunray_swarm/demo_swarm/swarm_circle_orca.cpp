@@ -32,6 +32,8 @@ int agent_time;                                  // 每次画圆的持续时间
 ros::Publisher orca_goal_pub[MAX_AGENT_NUM];     // 目标点发布者
 ros::Subscriber orca_state_sub[MAX_AGENT_NUM];   // ORCA状态订阅者
 ros::Subscriber swarm_circle_cmd_sub;            // 画圈命令的订阅者
+ros::Subscriber swarm_circle_rmtt_cmd_sub;            // 画圈命令的订阅者
+ros::Subscriber swarm_circle_ugv_cmd_sub;            // 画圈命令的订阅者
 sunray_msgs::orca_state orca_state[MAX_AGENT_NUM];      // ORCA状态
 ros::Publisher orca_cmd_pub;                        // 发布ORCA指令
 
@@ -49,6 +51,24 @@ void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg, int i) {
 
 // 处理画圈命令的回调函数
 void swarm_circle_cb(const std_msgs::Bool::ConstPtr &msg) {
+    received_start_cmd = msg->data; // 设置接收到的开始命令
+    // 设置ORCA命令为HOME
+    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
+    // 发布命令
+    orca_cmd_pub.publish(orca_cmd);
+}
+
+// 处理画圈命令的回调函数
+void swarm_circle_rmtt_cb(const std_msgs::Bool::ConstPtr &msg) {
+    received_start_cmd = msg->data; // 设置接收到的开始命令
+    // 设置ORCA命令为HOME
+    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
+    // 发布命令
+    orca_cmd_pub.publish(orca_cmd);
+}
+
+// 处理画圈命令的回调函数
+void swarm_circle_ugv_cb(const std_msgs::Bool::ConstPtr &msg) {
     received_start_cmd = msg->data; // 设置接收到的开始命令
     // 设置ORCA命令为HOME
     orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
@@ -139,7 +159,10 @@ int main(int argc, char **argv)
         orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb, _1, i));
     }
     swarm_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/swarm_circle", 1, swarm_circle_cb);
-    // swarm_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/rmtt_demo/swarm_circle", 1, swarm_circle_cb);
+
+    swarm_circle_rmtt_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo_rmtt/swarm_circle", 1, swarm_circle_rmtt_cb);
+
+    swarm_circle_ugv_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo_ugv/swarm_circle", 1, swarm_circle_ugv_cb);
 
     while (ros::ok()) {
         if (received_start_cmd) {

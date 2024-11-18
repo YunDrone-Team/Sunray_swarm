@@ -2,7 +2,7 @@
 #include <image_transport/image_transport.h>  
 #include <opencv2/highgui/highgui.hpp>  
 #include <cv_bridge/cv_bridge.h>  
-#include <sstream> // for converting the command line parameter to integer  
+#include <sstream>  
 #include "printf_utils.h"
 #include "math_utils.h"
 #include "ros_msg_utils.h"
@@ -32,12 +32,12 @@ int main(int argc, char** argv)
 
 
     image_transport::ImageTransport it(nh);  
-    image_transport::Publisher pub = it.advertise("/sunray_swarm" + agent_name +"/camera/image", 1);  
+    image_transport::Publisher pub = it.advertise("/sunray_swarm" + agent_name +"/camera/image", 1, "compressed");  
  
-    // Convert the passed as command line parameter index for the video device to an integer  
+
     std::istringstream video_sourceCmd(argv[1]);  
     int video_source;  
-    // Check if it is indeed a number  
+    // 检查数据源 
     if(!(video_sourceCmd >> video_source))   
     {  
         ROS_INFO("video_sourceCmd is %d\n",video_source);  
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     }  
  
     cv::VideoCapture cap(video_source);  
-    // Check if video device can be opened with the given index  
+    //  检测索引设备  
     if(!cap.isOpened())   
     {  
         ROS_INFO("can not opencv video device\n");  
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     while (nh.ok()) 
     {  
         cap >> frame;  
-        // Check if grabbed frame is actually full with some content  
+        // 检查获取视频流
         if(!frame.empty()) 
         {  
             msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frame).toImageMsg();  
@@ -70,69 +70,3 @@ int main(int argc, char** argv)
     ros::spinOnce();  
     loop_rate.sleep();  
 }  
-
-
-// #include "rclcpp/rclcpp.hpp"
-// #include "sensor_msgs/msg/compressed_image.hpp"
-// #include "opencv2/opencv.hpp"
-// #include "cv_bridge/cv_bridge.h"
- 
-// using namespace std::chrono_literals;
- 
-// class CameraPublisher : public rclcpp::Node {
-// public:
-//     CameraPublisher()
-//         : Node("camera_publisher"), count_(0) {
-//         publisher_ = this->create_publisher<sensor_msgs::msg::CompressedImage>("compressed_image", 10);        
-//         timer_ = this->create_wall_timer(100ms, std::bind(&CameraPublisher::publishImage, this));
-//         cap_ = cv::VideoCapture(0); // Open default camera
- 
-//         printf("record compressed image!\n");
- 
-//         if (!cap_.isOpened()) {
-//             RCLCPP_ERROR(this->get_logger(), "Failed to open camera");
-//         }
-//     }
- 
-// private:
-//     void publishImage() {
-//         cv::Mat frame;
-//         cap_ >> frame; // Capture a frame from the camera
- 
-//         if (frame.empty()) {
-//             RCLCPP_ERROR(this->get_logger(), "Failed to capture frame");
-//             return;
-//         }
-//         cv::Mat resized_frame;
-//         cv::resize(frame, resized_frame, cv::Size(640, 480), cv::INTER_LINEAR);
- 
- 
- 
-//         std::vector<uchar> buf;
-//         cv::imencode(".jpg", resized_frame, buf, {cv::IMWRITE_JPEG_QUALITY, 80}); // Adjust JPEG quality (0-100 scale)
- 
-//         sensor_msgs::msg::CompressedImage msg;
-//         msg.format = "jpeg";
-//         msg.data = buf;
- 
-//         publisher_->publish(msg);
- 
- 
-//         count_++;
-//         printf("record compressed image: %d\r", count_);
-//     }
- 
-//     rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr publisher_;
-//     rclcpp::TimerBase::SharedPtr timer_;
- 
-//     cv::VideoCapture cap_;
-//     int count_;
-// };
- 
-// int main(int argc, char **argv) {
-//     rclcpp::init(argc, argv);
-//     auto node = std::make_shared<CameraPublisher>();
-//     rclcpp::spin(node);
-//     rclcpp::shutdown();
-//     return 0;
-// }

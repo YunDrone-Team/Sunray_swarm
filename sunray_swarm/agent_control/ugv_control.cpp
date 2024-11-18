@@ -279,6 +279,13 @@ void UGV_CONTROL::agnet_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
         case sunray_msgs::agent_cmd::HOLD:
             text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: HOLD!";
             cout << BLUE << text_info.data << TAIL << endl;
+            //直接在回调函数中进行
+            // // 原地停止
+            // desired_vel.linear.x = 0.0;
+            // desired_vel.linear.y = 0.0;
+            // desired_vel.linear.z = 0.0;
+            // desired_vel.angular.z = 0.0;
+            // agent_cmd_vel_pub.publish(desired_vel);
             break;
         case sunray_msgs::agent_cmd::POS_CONTROL:
             desired_position.x = msg->desired_pos.x;
