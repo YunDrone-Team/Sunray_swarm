@@ -5,7 +5,7 @@
 	<group ns="/sunray_swarm/rmtt_1">
 		<node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
 			<param name="drone_sn" type="string" value="0TQZM41CNT02BB" />
-			<param name="drone_ip" type="string" value="192.168.31.191" />
+			<param name="drone_ip" type="string" value="192.168.31.197" />
 			<param name="drone_port" type="string" value="8889" />
 			<param name="local_ip" type="string" value="$(arg local_ip)" />
 			<param name="local_port" type="string" value="8890" />
@@ -15,83 +15,7 @@
 		<!-- 启动rmtt_control_node -->
 		<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_1" output="screen">
 			<param name="agent_id" value="1" />
-			<param name="agent_ip" value="192.168.31.191" />
-			<rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
-		</node>
-	</group>
-
-	<!-- 第2台无人机 -->
-	<group ns="/sunray_swarm/rmtt_2">
-		<node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
-			<param name="drone_sn" type="string" value="0TQZM43CNT03C9" />
-			<param name="drone_ip" type="string" value="192.168.31.224" />
-			<param name="drone_port" type="string" value="8889" />
-			<param name="local_ip" type="string" value="$(arg local_ip)" />
-			<param name="local_port" type="string" value="8891" />
-			<param name="video_port" type="string" value="11112" />
-			<param name="enable_camera" type="bool" value="true" />
-		</node>
-		<!-- 启动rmtt_control_node -->
-		<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_2" output="screen">
-			<param name="agent_id" value="2" />
-			<param name="agent_ip" value="192.168.31.224" />
-			<rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
-		</node>
-	</group>
-
-	<!-- 第3台无人机 -->
-	<group ns="/sunray_swarm/rmtt_3">
-		<node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
-			<param name="drone_sn" type="string" value="0TQZM4DCNT0AJL" />
-			<param name="drone_ip" type="string" value="192.168.31.192" />
-			<param name="drone_port" type="string" value="8889" />
-			<param name="local_ip" type="string" value="$(arg local_ip)" />
-			<param name="local_port" type="string" value="8892" />
-			<param name="video_port" type="string" value="11113" />
-			<param name="enable_camera" type="bool" value="true" />
-		</node>
-		<!-- 启动rmtt_control_node -->
-		<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_3" output="screen">
-			<param name="agent_id" value="3" />
-			<param name="agent_ip" value="192.168.31.192" />
-			<rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
-		</node>
-	</group>
-
-	<!-- 第4台无人机 -->
-	<group ns="/sunray_swarm/rmtt_4">
-		<node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
-			<param name="drone_sn" type="string" value="0TQZM42CNT02UU" />
-			<param name="drone_ip" type="string" value="192.168.31.55" />
-			<param name="drone_port" type="string" value="8889" />
-			<param name="local_ip" type="string" value="$(arg local_ip)" />
-			<param name="local_port" type="string" value="8893" />
-			<param name="video_port" type="string" value="11114" />
-			<param name="enable_camera" type="bool" value="true" />
-		</node>
-		<!-- 启动rmtt_control_node -->
-		<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_4" output="screen">
-			<param name="agent_id" value="4" />
-			<param name="agent_ip" value="192.168.31.55" />
-			<rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
-		</node>
-	</group>
-
-	<!-- 第5台无人机 -->
-	<group ns="/sunray_swarm/rmtt_5">
-		<node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
-			<param name="drone_sn" type="string" value="0TQZM43CNT037Q" />
-			<param name="drone_ip" type="string" value="192.168.31.250" />
-			<param name="drone_port" type="string" value="8889" />
-			<param name="local_ip" type="string" value="$(arg local_ip)" />
-			<param name="local_port" type="string" value="8894" />
-			<param name="video_port" type="string" value="11115" />
-			<param name="enable_camera" type="bool" value="true" />
-		</node>
-		<!-- 启动rmtt_control_node -->
-		<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_5" output="screen">
-			<param name="agent_id" value="5" />
-			<param name="agent_ip" value="192.168.31.250" />
+			<param name="agent_ip" value="192.168.31.197" />
 			<rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
 		</node>
 	</group>

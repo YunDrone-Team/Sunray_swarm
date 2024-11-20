@@ -142,8 +142,13 @@ target_link_libraries(swarm_formation_control ${catkin_LIBRARIES})
 add_executable(swarm_leader_follower demo_swarm/swarm_leader_follower_orca.cpp)
 add_dependencies(swarm_leader_follower sunray_swarm_gencpp)
 target_link_libraries(swarm_leader_follower ${catkin_LIBRARIES})
-## SWARM_DEMO - NOKOV队形变换
-add_executable(swarm_nokov demo_swarm/swarm_nokov.cpp)
+# ## SWARM_DEMO - NOKOV队形变换
+# add_executable(swarm_nokov demo_swarm/swarm_nokov.cpp)
+# add_dependencies(swarm_nokov sunray_swarm_gencpp)
+# target_link_libraries(swarm_nokov ${catkin_LIBRARIES})
+
+## SWARM_DEMO - 回字形队形变换
+add_executable(swarm_nokov demo_swarm/swarm_xhu.cpp)
 add_dependencies(swarm_nokov sunray_swarm_gencpp)
 target_link_libraries(swarm_nokov ${catkin_LIBRARIES})
 ## SWARM_DEMO - 避障

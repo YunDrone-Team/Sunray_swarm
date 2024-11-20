@@ -4,6 +4,7 @@ void ORCA::init(ros::NodeHandle& nh)
 {
     // 【参数】智能体类型
     nh.param<int>("agent_type", agent_type, 1);
+    // nh.param<int>("agent_id", agent_id, 2);  
     // 【参数】智能体数量
     nh.param<int>("agent_num", agent_num, 8);
     // 【参数】智能体高度

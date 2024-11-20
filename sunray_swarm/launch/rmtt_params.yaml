@@ -7,7 +7,7 @@ sim_mode : false
 flag_printf : true
 desired_yaw : 0.0
 target_name : "target"
-mled_text : "NOKOV"
+mled_text : "XHU"
 
 ## 控制参数
 rmtt_control_param:

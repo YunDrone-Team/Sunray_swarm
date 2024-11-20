@@ -120,6 +120,8 @@ int main(int argc, char **argv)
     nh.param<float>("direction", direction, 1.0f);
     // 【参数】从参数服务器获取智能画圆时间，默认为10
     nh.param<int>("agent_time", agent_time, 20);
+    // 【参数】从参数服务器获取智能画圆时间，默认为10
+    // nh.param<int>("agent_id", agent_id, 2);
 
     // 计算角速度
     if (circle_radius != 0)
