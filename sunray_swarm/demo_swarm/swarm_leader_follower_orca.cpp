@@ -2,7 +2,7 @@
 #include "std_msgs/String.h"
 #include "math_utils.h"
 
-#define MAX_AGENT_NUM 3
+#define MAX_AGENT_NUM 5
 
 using namespace std;
 int agent_type;                                 // 代理类型，用于区分无人机和无人车
@@ -60,13 +60,21 @@ int main(int argc, char **argv)
     // 【参数】从参数服务器获取智能体类型
     nh.param<int>("agent_type", agent_type, 0);        
 
-    // 设置2号和3号无人机的偏移量
+    // // 设置2号和3号无人机的偏移量
     offset[1].x = 0.4; // 设置2号机在X轴上的偏移量
     offset[1].y = 0.7; // 设置2号机在Y轴上的偏移量
     offset[1].z = 0.0; // 设置2号机的Z坐标为0
     offset[2].x = -0.4; // 设置3号机在X轴上的偏移量
     offset[2].y = 0.7; // 设置3号机在Y轴上的偏移量
     offset[2].z = 0.0; // 设置3号机的Z坐标为0
+    offset[3].x = 0.4; // 设置3号机在X轴上的偏移量
+    offset[3].y = -0.7; // 设置3号机在Y轴上的偏移量
+    offset[3].z = 0.0; // 设置3号机的Z坐标为0
+    offset[4].x = -0.4; // 设置3号机在X轴上的偏移量
+    offset[4].y = -0.7; // 设置3号机在Y轴上的偏移量
+    offset[4].z = 0.0; // 设置3号机的Z坐标为0
+
+
 
     string agent_prefix;
     switch (agent_type)
@@ -107,6 +115,7 @@ int main(int argc, char **argv)
         start_cmd == 0;
     }
     sleep(5.0);
+    bool first_goal_sent = false;
     // 主程序
     while (ros::ok())
     {
@@ -129,6 +138,13 @@ int main(int argc, char **argv)
                 goal_point.y = reference_point.y + offset[i].y; // 设置目标位置Y坐标
                 goal_point.z = reference_point.z + offset[i].z; // 设置目标位置Z坐标
                 orca_goal_pub[i].publish(goal_point); // 发布目标点
+                // sleep(0.1);  
+            }
+            if(!first_goal_sent)
+            {
+                // 休眠0.1秒
+                ros::Duration(8).sleep();
+                first_goal_sent = true;
             }
         }
         ros::spinOnce();
