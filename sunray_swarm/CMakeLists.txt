@@ -94,6 +94,19 @@ add_executable(agent_sim_node
 )
 target_link_libraries(agent_sim_node ${catkin_LIBRARIES})
 
+## 地图pose
+add_executable(rmtt_tf
+  agent_control/rmtt_tf.cpp
+)
+target_link_libraries(rmtt_tf ${catkin_LIBRARIES})
+
+## 地图pose
+add_executable(rmtt_tf_sub
+  agent_control/rmtt_tf_sub.cpp
+)
+target_link_libraries(rmtt_tf_sub ${catkin_LIBRARIES})
+
+
 ## RMTT_DEMO - 定点悬停
 add_executable(rmtt_hover demo_rmtt/rmtt_hover.cpp)
 add_dependencies(rmtt_hover sunray_swarm_gencpp)

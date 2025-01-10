@@ -5,7 +5,7 @@
 	<group ns="/sunray_swarm/rmtt_1">
 		<node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">
 			<param name="drone_sn" type="string" value="0TQZM47CNT046P" />
-			<param name="drone_ip" type="string" value="192.168.25.18" />
+			<param name="drone_ip" type="string" value="192.168.25.95" />
 			<param name="drone_port" type="string" value="8889" />
 			<param name="local_ip" type="string" value="$(arg local_ip)" />
 			<param name="local_port" type="string" value="8890" />

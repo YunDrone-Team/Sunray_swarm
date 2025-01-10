@@ -54,6 +54,7 @@ class RMTT_CONTROL
         std_msgs::String mled_text;
         std_msgs::String text_info;
         vector<geometry_msgs::PoseStamped> pos_vector;    // 无人机轨迹容器,用于rviz显示
+        int pose_source;
 
         // 地理围栏
         struct geo_fence
@@ -86,6 +87,8 @@ class RMTT_CONTROL
         
         // 订阅话题
         ros::Subscriber mocap_pos_sub;
+        //订阅map话题
+        ros::Subscriber map_pose_sub;
         ros::Subscriber mocap_vel_sub;
         ros::Subscriber agent_cmd_sub;
         ros::Subscriber battery_sub;
@@ -131,5 +134,7 @@ class RMTT_CONTROL
         void setup_led();
         void setup_mled();
         void setup_color();
+        //地图回调
+        void map_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg);
 };
 #endif

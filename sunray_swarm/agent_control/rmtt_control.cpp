@@ -42,11 +42,32 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     nh.param<float>("led_color/a", led_color.a, 1.0);
     // 【参数】mLED 字符
     nh.param<string>("mled_text", mled_text.data, "yundrone");
+    // 【参数】设置获取数据源
+    nh.param<int>("pose_source_", pose_source, 2);
 
     agent_name = "rmtt_" + std::to_string(agent_id);
-    // 【订阅】订阅rmtt动捕的数据(位置+速度) vrpn -> 本节点
-    mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
+    // // 【订阅】订阅rmtt动捕的数据(位置+速度) vrpn -> 本节点
+    // mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
     mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &RMTT_CONTROL::mocap_vel_cb, this);
+    // 根据 pose_source 参数选择数据源
+        if (pose_source == 1)
+        {
+            ROS_INFO("Using VRPN Motion Capture Data");
+            // 订阅 VRPN 动捕数据
+            mocap_pos_sub = nh.subscribe("/vrpn_client_node/" + agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
+        }
+        else if (pose_source == 2)
+        {
+            ROS_INFO("Using Map Pose Data");
+            // 订阅地图数据
+            map_pose_sub = nh.subscribe("/sunray_swarm/" + agent_name + "/map_pose", 1, &RMTT_CONTROL::map_pos_cb,this);
+        }
+        else
+        {
+            ROS_WARN("Unknown pose_source parameter, defaulting to VRPN Motion Capture Data");
+            // 默认选择 VRPN 数据
+            mocap_pos_sub = nh.subscribe("/vrpn_client_node/" + agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
+        }    
     // 【订阅】地面站指令 地面站 -> 本节点
     agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 1, &RMTT_CONTROL::agent_cmd_cb, this);
     // 【订阅】rmtt电池的数据 rmtt_driver -> 本节点
@@ -117,7 +138,7 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
 
 void RMTT_CONTROL::mainloop()
 {
-    check_geo_fence();
+    // check_geo_fence();
 
     // 动捕丢失情况下，不执行控制指令，直到动捕恢复
     if(!agent_state.odom_valid)
@@ -444,6 +465,26 @@ void RMTT_CONTROL::timercb_state(const ros::TimerEvent &e)
     agent_state_pub.publish(agent_state);
 }
 
+void RMTT_CONTROL::map_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg)
+{
+    // ROS_INFO("Received Pose: ");
+    // ROS_INFO("Position: x = %f, y = %f, z = %f", msg->pose.position.x, msg->pose.position.y, msg->pose.position.z);
+    // ROS_INFO("Orientation: x = %f, y = %f, z = %f, w = %f", msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z, msg->pose.orientation.w);
+    get_mocap_time = ros::Time::now(); // 记录时间戳，防止超时
+	agent_state.pos[0] = msg->pose.position.x;
+    agent_state.pos[1] = msg->pose.position.y;
+	agent_state.pos[2] = msg->pose.position.z;
+    agent_state.attitude_q = msg->pose.orientation;
+
+    Eigen::Quaterniond q_mocap = Eigen::Quaterniond(msg->pose.orientation.w, msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z);
+    Eigen::Vector3d agent_att = quaternion_to_euler(q_mocap);
+
+	agent_state.att[0] = agent_att.x();
+    agent_state.att[1] = agent_att.y();
+	agent_state.att[2] = agent_att.z();
+    agent_state.odom_valid = true;
+}
+
 void RMTT_CONTROL::mocap_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg)
 {
     get_mocap_time = ros::Time::now(); // 记录时间戳，防止超时
@@ -658,23 +699,23 @@ float RMTT_CONTROL::constrain_function(float data, float Max, float Min)
         return data;
     }
 }
-
-void RMTT_CONTROL::check_geo_fence()
-{
-    // 安全检查，超出地理围栏自动降落,打印相关位置信息
-    if (agent_state.pos[0] > rmtt_geo_fence.max_x || agent_state.pos[0] < rmtt_geo_fence.min_x || 
-        agent_state.pos[1] > rmtt_geo_fence.max_y || agent_state.pos[1] < rmtt_geo_fence.min_y || 
-        agent_state.pos[2] > rmtt_geo_fence.max_z || agent_state.pos[2] < rmtt_geo_fence.min_z)
-    {
-        current_agent_cmd.control_state = sunray_msgs::agent_cmd::LAND;
-        ROS_WARN_STREAM("RMTT [" << agent_id << "] out of geofence land! Position: [" 
-                        << agent_state.pos[0] << ", " << agent_state.pos[1] << ", " 
-                        << agent_state.pos[2] << "], Geofence: ["
-                        << rmtt_geo_fence.min_x << ", " << rmtt_geo_fence.max_x << ", "
-                        << rmtt_geo_fence.min_y << ", " << rmtt_geo_fence.max_y << ", "
-                        << rmtt_geo_fence.min_z << ", " << rmtt_geo_fence.max_z << "]");
-    }
-}
+/**/
+// void RMTT_CONTROL::check_geo_fence()
+// {
+//     // 安全检查，超出地理围栏自动降落,打印相关位置信息
+//     if (agent_state.pos[0] > rmtt_geo_fence.max_x || agent_state.pos[0] < rmtt_geo_fence.min_x || 
+//         agent_state.pos[1] > rmtt_geo_fence.max_y || agent_state.pos[1] < rmtt_geo_fence.min_y || 
+//         agent_state.pos[2] > rmtt_geo_fence.max_z || agent_state.pos[2] < rmtt_geo_fence.min_z)
+//     {
+//         current_agent_cmd.control_state = sunray_msgs::agent_cmd::LAND;
+//         ROS_WARN_STREAM("RMTT [" << agent_id << "] out of geofence land! Position: [" 
+//                         << agent_state.pos[0] << ", " << agent_state.pos[1] << ", " 
+//                         << agent_state.pos[2] << "], Geofence: ["
+//                         << rmtt_geo_fence.min_x << ", " << rmtt_geo_fence.max_x << ", "
+//                         << rmtt_geo_fence.min_y << ", " << rmtt_geo_fence.max_y << ", "
+//                         << rmtt_geo_fence.min_z << ", " << rmtt_geo_fence.max_z << "]");
+//     }
+// }
 
 Eigen::Vector3d RMTT_CONTROL::quaternion_to_euler(const Eigen::Quaterniond &q)
 {
