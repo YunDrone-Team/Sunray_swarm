@@ -4,6 +4,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Quaternion.h>
+#include "printf_utils.h"
 
 using namespace std;
 class MapTFListener
@@ -28,14 +29,14 @@ public:
         tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
         // 设定地图框架和程序框架的名称
-        map_frame_ = "sunray_swarm/rmtt_1/map";        // 假设地图框架是 "map"
-        program_frame_ = "sunray_swarm/rmtt_1/base_link"; // 假设程序框架是 "base_link"
+        map_frame_ = "sunray_swarm/"+ agent_name +"/map";        // 假设地图框架是 "map"
+        program_frame_ = "sunray_swarm/"+ agent_name +"/base_link"; // 假设程序框架是 "base_link"
     }
 
     // 监听并获取 TF 变换
     void listenToTF()
     {
-        ros::Rate rate(10); // 10 Hz
+        ros::Rate rate(5); // 10 Hz
         while (ros::ok())
         {
             try
@@ -62,6 +63,7 @@ public:
             catch (const tf2::TransformException& ex)
             {
                 ROS_WARN("TF Error: %s", ex.what());
+                cout << GREEN << ">>>>>>>>>>>>>>>>>>> RMTT_CONTROL Parameters <<<<<<<<<<<<<<<<" << TAIL << endl;
             }
 
             rate.sleep();
