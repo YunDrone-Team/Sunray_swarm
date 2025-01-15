@@ -16,7 +16,7 @@
 		<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_1" output="screen">
 			<param name="agent_id" value="1" />
 			<param name="agent_ip" value="192.168.25.95" />
-			<rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
+			<rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" />
 		</node>
 	</group>
 
@@ -35,7 +35,7 @@
 		<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_2" output="screen">
 			<param name="agent_id" value="2" />
 			<param name="agent_ip" value="192.168.25.91" />
-			<rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
+			<rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" />
 		</node>
 	</group>
 
@@ -54,7 +54,7 @@
 		<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_3" output="screen">
 			<param name="agent_id" value="3" />
 			<param name="agent_ip" value="192.168.25.80" />
-			<rosparam command="load" file="$(find sunray_swarm)/launch/rmtt_params.yaml" />
+			<rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" />
 		</node>
 	</group>
 

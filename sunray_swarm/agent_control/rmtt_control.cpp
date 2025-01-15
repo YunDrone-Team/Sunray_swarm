@@ -43,7 +43,7 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     // 【参数】mLED 字符
     nh.param<string>("mled_text", mled_text.data, "yundrone");
     // 【参数】设置获取数据源
-    nh.param<int>("pose_source_", pose_source, 2);
+    nh.param<int>("pose_source_", pose_source, 1);
 
     agent_name = "rmtt_" + std::to_string(agent_id);
     // // 【订阅】订阅rmtt动捕的数据(位置+速度) vrpn -> 本节点

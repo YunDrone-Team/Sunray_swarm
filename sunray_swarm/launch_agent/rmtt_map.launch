@@ -1,15 +1,17 @@
 <launch>
 	<node pkg="sunray_swarm" name="rmtt_tf_1" type="rmtt_tf" output="screen">
-		<!-- <rosparam command="load" file="$(find sunray_swarm)/launch_demo/rmtt_params.yaml" /> -->
+		<!-- <rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" /> -->
         <param name="agent_id" value="1" />
 	</node>
     <!-- 启动rmtt_show -->
     <node pkg="sunray_swarm" name="rmtt_tf_2" type="rmtt_tf" output="screen">
         <param name="agent_id" value="2" />
+        <!-- <rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" /> -->
     </node>
     <!-- 启动rmtt_show -->
     <node pkg="sunray_swarm" name="rmtt_tf_3" type="rmtt_tf" output="screen">
         <param name="agent_id" value="3" />
+        <!-- <rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" /> -->
     </node>
 
 </launch>

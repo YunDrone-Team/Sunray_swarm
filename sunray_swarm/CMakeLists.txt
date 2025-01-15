@@ -100,11 +100,7 @@ add_executable(rmtt_tf
 )
 target_link_libraries(rmtt_tf ${catkin_LIBRARIES})
 
-## 地图pose
-add_executable(rmtt_tf_sub
-  agent_control/rmtt_tf_sub.cpp
-)
-target_link_libraries(rmtt_tf_sub ${catkin_LIBRARIES})
+
 
 
 ## RMTT_DEMO - 定点悬停
@@ -170,10 +166,6 @@ target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
 
 
 
-#DEMO 自主降落
-# add_executable(autonomous_landing demo/multi_autonomous_landing.cpp)
-# add_dependencies(autonomous_landing sunray_swarm_gencpp)
-# target_link_libraries(autonomous_landing ${catkin_LIBRARIES})
 
 
 ## Mark cpp header files for installation
