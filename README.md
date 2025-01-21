@@ -145,7 +145,7 @@ roslaunch sunray_swarm rmtt_all_drone.launch
 
 
 
-  #### 步骤 5: 启动地面站节点
+  #### 步骤 5: 启动地面站节点(需下载)
 
 
 ```XML
@@ -153,9 +153,6 @@ cd swarmV1.0.0/
 ./startSwarm.sh
 
 ```
-
-
-
 
 
   #### 步骤 6: 操控无人机起飞、发送目标点
@@ -183,11 +180,10 @@ roslaunch sunray_swarm rmtt_all_drone.launch
 
 roslaunch sunray_swarm rmtt_hover.launch
 
+rostopic pub /sunray_swarm/demo/rmtt_hover std_msgs/Bool "data: true"
+
 ```
 
-需要先启动上述命令后点击按钮生效
-
-![](https://secure2.wostatic.cn/static/rFarDRnj4k4eRgPREupoUa/2024-10-30?auth_key=1737094327-j3nZzTCjYgA6sNUkEVh77D-0-e3a457dd59ba1d171c706c39e102ae1e)
 
 #### 5.1.2画圆示例（单机）
 
@@ -203,11 +199,10 @@ roslaunch sunray_swarm rmtt_all_drone.launch
 
 roslaunch sunray_swarm rmtt_circle.launch
 
+rostopic pub /sunray_swarm/demo/rmtt_hover std_msgs/Bool "data: true"
+
 ```
 
-需要先启动上述命令后点击按钮生效
-
-![](https://secure2.wostatic.cn/static/rFarDRnj4k4eRgPREupoUa/2024-10-30?auth_key=1737094327-fem1VheeFaYC9LbYUE5b2B-0-2a87dae43b958e3731bac7ce9eae2de9)
 
 #### 5.1.3航点示例（单机）
 
@@ -223,11 +218,10 @@ roslaunch sunray_swarm rmtt_all_drone.launch
 
 roslaunch sunray_swarm rmtt_waypoint.launch
 
+rostopic pub /sunray_swarm/demo/rmtt_circle std_msgs/Bool "data: true" 
+
 ```
 
-需要先启动上述命令后点击按钮生效
-
-![](https://secure2.wostatic.cn/static/rFarDRnj4k4eRgPREupoUa/2024-10-30?auth_key=1737094327-qJC1RDg2ehgD3pex8e3kiv-0-805e90c141cf5d1e9eba784bf1234e15)
 
 #### 5.1.1路径规划示例（单机）
 
@@ -243,11 +237,10 @@ roslaunch sunray_swarm rmtt_all_drone.launch
 
 roslaunch sunray_swarm rmtt_pathplanning.launch
 
+rostopic pub /sunray_swarm/demo/rmtt_pathPlanning std_msgs/Bool "data: true"
+
 ```
 
-需要先启动上述命令后点击按钮生效
-
-![](https://secure2.wostatic.cn/static/rFarDRnj4k4eRgPREupoUa/2024-10-30?auth_key=1737094327-e7ziGuRNK4SXqPbhnEBmEF-0-67b7d923b422231e3cabfe630e59fe5c)
 
 ### 5.2多机示例程序
 
@@ -266,11 +259,10 @@ roslaunch sunray_swarm orca.launch
 roslaunch sunray_swarm rmtt_all_drone.launch
 
 roslaunch sunray_swarm swarm_nokov.launch
+
+rostopic pub /sunray_swarm/demo/swarm_formation_nokov std_msgs/Bool "data: false"
 ```
 
-需要先启动上述命令后点击按钮生效
-
-![](https://secure2.wostatic.cn/static/rFarDRnj4k4eRgPREupoUa/2024-10-30?auth_key=1737094327-p92R1jw9QWqGHfMVFPWKgk-0-c2bfd36c328d240266c5ed88f8684b25)
 
 #### 5.1.1固定障碍物示例
 
@@ -288,11 +280,8 @@ roslaunch sunray_swarm orca.launch
 
 roslaunch sunray_swarm swarm_with_obstacles.launch
 
+rostopic pub /sunray_swarm/demo/swarm_with_obstacles std_msgs/Bool "data: false" 
+
 ```
-
-需要先启动上述命令后点击按钮生效
-
-![](https://secure2.wostatic.cn/static/rFarDRnj4k4eRgPREupoUa/2024-10-30?auth_key=1737094327-8ESeuBodV4hkoaRF4zRcMt-0-0f4016de29f1852f559f8e24044872bc)
-
 
 
