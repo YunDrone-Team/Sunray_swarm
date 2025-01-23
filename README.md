@@ -1,4 +1,4 @@
-<div align=center> <img src="https://secure2.wostatic.cn/static/6H2ntKih8Sae582dY6XXbg/dbac49483817c80246791bb3244f661.jpg?auth_key=1737614915-jEvMHTdsTqWZdMgtoXCBAf-0-bc9a3592e7dfa3f27982d37e9bce1b94&file_size=209694" width="220" height="220">
+<div align=center> <img src="/img/logo.png" width="220" height="220">
 <h3>云纵科技是一家专业从事无人机软硬件和解决方案定制的公司，拥有丰富的行业经验和技术优势。我们的团队致力于为客户提供个性化的服务，在无人机及其周边领域打造顶尖服务。</h3>
 </div>
 
@@ -34,6 +34,6 @@
 
 ---
   <center class="half">
-    <img src="/img/1-1.png" height="" width="300"/>
-    <img src="/img/2-1.png" width="300"/>
+    <img src="/img/1-1.png" height="472" width="472"/>
+    <img src="/img/2-1.png" height="472" width="472"/>
 </center>
