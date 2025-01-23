@@ -34,7 +34,6 @@
 
 
 ---
-  <center class="half">
-    <img src="/img/1-1.png" height="472" width="472"/>
-    <img src="/img/2-1.png" height="472" width="472"/>
-</center>
+
+<div align=center> <img src="/img/1-1.png"></div>
+<div align=center> <img src="/img/2-1.png"></div>
