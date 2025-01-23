@@ -10,11 +10,20 @@ target_name : "target"
 mled_text : "CXY"
 pose_source: 1
 
-hover_x: 2.0
+hover_x: 6.0
 hover_y: 4.0
 
-target.x: 3.0
-target.y: 2.0
+waypoint_count: 3
+
+waypoint_0_x: 1.0
+waypoint_0_y: 3.0
+waypoint_2_x: 2.0
+waypoint_2_y: 2.0
+waypoint_3_x: 3.0
+waypoint_3_y: 3.0
+
+target_x: 3.0
+target_y: 2.0
 
 ## 控制参数
 rmtt_control_param:

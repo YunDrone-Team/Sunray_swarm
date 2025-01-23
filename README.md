@@ -1,287 +1,39 @@
-  # Sunray_swarm
-  思锐多智能体协同控制与规划开发平台
-  配套文档链接：https://wiki.yundrone.cn/docs/rmtt_doc
-  ### 1. 安装依赖
+<div align=center> <img src="https://secure2.wostatic.cn/static/6H2ntKih8Sae582dY6XXbg/dbac49483817c80246791bb3244f661.jpg?auth_key=1737614915-jEvMHTdsTqWZdMgtoXCBAf-0-bc9a3592e7dfa3f27982d37e9bce1b94&file_size=209694" width="220" height="220">
+<h3>云纵科技是一家专业从事无人机软硬件和解决方案定制的公司，拥有丰富的行业经验和技术优势。我们的团队致力于为客户提供个性化的服务，在无人机及其周边领域打造顶尖服务。</h3>
+</div>
 
-  **检查安装vrpn**：运行`sudo apt-get install ros-<your-ros-distro>-vrpn`来安装`vrpn_client_ros`包。
+# 前言
 
-```Bash
-sudo apt-get install ros-noetic-vrpn
+“智群·RMTT”是一套基于无人机和无人车的室内多智能体集群编队实验平台，配套丰富的二次开发例程和简洁的集群控制地面站，支持集群控制、路径规划、目标识别、任务决策等教学任务和算法验证。
 
-```
+## “智群·RMTT”平台介绍
+- **教学目的**：为相关专业的学生提供实践操作平台，帮助学生理解多智能体集群编队、路径规划、任务分配与决策等关键概念，培养学生在实际环境中的应用能力和创新能力。
+- **科研目的**：解决在多智能体系统集群控制和复杂环境下的多无人机集群作业中的技术瓶颈，特别是在精确控制、动态任务分配、路径规划及实时决策中的挑战。通过该平台，研究人员可以验证和优化多智能体协同算法，推动无人系统在多个领域的应用。
+- **应用对象**：主要针对高校师生、科研人员、工程技术人员及机器人爱好者，适合用于机器人学、无人系统、智能控制、人工智能等专业的实验、研究、开发与验证工作。
 
+## 文档：
 
-  **检查安装Tello无人机环境依赖(使用清华源进行安装)**：运行`sudo apt-get install ros-<your-ros-distro>-vrpn`来安装`vrpn_client_ros`包。
+* [“智群·RMTT”使用文档wiki](https://wiki.yundrone.cn/catalog/rmtt_doc)
 
-```Bash
-pip3 install robomaster==0.1.1.63 -i https://pypi.tuna.tsinghua.edu.cn/simple
-```
-
-
-
-###  2: 如何安装配置Sunray_swarm代码及编译
-
-  #### 步骤 1: 下载源码
-
-  打开终端（`ctrl+alt+t`），输入如下指令下载代码
-
-```Bash
-# 从gitee服务器clone代码，默认放置在home目录下
-git clone https://gitee.com/yundrone_sunray2023/Sunray_swarm.git
-
-```
+## 公司及产品介绍
+* [广州云纵科技有限公司](http://www.yundrone.cn/index.html):云纵科技是一家专业从事无人机软硬件和解决方案定制的公司
+* [室内多智能体集群编队实验平台视频介绍](https://www.bilibili.com/video/BV1sw6mYEEJy/?share_source=copy_web&vd_source=0fc5f616d655707c69c3292e4afd541e):小型化的无人机和无人车平台安全可靠且基于ROS可互通互联，适合进行集群类算法的教学和开发验证。
 
 
 
-  #### 步骤 2: 编译源码
-
-  如果你还没有编译你的工作空间，请使用以下命令进行编译。
-
-```Bash
-cd ~/Sunray_swarm
-# 通过脚本编译代码
-./build.sh
-
-```
-
-
+## 致谢
+- **感谢北京度量科技有限公司提供的动作捕捉设备进行产品开发测试**
+    - [度量科技](https://www.nokov.com/)
   
+- **感谢西安天之博特有限公司开源的RMTT ROS开发包**
+  - [rmtt_ros](https://github.com/tianbot/rmtt_ros)
 
-  #### 步骤 3: 更新 ROS 工作空间（当前终端）
+- **感谢北卡罗来纳大学教堂山分校Jur van den Berg, Stephen J. Guy, Jamie Snape, Ming C. Lin, and Dinesh Manocha开源的RVO算法库**
+  - [RVO算法库](https://gamma.cs.unc.edu/RVO2/)
 
-  确保你的 ROS 工作空间已经被正确设置，并且代码已经被编译（只在当前终端生效）。
 
-```Bash
-source /opt/ros/noetic/setup.bash
-source ~/Sunray_swarm/devel/setup.bash
-
-```
-
-
-
-  **注意：**上述代码只在当前终端生效，写入配置文件bashrc中即可在所有终端生效。
-
-
-
-  进入配置文件后使用键盘输入i,光标移动到末尾，输入代码，键盘输入`:wq!` 即可保存。
-
-```Bash
-source /opt/ros/noetic/setup.bash
-source ~/Sunray_swarm/devel/setup.bash
-```
-
-###  3: 如何安装地面站（无需编译）
-
-  #### 步骤 1: 下载程序
-
-  
-
-  #### 步骤 2: 启动地面站程序
-
-  测试地面站程序是否能够正常启动：
-
-```Bash
-cd swarmV1.0.0/
-# 通过脚本启动地面站
-./startSwarm.sh
-
-```
-
-
-
-###  4: 使用地面站控制一台RMTT进行起飞操控
-
-  #### 步骤 1: 设置RMTT无人机路由模式(如已经设置过，可跳过该步骤)
-
-  首先进行特洛无人机进行连接路由器设置，连接每台Tello无人机的热点，使用python脚本 `set.sta.py` 设置无人机连接的路由器。以下是使用 `set.sta.py` 的方式：
-
-  其中yundrone_NOKOV为wifi名称，12345678为密码
-
-```Bash
-cd Sunray_swarm/sunray_drivers/rmtt/rmtt_driver/scripts/
-./set_sta.py yundrone_NOKOV 12345678
-
-
-```
-
-
-  #### 步骤 2: 启动 ROS Master
-
-  启动 ROS Master（`roscore`），这是所有 ROS 节点通信的核心。
-
-  
-
-```Bash
-# 启动ROS主节点
-roscore
-
-```
-
-
-  #### 步骤 3: 启动 `vrpn_client` 节点
-
-
-```text
-roslaunch vrpn_client_ros sample.launch
-```
-
-  
-  #### 步骤 4: 启动 `rmtt_control、rmtt_node` 节点
-
-  在启动无人机节点前需要扫设置无人机的IP，在launch文件夹下使用脚本进行获取无人机SN以及IP
-
-```Bash
-cd Sunray_swarm/sunray_swarm/launch/
-./generate_launch.py -n 6
-```
-
-  generate_launch.py脚本直接创建了一个 `rmtt_all_drone.launch` 文件，参数`-n 6 `表示扫描有6架无人机：其中`local_ip`为本机IP
-
-
-
-```Bash
-roslaunch sunray_swarm rmtt_all_drone.launch
-```
-
-
-
-  #### 步骤 5: 启动地面站节点(需下载)
-
-
-```XML
-cd swarmV1.0.0/
-./startSwarm.sh
-
-```
-
-
-  #### 步骤 6: 操控无人机起飞、发送目标点
-
-  完成上述操作后即可在地面站看到上线设备以及设备的信息
-
-
-  点击`单机起飞`按钮即可起飞无人机，等待3秒无人机起飞后在位置控制区域输入`x、y、yaw`，点击发送控制无人机即可移动到目标点,无人机到达目标点后等待3秒点击`单机降落`即可降落RMTT
-![!\[alt text\](image.png)](image.png)
-
-
-### 5.1单机示例程序
-
-#### 5.1.1悬停示例（单机）
-
-无人机目标点按钮按下后无人机一键起飞，并在指定位置悬停:
-
-```Bash
-"输入下述指令后，点击地面站无人机目标点悬停即可控制无人机移动到指定目标点"
-roscore
-
-roslaunch vrpn_client_ros sample.launch
-
-roslaunch sunray_swarm rmtt_all_drone.launch
-
-roslaunch sunray_swarm rmtt_hover.launch
-
-rostopic pub /sunray_swarm/demo/rmtt_hover std_msgs/Bool "data: true"
-
-```
-
-
-#### 5.1.2画圆示例（单机）
-
-无人机画圆按钮按下后无人机一键起飞，并按照指定的圆形轨迹移动:
-
-```Bash
-"输入下述指令后，点击地面站无人机画圆即可控制无人机起飞移动到点后以圆点为中心、半径1米、持续20秒中的圆形轨迹"
-roscore
-
-roslaunch vrpn_client_ros sample.launch
-
-roslaunch sunray_swarm rmtt_all_drone.launch
-
-roslaunch sunray_swarm rmtt_circle.launch
-
-rostopic pub /sunray_swarm/demo/rmtt_hover std_msgs/Bool "data: true"
-
-```
-
-
-#### 5.1.3航点示例（单机）
-
-无人机航点按钮按下后无人机一键起飞，无人机起飞依次到设定的目标点:
-
-```Bash
-"输入下述指令后，点击地面站无人机航点即可控制无人机起飞依次到设定的目标点"
-roscore
-
-roslaunch vrpn_client_ros sample.launch
-
-roslaunch sunray_swarm rmtt_all_drone.launch
-
-roslaunch sunray_swarm rmtt_waypoint.launch
-
-rostopic pub /sunray_swarm/demo/rmtt_circle std_msgs/Bool "data: true" 
-
-```
-
-
-#### 5.1.1路径规划示例（单机）
-
-无人机路径规划按钮按下后无人机一键起飞，无人机起飞依次到设定的目标点并安全到达:
-
-```Bash
-"输入下述指令后，点击地面站无人机路径规划即可控制无人机起飞依次到设定的目标点并安全到达"
-roscore
-
-roslaunch vrpn_client_ros sample.launch
-
-roslaunch sunray_swarm rmtt_all_drone.launch
-
-roslaunch sunray_swarm rmtt_pathplanning.launch
-
-rostopic pub /sunray_swarm/demo/rmtt_pathPlanning std_msgs/Bool "data: true"
-
-```
-
-
-### 5.2多机示例程序
-
-#### 5.1.1阵型示例（多机）
-
-无人机NOKOV阵型按钮按下后无人机一键起飞，无人机起飞依次到设定的目标点并安全到达:
-
-```Bash
-"输入下述指令后，点击地面站无人机阵型即可控制无人机起飞依次到设定的目标点，摆出N、O、K、O、V阵型，让后返回起始点"
-roscore
-
-roslaunch vrpn_client_ros sample.launch
-
-roslaunch sunray_swarm orca.launch
-
-roslaunch sunray_swarm rmtt_all_drone.launch
-
-roslaunch sunray_swarm swarm_nokov.launch
-
-rostopic pub /sunray_swarm/demo/swarm_formation_nokov std_msgs/Bool "data: false"
-```
-
-
-#### 5.1.1固定障碍物示例
-
-无人机固定障碍物按钮按下后无人机一键起飞，无人机起飞依次到设定的目标点展示阵型避开障碍物并安全到达:
-
-```Bash
-"输入下述指令后，点击地面站无人机阵型即可控制无人机起飞依次到设定的目标点，摆出N、O、K、O、V阵型，让后返回起始点，同时避开程序设置障碍物"
-roscore
-
-roslaunch vrpn_client_ros sample.launch
-
-roslaunch sunray_swarm rmtt_all_drone.launch
-
-roslaunch sunray_swarm orca.launch
-
-roslaunch sunray_swarm swarm_with_obstacles.launch
-
-rostopic pub /sunray_swarm/demo/swarm_with_obstacles std_msgs/Bool "data: false" 
-
-```
-
-
+---
+  <center class="half">
+    <img src="/img/1-1.png" height="" width="300"/>
+    <img src="/img/2-1.png" width="300"/>
+</center>

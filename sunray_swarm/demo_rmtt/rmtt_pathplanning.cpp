@@ -82,8 +82,8 @@ int main(int argc, char **argv)
     // 【参数】从参数服务器设置数量，默认为1
     nh.param<int>("agent_id", agent_id, 1);
     // 【参数】从参数服务器获取目标位置——TODO
-    nh.param<double>("target_x", target.x, 0.0);
-    nh.param<double>("target_y", target.y, 0.0);
+    nh.param<double>("target_x", target.x, 2.0);
+    nh.param<double>("target_y", target.y, 3.0);
     // 【参数】使用智能体飞行高度作为z值
     nh.param<float>("target_z", agent_height);
 
@@ -145,6 +145,8 @@ int main(int argc, char **argv)
 
                         
             // 从参数服务器获取z
+            // target.x = target_x;
+            // target.y = target_y;
             target.z = agent_height;
             // 设置控制状态为位置控制模式
             cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
