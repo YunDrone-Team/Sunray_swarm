@@ -78,14 +78,14 @@ void setup_obstacles()
     // 障碍物示例：中心在原点，边长为2的正方体
 
     geometry_msgs::Point Point1, Point2, Point3, Point4;
-    Point1.x = 1.0;
-    Point1.y = 1.0;
-    Point2.x = -1.0;
-    Point2.y = 1.0;
-    Point3.x = -1.0;
-    Point3.y = -1.0;
-    Point4.x = 1.0;
-    Point4.y = -1.0;
+    Point1.x = 0.7;
+    Point1.y = 0.7;
+    Point2.x = 0.7;
+    Point2.y = 0.3;
+    Point3.x = 0.3;
+    Point3.y = 0.3;
+    Point4.x = 0.3;
+    Point4.y = 0.7;
 
     // 将顶点添加到障碍物指令中
     orca_cmd.obs_point.push_back(Point1);
@@ -94,7 +94,7 @@ void setup_obstacles()
     orca_cmd.obs_point.push_back(Point4);
 
     // 发布设置障碍物指令
-    // orca_cmd_pub.publish(orca_cmd);
+    orca_cmd_pub.publish(orca_cmd);
     // 输出设置障碍物完成信息
     cout << GREEN << "setup_obstacles" << TAIL << endl;
 
