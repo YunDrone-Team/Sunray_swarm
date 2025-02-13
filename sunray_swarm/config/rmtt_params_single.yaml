@@ -15,12 +15,12 @@ hover_y: 4.0
 
 waypoint_count: 3
 
-waypoint_0_x: 1.0
-waypoint_0_y: 3.0
-waypoint_2_x: 2.0
-waypoint_2_y: 2.0
-waypoint_3_x: 3.0
-waypoint_3_y: 3.0
+waypoint_1_x: 2.0
+waypoint_1_y: 2.0
+waypoint_2_x: 1.0
+waypoint_2_y: 1.0
+waypoint_3_x: 1.0
+waypoint_3_y: 2.0
 
 target_x: 3.0
 target_y: 2.0

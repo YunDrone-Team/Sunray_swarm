@@ -43,7 +43,7 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     // 【参数】mLED 字符
     nh.param<string>("mled_text", mled_text.data, "yundrone");
     // 【参数】设置获取数据源
-    nh.param<int>("pose_source_", pose_source, 1);
+    nh.param<int>("pose_source", pose_source, 1);
 
     agent_name = "rmtt_" + std::to_string(agent_id);
     // // 【订阅】订阅rmtt动捕的数据(位置+速度) vrpn -> 本节点
@@ -61,6 +61,7 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
             ROS_INFO("Using Map Pose Data");
             // 订阅地图数据
             map_pose_sub = nh.subscribe("/sunray_swarm/" + agent_name + "/map_pose", 1, &RMTT_CONTROL::map_pos_cb,this);
+            agent_state.odom_valid = true;
         }
         else
         {
