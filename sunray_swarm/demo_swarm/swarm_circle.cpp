@@ -129,7 +129,7 @@ int main(int argc, char **argv)
         // 生成智能体名称
         agent_name = "/" + agent_prefix + std::to_string(i + 1);
         // 【发布】无人车控制指令
-        ugv_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
+        ugv_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 1);
     }
     // 主循环
     while (ros::ok())

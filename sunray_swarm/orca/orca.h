@@ -70,6 +70,7 @@ class ORCA
         ros::Publisher agent_orca_state_pub[MAX_NUM];
         ros::Publisher goal_point_pub[MAX_NUM];
         ros::Publisher text_info_pub;
+        ros::Publisher agent_rmtt_cmd_pub;
 
         ros::Timer debug_timer;
         void orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg);

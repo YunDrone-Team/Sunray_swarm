@@ -1,8 +1,8 @@
 ## parameter for ugv_control
 agent_type : 0
-agent_num : 5
+agent_num : 6
 agent_height : 1.0
-agent_id : 2
+agent_id : 1
 sim_mode : false
 flag_printf : true
 desired_yaw : 0.0
@@ -45,6 +45,6 @@ orca_params:
   ## 无人机体积半径
   radius : 0.35
   ## 无人机最大速度
-  maxSpeed : 0.35
+  maxSpeed : 0.25
   ## 时间步长 不确定有啥用
   time_step : 0.1

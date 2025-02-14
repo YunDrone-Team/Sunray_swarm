@@ -29,7 +29,7 @@ void AGENT_SIM::init(ros::NodeHandle& nh)
 
     string agent_name = agent_prefix + std::to_string(agent_id);
     // 【订阅】地面站指令 地面站 -> 本节点 
-    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1, &AGENT_SIM::agent_cmd_cb, this);  
+    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 8, &AGENT_SIM::agent_cmd_cb, this);  
     // 【订阅】无人机cmd数据
     agent_cmd_vel_sub = nh.subscribe<geometry_msgs::Twist>("/sunray_swarm" + agent_name + "/cmd_vel", 1, &AGENT_SIM::agent_cmd_vel_cb, this);
     // 【发布】位置&速度数据（仿真中模拟）
@@ -137,11 +137,12 @@ bool AGENT_SIM::mainloop()
 
 void AGENT_SIM::agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
 {
+    // cout<<"msg->agent_id："<<int(msg->agent_id)<<" agent_id:"<<agent_id<<endl;
+
     if(msg->agent_id != agent_id && msg->agent_id != 99)
     {
         return;
     }
-
     current_agent_cmd = *msg; 
 }
 
