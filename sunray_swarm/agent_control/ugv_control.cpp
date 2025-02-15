@@ -51,7 +51,7 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &UGV_CONTROL::mocap_pos_cb, this);
     mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &UGV_CONTROL::mocap_vel_cb, this);
     // 【订阅】地面站指令 地面站 -> 本节点
-    ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 10, &UGV_CONTROL::agnet_cmd_cb, this);
+    ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 10, &UGV_CONTROL::agnet_cmd_cb, this);
     // 【订阅】ugv电池的数据 ugv_driver -> 本节点
     battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm/" + agent_name + "/battery", 1, &UGV_CONTROL::battery_cb, this);  
     
@@ -60,7 +60,7 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     // 【发布】led灯 本节点 -> ugv_driver
     led_pub = nh.advertise<std_msgs::ColorRGBA>("/sunray_swarm/" + agent_name + "/led", 1);
     // 【发布】智能体状态 本节点 -> 地面站
-    agent_state_pub = nh.advertise<sunray_msgs::agent_state>("/sunray_swarm/rmtt/agent_state", 1); 
+    agent_state_pub = nh.advertise<sunray_msgs::agent_state>("/sunray_swarm/ugv/agent_state", 10); 
     // 【发布】无人车marker 本节点 -> RVIZ
     ugv_mesh_pub = nh.advertise<visualization_msgs::Marker>("/sunray_swarm/" + agent_name + "/mesh", 1);
     // 【发布】无人车运动轨迹  本节点 -> RVIZ

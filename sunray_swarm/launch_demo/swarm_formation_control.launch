@@ -1,5 +1,5 @@
 <launch>
 	<node pkg="sunray_swarm" name="swarm_formation_control" type="swarm_formation_control" output="screen">
-		<rosparam command="load" file="$(find sunray_swarm)/launch_demo/rmtt_params_3.yaml" />
+		<rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" />
 	</node>
 </launch>

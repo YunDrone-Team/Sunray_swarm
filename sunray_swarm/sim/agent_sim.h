@@ -39,6 +39,7 @@ class AGENT_SIM
         // 订阅话题
         ros::Subscriber agent_cmd_sub;
         ros::Subscriber agent_cmd_vel_sub;
+        ros::Subscriber ugv_cmd_sub;
 
         // 发布话题
         ros::Publisher mocap_pos_pub;

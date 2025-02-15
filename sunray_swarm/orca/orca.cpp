@@ -51,7 +51,9 @@ void ORCA::init(ros::NodeHandle& nh)
     {
         agent_name = agent_prefix + std::to_string(i+1);
         // 【订阅】无人机状态数据
-        agent_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/rmtt/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
+        // agent_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/rmtt/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
+        // 【订阅】无人机状态数据
+        // agent_ugv_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/ugv/agent_state", 20, boost::bind(&ORCA::agent_state_cb_ugv,this ,_1,i));
         // 【订阅】无人机的目标点
         agent_goal_sub[i] = nh.subscribe<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 1, boost::bind(&ORCA::agent_goal_cb,this ,_1,i));
         // 【发布】智能体控制指令
@@ -61,8 +63,25 @@ void ORCA::init(ros::NodeHandle& nh)
         // 【发布】目标点marker 本节点 -> RVIZ
         goal_point_pub[i] = nh.advertise<visualization_msgs::Marker>("/sunray_swarm" + agent_name + "/goal_point_rviz", 1);   
     }
-    //发布缓存需要较大
-    agent_rmtt_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 8); 
+
+    if(agent_type == sunray_msgs::agent_state::RMTT)
+    {
+            agent_state_sub = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/rmtt/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1));
+            agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 8); 
+
+    }
+    else if(agent_type == sunray_msgs::agent_state::UGV)
+    {
+            agent_state_sub = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/ugv/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this, _1));
+            agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 8); 
+
+
+    }
+
+    // //发布缓存需要较大
+    // agent_rmtt_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 8); 
+    // //发布缓存需要较大
+    // agent_ugv_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 8); 
 
     // 打印定时器
     debug_timer = nh.createTimer(ros::Duration(10.0), &ORCA::debugCb, this);
@@ -133,7 +152,7 @@ bool ORCA::orca_run()
             agent_cmd[i].desired_pos.z = agent_height; 
             agent_cmd[i].desired_yaw = 0.0;
             // agent_cmd_pub[i].publish(agent_cmd[i]);
-            agent_rmtt_cmd_pub.publish(agent_cmd[i]);
+            agent_cmd_pub.publish(agent_cmd[i]);
             if (!goal_reached_printed[i])
             {
                 cout << BLUE << node_name << agent_prefix << i+1 << " Arrived." << TAIL << endl;
@@ -160,7 +179,7 @@ bool ORCA::orca_run()
             // cout<< "i "<<i<<" agent_cmd[i].agent_id:"<<int(agent_cmd[i].agent_id)<<endl;
 
             // agent_cmd_pub[i].publish(agent_cmd[i]);
-            agent_rmtt_cmd_pub.publish(agent_cmd[i]);
+            agent_cmd_pub.publish(agent_cmd[i]);
             // 只要有一个智能体未到达目标点，整体状态就是未完成
             arrived_all_goal = false;                   
         }
@@ -324,11 +343,12 @@ bool ORCA::reachedGoal(int i)
     return false;
 }
 
-void ORCA::agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg, int i)
+void ORCA::agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg)
 {
     if (msg->agent_id > 0 && msg->agent_id <= 8)
         agent_state[msg->agent_id - 1] = *msg;
 }
+
 
 void ORCA::agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i)
 {

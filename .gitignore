@@ -11,6 +11,7 @@
 # Dirs
 build/
 devel/
+c++/
 
 # Compiled Object files
 *.slo

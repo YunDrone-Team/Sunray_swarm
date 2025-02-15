@@ -1,5 +1,5 @@
 <launch>
 	<node pkg="sunray_swarm" name="rmtt_waypoint" type="rmtt_waypoint" output="screen">
-		<rosparam command="load" file="$(find sunray_swarm)/launch_demo/rmtt_params.yaml" />
+		<rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params_single.yaml" />
 	</node>
 </launch>

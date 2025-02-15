@@ -61,21 +61,26 @@ class ORCA
         std_msgs::String text_info;
         
         // 订阅话题
-        ros::Subscriber agent_state_sub[MAX_NUM];
+        // ros::Subscriber agent_state_sub[MAX_NUM];
+
         ros::Subscriber agent_goal_sub[MAX_NUM];
         ros::Subscriber orca_cmd_sub;
+        ros::Subscriber agent_state_sub;
+
 
         // 发布话题
-        ros::Publisher agent_cmd_pub[MAX_NUM];
+        // ros::Publisher agent_cmd_pub[MAX_NUM];
         ros::Publisher agent_orca_state_pub[MAX_NUM];
         ros::Publisher goal_point_pub[MAX_NUM];
         ros::Publisher text_info_pub;
         ros::Publisher agent_rmtt_cmd_pub;
+        ros::Publisher agent_ugv_cmd_pub;
+        ros::Publisher agent_cmd_pub;
 
         ros::Timer debug_timer;
         void orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg);
         void debugCb(const ros::TimerEvent &e);
-        void agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg, int i);
+        void agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg);
         void agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i);
         void setup_obstacles();
         void setup_agents();
