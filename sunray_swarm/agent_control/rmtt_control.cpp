@@ -50,25 +50,25 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     // mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
     mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &RMTT_CONTROL::mocap_vel_cb, this);
     // 根据 pose_source 参数选择数据源
-        if (pose_source == 1)
-        {
-            ROS_INFO("Using VRPN Motion Capture Data");
-            // 订阅 VRPN 动捕数据
-            mocap_pos_sub = nh.subscribe("/vrpn_client_node/" + agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
-        }
-        else if (pose_source == 2)
-        {
-            ROS_INFO("Using Map Pose Data");
-            // 订阅地图数据
-            map_pose_sub = nh.subscribe("/sunray_swarm/" + agent_name + "/map_pose", 1, &RMTT_CONTROL::map_pos_cb,this);
-            agent_state.odom_valid = true;
-        }
-        else
-        {
-            ROS_WARN("Unknown pose_source parameter, defaulting to VRPN Motion Capture Data");
-            // 默认选择 VRPN 数据
-            mocap_pos_sub = nh.subscribe("/vrpn_client_node/" + agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
-        }    
+    if (pose_source == 1)
+    {
+        ROS_INFO("Using VRPN Motion Capture Data");
+        // 订阅 VRPN 动捕数据
+        mocap_pos_sub = nh.subscribe("/vrpn_client_node/" + agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
+    }
+    else if (pose_source == 2)
+    {
+        ROS_INFO("Using Map Pose Data");
+        // 订阅地图数据
+        map_pose_sub = nh.subscribe("/sunray_swarm/" + agent_name + "/map_pose", 1, &RMTT_CONTROL::map_pos_cb,this);
+        agent_state.odom_valid = true;
+    }
+    else
+    {
+        ROS_WARN("Unknown pose_source parameter, defaulting to VRPN Motion Capture Data");
+        // 默认选择 VRPN 数据
+        mocap_pos_sub = nh.subscribe("/vrpn_client_node/" + agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
+    }    
     // 【订阅】地面站指令 地面站 -> 本节点
     agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 1, &RMTT_CONTROL::agent_cmd_cb, this);
     // 【订阅】rmtt电池的数据 rmtt_driver -> 本节点

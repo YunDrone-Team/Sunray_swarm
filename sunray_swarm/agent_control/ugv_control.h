@@ -30,6 +30,7 @@ class UGV_CONTROL
         string agent_prefix{""};           
         string agent_ip;
         string agent_name;
+        int pose_source;
         int agent_id;                     // 无人机编号
         bool flag_printf;
         bool sim_mode;
@@ -81,6 +82,7 @@ class UGV_CONTROL
         // 订阅话题
         ros::Subscriber mocap_pos_sub;
         ros::Subscriber mocap_vel_sub;
+        ros::Subscriber viobot_odom_sub;
         ros::Subscriber ugv_cmd_sub;
         ros::Subscriber battery_sub;
 
@@ -100,6 +102,7 @@ class UGV_CONTROL
 
         void mocap_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg);
         void mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg);
+        void odom_cb(const nav_msgs::OdometryConstPtr& msg);
         void agnet_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg);
         void battery_cb(const std_msgs::Float32ConstPtr& msg);
         void timercb_state(const ros::TimerEvent &e);

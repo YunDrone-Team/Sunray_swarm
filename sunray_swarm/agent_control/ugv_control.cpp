@@ -16,6 +16,8 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     nh.param<double>("desired_yaw", desired_yaw, 0.0f);
     // 【参数】是否打印
     nh.param<bool>("flag_printf", flag_printf, true);
+    // 【参数】设置获取数据源
+    nh.param<int>("pose_source", pose_source, 1);
     // 【参数】悬停控制参数 - xy
     nh.param<float>("ugv_control_param/Kp_xy", ugv_control_param.Kp_xy, 1.5);
     // 【参数】悬停控制参数 - yaw
@@ -32,24 +34,29 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     nh.param<float>("ugv_geo_fence/max_z", ugv_geo_fence.max_z, 2.0);
     nh.param<float>("ugv_geo_fence/min_z", ugv_geo_fence.min_z, -0.1);
 
-    if(agent_type == sunray_msgs::agent_state::RMTT)
-    {
-        agent_prefix = "rmtt_";
-    }else if(agent_type == sunray_msgs::agent_state::UGV)
-    {
-        agent_prefix = "ugv_";
-    }else if(agent_type == sunray_msgs::agent_state::SIKONG)
-    {
-        agent_prefix = "sikong_";
-    }else
-    {
-        agent_prefix = "unkonown_";
-    }
-
+    agent_prefix = "ugv_";
     agent_name = agent_prefix + std::to_string(agent_id);
-    // 【订阅】订阅动捕的数据(位置+速度) vrpn -> 本节点
-    mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &UGV_CONTROL::mocap_pos_cb, this);
-    mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &UGV_CONTROL::mocap_vel_cb, this);
+
+    // 根据 pose_source 参数选择数据源
+    if (pose_source == 1)
+    {
+        ROS_INFO("Using VRPN Motion Capture Data");
+        // 【订阅】订阅动捕的数据(位置+速度) vrpn -> 本节点
+        mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &UGV_CONTROL::mocap_pos_cb, this);
+        mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &UGV_CONTROL::mocap_vel_cb, this);
+    }
+    else if (pose_source == 2)
+    {
+        ROS_INFO("Using VIOBOT Pose Data");
+        // 订阅地图数据
+        viobot_odom_sub = nh.subscribe("/sunray/robobaton_mini/odom", 1, &UGV_CONTROL::odom_cb,this);
+    }
+    else
+    {
+        ROS_WARN("Unknown pose_source parameter, defaulting to VRPN Motion Capture Data");
+    }   
+
+
     // 【订阅】地面站指令 地面站 -> 本节点
     ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 1, &UGV_CONTROL::agnet_cmd_cb, this);
     // 【订阅】ugv电池的数据 ugv_driver -> 本节点
@@ -115,11 +122,6 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     text_info_pub.publish(text_info);
     cout << BLUE << text_info.data << TAIL << endl;
 }
-
-
-
-
-
 
 void UGV_CONTROL::mainloop()
 {
@@ -442,6 +444,28 @@ void UGV_CONTROL::mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg)
     agent_state.vel[1] = msg->twist.linear.y;
 	agent_state.vel[2] = msg->twist.linear.z;
 }
+
+void UGV_CONTROL::odom_cb(const nav_msgs::OdometryConstPtr& msg)
+{
+    get_mocap_time = ros::Time::now(); // 记录时间戳，防止超时
+	agent_state.pos[0] = msg->pose.pose.position.x;
+    agent_state.pos[1] = msg->pose.pose.position.y;
+	agent_state.pos[2] = agent_height;
+	agent_state.vel[0] = msg->twist.twist.linear.x;
+    agent_state.vel[1] = msg->twist.twist.linear.y;
+	agent_state.vel[2] = msg->twist.twist.linear.z;
+    agent_state.attitude_q = msg->pose.pose.orientation;
+
+    Eigen::Quaterniond q_mocap = Eigen::Quaterniond(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z);
+    Eigen::Vector3d agent_att = quaternion_to_euler(q_mocap);
+
+	agent_state.att[0] = agent_att.x();
+    agent_state.att[1] = agent_att.y();
+	agent_state.att[2] = agent_att.z();
+
+    agent_state.odom_valid = true;
+}
+
 
 void UGV_CONTROL::battery_cb(const std_msgs::Float32ConstPtr& msg)
 {

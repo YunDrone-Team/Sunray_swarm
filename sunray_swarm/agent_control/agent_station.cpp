@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	int agent_num;
 	int agent_id;
     int agent_type;
-    nh.param<int>("agent_type", agent_type, 2);
+    nh.param<int>("agent_type", agent_type, 1);
     nh.param<int>("agent_num", agent_num, 8);
     nh.param<int>("agent_id", agent_id, 1);
 
