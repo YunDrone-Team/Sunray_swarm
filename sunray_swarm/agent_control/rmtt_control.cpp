@@ -47,8 +47,13 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     // 【订阅】订阅rmtt动捕的数据(位置+速度) vrpn -> 本节点
     mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
     mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &RMTT_CONTROL::mocap_vel_cb, this);
-    // 【订阅】地面站指令 地面站 -> 本节点
+    // 【订阅】地面站/ORCA指令 地面站/ORCA -> 本节点
     agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 10, &RMTT_CONTROL::agent_cmd_cb, this);
+
+    
+    // 【订阅】地面站指令 地面站 -> 本节点
+    agent_gs_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt_gs/agent_cmd", 10, &RMTT_CONTROL::agent_gs_cmd_cb, this);
+
     // 【订阅】rmtt电池的数据 rmtt_driver -> 本节点
     battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm/" + agent_name + "/battery", 1, &RMTT_CONTROL::battery_cb, this);  
     
@@ -149,7 +154,7 @@ void RMTT_CONTROL::mainloop()
         break;
 
     case sunray_msgs::agent_cmd::POS_CONTROL:
-        // 位置控制
+        // 位置控制 
         pos_control(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
         break;
 
@@ -276,6 +281,82 @@ void RMTT_CONTROL::rotation_yaw(double yaw_angle, float body_frame[2], float enu
 {
     body_frame[0] = enu_frame[0] * cos(yaw_angle) + enu_frame[1] * sin(yaw_angle);
     body_frame[1] = -enu_frame[0] * sin(yaw_angle) + enu_frame[1] * cos(yaw_angle);
+}
+
+void RMTT_CONTROL::agent_gs_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
+{
+    if(msg->agent_id != agent_id && msg->agent_id != 99)
+    {
+        return;
+    }
+
+    switch(msg->control_state) 
+    {
+        case sunray_msgs::agent_cmd::INIT:
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: INIT!";
+            cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::HOLD:
+            set_desired_position();
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: HOLD!";
+            cout << BLUE << text_info.data << TAIL << endl;
+            //直接在回调中执行
+            pos_control(desired_position, desired_yaw);
+            break;
+        case sunray_msgs::agent_cmd::POS_CONTROL:
+            desired_position.x = msg->desired_pos.x;
+            desired_position.y = msg->desired_pos.y;
+            desired_position.z = agent_height;
+            desired_yaw = msg->desired_yaw;
+            // text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: POS_CONTROL!";
+            // cout << BLUE << "POS_REF [X Y Z] : " << desired_position.x   << " [ m ] " << desired_position.y   << " [ m ] " << desired_position.z   << " [ m ] " << TAIL << endl;
+            // cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:
+             text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_BODY!";
+            // cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::VEL_CONTROL_ENU:
+             text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_ENU!";
+            // cout << BLUE << text_info.data << TAIL << endl;
+            break;
+        case sunray_msgs::agent_cmd::TAKEOFF:
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: TAKEOFF!";
+            cout << BLUE << text_info.data << TAIL << endl;
+            //直接在回调中执行
+            // 起飞
+            takeoff_pub.publish(takeoff); 
+            // 等待飞机起飞，此时不能发送其他指令
+            text_info_pub.publish(text_info);
+            sleep(5.0);
+            // 起飞后进入悬停状态，并设定起飞点上方为悬停点
+            set_desired_position();
+            current_agent_cmd.control_state = sunray_msgs::agent_cmd::HOLD;
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: HOLD!";
+            text_info_pub.publish(text_info);
+            return;
+        case sunray_msgs::agent_cmd::LAND:
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: LAND!";
+            cout << BLUE << text_info.data << TAIL << endl;
+            // 降落
+            land_pub.publish(land);
+            text_info_pub.publish(text_info);
+            // 等待飞机降落，此时不能发送其他指令
+            sleep(5.0); 
+            // 降落后进入INIT
+            current_agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: INIT!";
+            text_info_pub.publish(text_info);
+            return;
+        default:
+            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: Wrong!";
+            cout << RED << text_info.data << TAIL << endl;
+            return;
+            break;
+    }
+    text_info_pub.publish(text_info);
+
+    current_agent_cmd = *msg; 
 }
 
 void RMTT_CONTROL::agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)

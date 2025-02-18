@@ -89,6 +89,8 @@ class RMTT_CONTROL
         ros::Subscriber mocap_vel_sub;
         ros::Subscriber agent_cmd_sub;
         ros::Subscriber battery_sub;
+        ros::Subscriber agent_gs_cmd_sub;
+
 
         // 发布话题
         ros::Publisher agent_cmd_vel_pub;
@@ -112,6 +114,8 @@ class RMTT_CONTROL
         void mocap_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg);
         void mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg);
         void agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg);
+        void agent_gs_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg);
+
         void battery_cb(const std_msgs::Float32ConstPtr& msg);
         void orca_cmd_vel_cb(const geometry_msgs::TwistConstPtr& msg);
         void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg);
