@@ -40,28 +40,26 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     // 根据 pose_source 参数选择数据源
     if (pose_source == 1)
     {
-        ROS_INFO("Using VRPN Motion Capture Data");
+        cout << GREEN << "Pose source: Mocap" << TAIL << endl;
         // 【订阅】订阅动捕的数据(位置+速度) vrpn -> 本节点
         mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &UGV_CONTROL::mocap_pos_cb, this);
         mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &UGV_CONTROL::mocap_vel_cb, this);
     }
     else if (pose_source == 2)
     {
-        ROS_INFO("Using VIOBOT Pose Data");
-        // 订阅地图数据
+        cout << GREEN << "Pose source: VIOBOT" << TAIL << endl;
+        // 订阅VIOBOT Odom数据
         viobot_odom_sub = nh.subscribe("/sunray/robobaton_mini/odom", 1, &UGV_CONTROL::odom_cb,this);
     }
     else
     {
-        ROS_WARN("Unknown pose_source parameter, defaulting to VRPN Motion Capture Data");
+        cout << RED << "Pose source: Unknown" << TAIL << endl;
     }   
-
 
     // 【订阅】地面站指令 地面站 -> 本节点
     ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 1, &UGV_CONTROL::agnet_cmd_cb, this);
     // 【订阅】ugv电池的数据 ugv_driver -> 本节点
     battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm/" + agent_name + "/battery", 1, &UGV_CONTROL::battery_cb, this);  
-    
     // 【发布】控制指令（机体系，单位：米/秒，Rad/秒）
     agent_cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/sunray_swarm/" + agent_name + "/cmd_vel", 1); 
     // 【发布】led灯 本节点 -> ugv_driver
@@ -83,12 +81,8 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     timer_state_pub = nh.createTimer(ros::Duration(0.1), &UGV_CONTROL::timercb_state, this);
     // 【定时器】 定时发布RVIZ显示相关话题 - 10Hz
     timer_rivz = nh.createTimer(ros::Duration(0.1), &UGV_CONTROL::timercb_rviz, this);
-
     // 【定时器】 定时打印 - 1Hz
     timer_debug = nh.createTimer(ros::Duration(3.0), &UGV_CONTROL::timercb_debug, this);
-
-
-
 
     agent_state.header.stamp = ros::Time::now();
     agent_state.header.frame_id = "world";
