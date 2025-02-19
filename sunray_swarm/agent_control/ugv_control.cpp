@@ -60,7 +60,9 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     // 【发布】led灯 本节点 -> ugv_driver
     led_pub = nh.advertise<std_msgs::ColorRGBA>("/sunray_swarm/" + agent_name + "/led", 1);
     // 【发布】智能体状态 本节点 -> 地面站
-    agent_state_pub = nh.advertise<sunray_msgs::agent_state>("/sunray_swarm/ugv/agent_state", 10); 
+    // agent_state_pub = nh.advertise<sunray_msgs::agent_state>("/sunray_swarm/ugv/agent_state", 10); 
+    // 【发布】智能体状态 本节点 -> 地面站
+    agent_state_pub = nh.advertise<sunray_msgs::agent_state>("/sunray_swarm/" + agent_name + "/agent_state", 10); 
     // 【发布】无人车marker 本节点 -> RVIZ
     ugv_mesh_pub = nh.advertise<visualization_msgs::Marker>("/sunray_swarm/" + agent_name + "/mesh", 1);
     // 【发布】无人车运动轨迹  本节点 -> RVIZ

@@ -51,6 +51,8 @@ void ORCA::init(ros::NodeHandle& nh)
     {
         agent_name = agent_prefix + std::to_string(i+1);
         // 【订阅】无人机状态数据
+        agent_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/" + agent_name + "/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
+        // 【订阅】无人机状态数据
         // agent_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/rmtt/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
         // 【订阅】无人机状态数据
         // agent_ugv_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/ugv/agent_state", 20, boost::bind(&ORCA::agent_state_cb_ugv,this ,_1,i));
@@ -66,13 +68,13 @@ void ORCA::init(ros::NodeHandle& nh)
 
     if(agent_type == sunray_msgs::agent_state::RMTT)
     {
-            agent_state_sub = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/rmtt/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1));
+            // agent_state_sub = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/rmtt/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1));
             agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 8); 
 
     }
     else if(agent_type == sunray_msgs::agent_state::UGV)
     {
-            agent_state_sub = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/ugv/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this, _1));
+            // agent_state_sub = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm/ugv/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this, _1));
             agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 8); 
 
 
@@ -343,10 +345,14 @@ bool ORCA::reachedGoal(int i)
     return false;
 }
 
-void ORCA::agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg)
+// void ORCA::agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg)
+// {
+//     if (msg->agent_id > 0 && msg->agent_id <= 8)
+//         agent_state[msg->agent_id - 1] = *msg;
+// }
+void ORCA::agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg, int i)
 {
-    if (msg->agent_id > 0 && msg->agent_id <= 8)
-        agent_state[msg->agent_id - 1] = *msg;
+    agent_state[i] = *msg;
 }
 
 
