@@ -135,5 +135,7 @@ class RMTT_CONTROL
         void setup_led();
         void setup_mled();
         void setup_color();
+
+        // void agent_gs_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg);
 };
 #endif
