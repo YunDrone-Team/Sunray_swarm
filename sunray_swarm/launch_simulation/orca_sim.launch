@@ -1,0 +1,6 @@
+<launch>
+	<node pkg="sunray_swarm" name="orca_node" type="orca_node" output="screen">
+        <rosparam command="load" file="$(find sunray_swarm)/launch_sim/rmtt_params.yaml" />
+	</node>
+</launch>
+

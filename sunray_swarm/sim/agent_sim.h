@@ -22,17 +22,26 @@ class AGENT_SIM
         bool mainloop();
 
     private:
+        // 节点名称
+        string node_name;   
+        // 智能体类型
         int agent_type;
-        string agent_prefix;
-        string node_name;               // 节点名称
-        int agent_id;                     // 无人机编号
+        // 智能体编号 - 通过参数配置
+        int agent_id;         
+        // 智能体名称 = 智能体类型+ID号
+        string agent_name;
+        // 智能体的固定高度 - 通过参数配置
         float agent_height;
+        // 电池电量
         std_msgs::Float32 battery;
 
-
+        // 智能体当前控制指令
         sunray_msgs::agent_cmd current_agent_cmd;
 
+        // 智能体当前底层控制指令
         geometry_msgs::Twist cmd_vel;
+
+        // 智能体位置+姿态
         geometry_msgs::PoseStamped agent_pos;
         double agent_yaw;
 

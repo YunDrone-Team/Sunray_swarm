@@ -1,3 +1,6 @@
+## 自定义消息：智能体状态
+
+## 消息header
 std_msgs/Header header
 
 ## 基本状态
@@ -22,4 +25,3 @@ uint8 control_state
 ## agent_type枚举
 uint8 RMTT = 0
 uint8 UGV = 1
-uint8 SIKONG = 2

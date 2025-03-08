@@ -1,8 +1,0 @@
-<launch>
-    <arg name="agent_type" default="0" />
-
-	<node pkg="sunray_swarm" name="agent_station" type="agent_station" output="screen">
-		<param name="agent_type" type="int" value="$(arg agent_type)" />
-		<rosparam command="load" file="$(find sunray_swarm)/launch_sim/ugv_params.yaml" />
-	</node>
-</launch>

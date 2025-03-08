@@ -72,9 +72,9 @@ add_executable(rmtt_control_node
 target_link_libraries(rmtt_control_node ${catkin_LIBRARIES})
 
 ## 终端地面站
-add_executable(agent_station agent_control/agent_station.cpp)
-add_dependencies(agent_station sunray_swarm_gencpp)
-target_link_libraries(agent_station ${catkin_LIBRARIES})
+add_executable(agent_terminal_station agent_control/agent_terminal_station.cpp)
+add_dependencies(agent_terminal_station sunray_swarm_gencpp)
+target_link_libraries(agent_terminal_station ${catkin_LIBRARIES})
 
 ## ORCA
 add_executable(orca_node

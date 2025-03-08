@@ -109,10 +109,6 @@ int main(int argc, char **argv)
     {
         agent_prefix = "ugv_";
     }
-    else if (agent_type == sunray_msgs::agent_state::SIKONG)
-    {
-        agent_prefix = "sikong_";
-    }
     else
     {
         agent_prefix = "unkonown_";

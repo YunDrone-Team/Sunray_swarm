@@ -9,6 +9,8 @@ int main(int argc, char **argv)
     ros::NodeHandle nh("~");
     ros::Rate rate(100.0);
 
+    sleep(2.0);
+    
     // rmtt仿真器
     AGENT_SIM agent_sim;
     agent_sim.init(nh);

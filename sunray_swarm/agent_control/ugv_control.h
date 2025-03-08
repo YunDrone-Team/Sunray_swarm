@@ -12,7 +12,7 @@
 using namespace std;
 
 #define TRA_WINDOW 50        
-#define MOCAP_TIMEOUT 0.35                 
+#define ODOM_TIMEOUT 0.35                 
 
 class UGV_CONTROL
 {
@@ -25,59 +25,61 @@ class UGV_CONTROL
         void mainloop();
 
     private:
+        // 节点名称
+        string node_name;     
+        // 智能体类型 - RMTT
         int agent_type;
-        string node_name;               // 节点名称
-        string agent_prefix{""};           
-        string agent_ip;
+        // 智能体编号 - 通过参数配置
+        int agent_id;                     
+        // 智能体名称 = 智能体类型+ID号
         string agent_name;
-        int pose_source;
-        int agent_id;                     // 无人机编号
-        bool flag_printf;
-        bool sim_mode;
-        ros::Time get_mocap_time{0};
-        bool get_target_pos{false};
-        string target_name;
+        // 智能体IP - 通过参数配置
+        string agent_ip;
+        // 智能体的固定高度 - 通过参数配置
         float agent_height;
-
-        sunray_msgs::agent_state agent_state;           
-        sunray_msgs::agent_state agent_state_last;      
-        geometry_msgs::Point desired_position;
-        double desired_yaw;
-
-        geometry_msgs::Twist desired_vel;
-
-        std_msgs::ColorRGBA led_color;
-        std_msgs::String text_info;
-        vector<geometry_msgs::PoseStamped> pos_vector;    // 无人机轨迹容器,用于rviz显示
-
-        // 地理围栏
+        // 智能体位置来源（1：代表动捕、2代表viobot odom） - 通过参数配置
+        int pose_source;
+        // 是否打印 - 通过参数配置
+        bool flag_printf;
+        // 悬停控制参数 - 通过参数配置
+        struct control_param
+        {
+            float Kp_xy;
+            float Kp_yaw;
+            float max_vel_xy;
+            float max_vel_yaw;
+        };
+        control_param ugv_control_param;
+        // 地理围栏 - 通过参数配置
         struct geo_fence
         {
             float max_x;
             float min_x;
             float max_y;
             float min_y;
-            float max_z;
-            float min_z;
         };
         geo_fence ugv_geo_fence;
 
-        // 悬停控制参数
-        struct control_param
-        {
-            float Kp_xy;
-            float Kp_z;
-            float Kp_yaw;
-            float max_vel_xy;
-            float max_vel_z;
-            float max_vel_yaw;
-        };
-        control_param ugv_control_param;
+        // 智能体当前状态
+        sunray_msgs::agent_state agent_state;   
+        // 智能体上一时刻状态        
+        sunray_msgs::agent_state agent_state_last; 
+        // 智能体获得上一帧定位数据的时间（用于检查定位数据获取是否超时）
+        ros::Time get_odom_time{0};
 
-        bool all_odom_valid{false};
-        bool all_connected{false};
-
+        // 智能体当前控制指令
         sunray_msgs::agent_cmd current_agent_cmd;
+        // 智能体当前期望位置+偏航角（来自外部控制指令赋值）    
+        geometry_msgs::Point desired_position;
+        double desired_yaw{0.0};
+        // 智能体当前期望速度
+        geometry_msgs::Twist desired_vel;
+
+        // 以下为辅助变量
+        std_msgs::ColorRGBA led_color;
+        std_msgs::String text_info;
+        // 轨迹容器,用于rviz显示
+        vector<geometry_msgs::PoseStamped> pos_vector;    
 
         // 订阅话题
         ros::Subscriber mocap_pos_sub;
@@ -93,8 +95,10 @@ class UGV_CONTROL
         ros::Publisher ugv_mesh_pub;
         ros::Publisher ugv_trajectory_pub;
         ros::Publisher text_info_pub;
-        ros::Publisher goal_point_pub,vel_rviz_pub;
-
+        ros::Publisher goal_point_pub;
+        ros::Publisher vel_rviz_pub;
+        
+        // 定时器
         ros::Timer timer_state_pub;
         ros::Timer timer_rivz;
         ros::Timer timer_debug;
@@ -110,7 +114,7 @@ class UGV_CONTROL
         void timercb_debug(const ros::TimerEvent &e);
         void printf_param();
         void set_desired_position();
-        void check_geo_fence();
+        bool check_geo_fence();
         geometry_msgs::Twist enu_to_body(geometry_msgs::Twist enu_cmd);
         void pos_control(geometry_msgs::Point pos_ref, double yaw_ref);
         float constrain_function(float data, float Max, float Min);
@@ -119,7 +123,6 @@ class UGV_CONTROL
 
         void rotation_yaw(double yaw_angle, float body_frame[2], float enu_frame[2]);
         void setup_led();
-        void setup_color();
-
+        void setup_rviz_color();
 };
 #endif

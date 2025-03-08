@@ -35,9 +35,6 @@ void ORCA::init(ros::NodeHandle& nh)
     }else if(agent_type == sunray_msgs::agent_state::UGV)
     {
         agent_prefix = "/ugv_";
-    }else if(agent_type == sunray_msgs::agent_state::SIKONG)
-    {
-        agent_prefix = "/sikong_";
     }else
     {
         agent_prefix = "/unkonown_";
@@ -475,9 +472,6 @@ void ORCA::printf_param()
     }else if(agent_type == sunray_msgs::agent_state::UGV)
     {
         cout << GREEN << "agent_type : UGV" << TAIL << endl;
-    }else if(agent_type == sunray_msgs::agent_state::SIKONG)
-    {
-        cout << GREEN << "agent_type : SIKONG" << TAIL << endl;
     }else
     {
         cout << GREEN << "agent_type : UNKONWN" << TAIL << endl;

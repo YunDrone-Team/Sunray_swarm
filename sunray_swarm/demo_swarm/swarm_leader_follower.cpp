@@ -61,9 +61,6 @@ int main(int argc, char **argv)
     case sunray_msgs::agent_state::UGV:
         agent_prefix = "ugv_";
         break;
-    case sunray_msgs::agent_state::SIKONG:
-        agent_prefix = "sikong_";
-        break;
     default:
         agent_prefix = "unknown_";
         break;
