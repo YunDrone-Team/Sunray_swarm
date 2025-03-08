@@ -30,6 +30,7 @@ int main(int argc, char **argv)
 
     bool arrived_all_goals{false};
 
+    // 等待ORCA算法启动
     while(!orca.start_flag && ros::ok())
     {
         // 回调函数

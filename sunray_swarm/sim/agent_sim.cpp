@@ -23,15 +23,13 @@ void AGENT_SIM::init(ros::NodeHandle& nh)
     if(agent_type == sunray_msgs::agent_state::RMTT)
     {
         agent_name = "/rmtt_" + std::to_string(agent_id);
-        // 【订阅】智能体控制指令 地面站/ORCA等上层算法 -> 本节点 
-        agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 1, &AGENT_SIM::agent_cmd_cb, this);  
     }else if(agent_type == sunray_msgs::agent_state::UGV)
     {
         agent_name = "/ugv_" + std::to_string(agent_id);
-        // 【订阅】智能体控制指令 地面站/ORCA等上层算法 -> 本节点 
-        agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 1, &AGENT_SIM::agent_cmd_cb, this); 
     }
 
+    // 【订阅】智能体控制指令 地面站/ORCA等上层算法 -> 本节点 
+    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1, &AGENT_SIM::agent_cmd_cb, this); 
     // 【订阅】智能体底层控制指令 智能体控制节点(rmtt_control/ugv_control) -> 本节点
     agent_cmd_vel_sub = nh.subscribe<geometry_msgs::Twist>("/sunray_swarm" + agent_name + "/cmd_vel", 1, &AGENT_SIM::agent_cmd_vel_cb, this);
     // 【发布】伪装成动捕的位置数据发布 本节点 -> 智能体控制节点(rmtt_control/ugv_control)
@@ -47,7 +45,7 @@ void AGENT_SIM::init(ros::NodeHandle& nh)
     agent_pos.pose.orientation = ros_quaternion_from_rpy(0.0, 0.0, agent_yaw);
     mocap_pos_pub.publish(agent_pos);
 
-    cout << GREEN << node_name << " init! " << TAIL << endl;
+    cout << GREEN << node_name << " ---------------> init! " << TAIL << endl;
     if(agent_type == sunray_msgs::agent_state::RMTT)
     {
         cout << GREEN << "agent_type : RMTT" << TAIL << endl;

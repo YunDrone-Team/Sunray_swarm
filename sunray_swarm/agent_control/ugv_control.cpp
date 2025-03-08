@@ -51,7 +51,9 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     }   
 
     // 【订阅】智能体控制指令 地面站/ORCA等上层算法 -> 本节点
-    ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 1, &UGV_CONTROL::agnet_cmd_cb, this);
+    ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 50, &UGV_CONTROL::agnet_cmd_cb, this);
+    // 【订阅】智能体控制指令 ORCA算法 -> 本节点
+    ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &UGV_CONTROL::agnet_cmd_cb, this);
     // 【订阅】ugv电池的数据 ugv_driver -> 本节点
     battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm/" + agent_name + "/battery", 1, &UGV_CONTROL::battery_cb, this);  
     

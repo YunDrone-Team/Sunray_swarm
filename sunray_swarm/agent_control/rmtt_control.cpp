@@ -62,7 +62,7 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     }  
 
     // 【订阅】智能体控制指令 ORCA等上层算法 -> 本节点
-    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 10, &RMTT_CONTROL::agent_cmd_cb, this);
+    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &RMTT_CONTROL::agent_cmd_cb, this);
     // 【订阅】智能体控制指令 地面站 -> 本节点
     agent_gs_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt_gs/agent_cmd", 10, &RMTT_CONTROL::agent_gs_cmd_cb, this);   
     // 【订阅】rmtt电池的数据 rmtt_driver -> 本节点

@@ -26,26 +26,29 @@ void ORCA::init(ros::NodeHandle& nh)
     string agent_prefix;
     if(agent_type == sunray_msgs::agent_state::RMTT)
     {
-        agent_prefix = "/rmtt";
+        agent_prefix = "/rmtt_";
+        // 【订阅】ORCA算法指令 地面站/其他节点 -> 本节点
+        orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm/rmtt/orca_cmd", 10, &ORCA::orca_cmd_cb, this);
+        // 【发布】智能体控制指令 本节点 -> 智能体控制节点
+        agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 100);         
     }
     else if(agent_type == sunray_msgs::agent_state::UGV)
     {
-        agent_prefix = "/ugv";
+        agent_prefix = "/ugv_";
+        // 【订阅】ORCA算法指令 地面站/其他节点 -> 本节点
+        orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm/ugv/orca_cmd", 10, &ORCA::orca_cmd_cb, this);
+        // 【发布】智能体控制指令 本节点 -> 智能体控制节点
+        agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 100); 
     }
-
-    // 【订阅】ORCA算法指令 地面站/其他节点 -> 本节点
-    orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm" + agent_prefix + "/orca_cmd", 10, &ORCA::orca_cmd_cb, this);
 
     string agent_name;
     for(int i = 0; i < agent_num; i++) 
     {
-        agent_name = agent_prefix + "_" + std::to_string(i+1);
+        agent_name = agent_prefix + std::to_string(i+1);
         // 【订阅】智能体状态数据 智能体控制节点 -> 本节点
         agent_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm" + agent_name + "/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
         // 【订阅】智能体目标点 地面站/其他节点 -> 本节点
         agent_goal_sub[i] = nh.subscribe<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 10, boost::bind(&ORCA::agent_goal_cb,this ,_1,i));
-        // 【发布】智能体控制指令 本节点 -> 智能体控制节点
-        agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10); 
         // 【发布】无人机orca状态 本节点 -> 地面站/其他节点
 		agent_orca_state_pub[i] = nh.advertise<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1);
         // 【发布】目标点marker 本节点 -> RVIZ （仿真）
@@ -128,7 +131,7 @@ bool ORCA::orca_run()
             agent_cmd[i].desired_pos.y = sim->getAgentGoal(i).y();
             agent_cmd[i].desired_pos.z = agent_height; 
             agent_cmd[i].desired_yaw = 0.0;
-            agent_cmd_pub[i].publish(agent_cmd[i]);
+            agent_cmd_pub.publish(agent_cmd[i]);
             sleep(0.01);
             // 当智能体抵达目标点时，会打印一次
             if (!goal_reached_printed[i])
@@ -153,7 +156,7 @@ bool ORCA::orca_run()
             agent_cmd[i].desired_vel.angular.x = 0.0;
             agent_cmd[i].desired_vel.angular.y = 0.0;
             agent_cmd[i].desired_vel.angular.z = 0.0; 
-            agent_cmd_pub[i].publish(agent_cmd[i]);
+            agent_cmd_pub.publish(agent_cmd[i]);
             sleep(0.01);
             // 只要有一个智能体未到达目标点，整体状态就是未完成
             arrived_all_goal = false;                   
@@ -420,30 +423,6 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         sim->processObstacles();
 
         text_info.data = "Received orca_cmd: SETUP_OBS"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
-    }
-
-    // 当orca_cmd为ORCA_STOP时，不更改目标点，但是停止ORCA算法运行
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_STOP)
-    {
-        start_flag = false;
-        // 发送HOLD指令
-        for(int i = 0; i < agent_num; ++i) 
-        {	
-            agent_cmd[i].agent_id = i+1;
-            agent_cmd[i].control_state = sunray_msgs::agent_cmd::HOLD;
-            agent_cmd[i].cmd_source = "ORCA";
-            agent_cmd_pub[i].publish(agent_cmd[i]);
-        }
-        text_info.data = "Get orca_cmd: ORCA_STOP!"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
-    }
-
-    // 当orca_cmd为ORCA_RESTART时，不更改此前目标点，继续运行ORCA算法
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_RESTART)
-    {
-        start_flag = true;
-        text_info.data = "Get orca_cmd: ORCA_RESTART!"; 
         cout << BLUE << node_name << text_info.data << TAIL << endl;
     }
 

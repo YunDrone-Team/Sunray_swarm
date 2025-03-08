@@ -6,7 +6,8 @@
 using namespace std;
 #define MAX_NUM 20
 
-ros::Publisher agent_cmd_pub;
+ros::Publisher agent_cmd_pub[MAX_NUM];
+ros::Publisher orca_cmd_pub;
 sunray_msgs::agent_cmd agent_cmd;
 sunray_msgs::orca_cmd orca_cmd;
 
@@ -21,20 +22,25 @@ int main(int argc, char **argv)
     nh.param<int>("agent_num", agent_num, 1);
     nh.param<int>("agent_id", agent_id, 1);
 
-    string agent_name;
+    string agent_prefix;
     if(agent_type == sunray_msgs::agent_state::RMTT)
     {
-        agent_name = "/rmtt_" + std::to_string(agent_id);
-        // 【发布】智能体控制指令 本节点 -> 智能体控制节点  
-        agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt/agent_cmd", 1);  
+        agent_prefix = "/rmtt";
     }else if(agent_type == sunray_msgs::agent_state::UGV)
     {
-        agent_name = "/ugv_" + std::to_string(agent_id);
-        // 【发布】智能体控制指令 本节点 -> 智能体控制节点
-        agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 1);  
+        agent_prefix = "/ugv";
     }
 
-	// ros::Publisher orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm" + agent_prefix + "/orca_cmd", 1);	
+	// 【发布】ORCA控制指令 本节点 -> 智能体控制节点  
+	orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm" + agent_prefix + "/orca_cmd", 1);	
+
+    string agent_name;
+    for(int i = 0; i < agent_num; i++) 
+    {
+        agent_name = agent_prefix + "_" + std::to_string(i+1);
+		// 【发布】智能体控制指令 本节点 -> 智能体控制节点
+		agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1);
+    }
 
 	agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
 	agent_cmd.agent_id = 99;
@@ -78,14 +84,24 @@ int main(int argc, char **argv)
 		{
 			case 0:
                 agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
-				agent_cmd.agent_id = 99;
-				agent_cmd_pub.publish(agent_cmd);
+				for(int i = 0; i < agent_num; i++) 
+				{
+					agent_cmd.agent_id = i+1;
+					agent_cmd_pub[i].publish(agent_cmd);
+				}
 				break;
 			
 			case 1:
                 agent_cmd.control_state = sunray_msgs::agent_cmd::HOLD;
-				agent_cmd.agent_id = 99;
-				agent_cmd_pub.publish(agent_cmd);
+
+				orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_STOP;
+				orca_cmd_pub.publish(orca_cmd);
+
+				for(int i = 0; i < agent_num; i++) 
+				{
+					agent_cmd.agent_id = i+1;
+					agent_cmd_pub[i].publish(agent_cmd);
+				}
 				break;
 
             case 2:
@@ -98,8 +114,11 @@ int main(int argc, char **argv)
 				cin >> agent_cmd.desired_yaw;
 				agent_cmd.desired_yaw = agent_cmd.desired_yaw / 180.0 * M_PI;
 				agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-				agent_cmd.agent_id = 99;
-				agent_cmd_pub.publish(agent_cmd);
+				for(int i = 0; i < agent_num; i++) 
+				{
+					agent_cmd.agent_id = i+1;
+					agent_cmd_pub[i].publish(agent_cmd);
+				}
 				cout << GREEN << "POS_CONTROL, desired pos: [" << agent_cmd.desired_pos.x << "," << agent_cmd.desired_pos.y << "], desired yaw: " << agent_cmd.desired_yaw / M_PI * 180.0 << TAIL << endl;
 			break; 
 
@@ -113,8 +132,11 @@ int main(int argc, char **argv)
 				cin >> agent_cmd.desired_vel.angular.z;
 				agent_cmd.desired_vel.angular.z = agent_cmd.desired_vel.angular.z / 180.0 * M_PI;
 				agent_cmd.control_state = sunray_msgs::agent_cmd::VEL_CONTROL_BODY;
-				agent_cmd.agent_id = 99;
-				agent_cmd_pub.publish(agent_cmd);
+				for(int i = 0; i < agent_num; i++) 
+				{
+					agent_cmd.agent_id = i+1;
+					agent_cmd_pub[i].publish(agent_cmd);
+				}
 				cout << GREEN << "VEL_CONTROL_BODY, desired vel: [" << agent_cmd.desired_vel.linear.x << "," << agent_cmd.desired_vel.linear.y << "], desired yaw: " << agent_cmd.desired_vel.angular.z / M_PI * 180.0 << TAIL << endl;
 				break;
 
@@ -128,49 +150,64 @@ int main(int argc, char **argv)
 				cin >> agent_cmd.desired_vel.angular.z;
 				agent_cmd.desired_vel.angular.z = agent_cmd.desired_vel.angular.z / 180.0 * M_PI;
 				agent_cmd.control_state = sunray_msgs::agent_cmd::VEL_CONTROL_ENU;
-				agent_cmd.agent_id = 99;
-				agent_cmd_pub.publish(agent_cmd);
+				for(int i = 0; i < agent_num; i++) 
+				{
+					agent_cmd.agent_id = i+1;
+					agent_cmd_pub[i].publish(agent_cmd);
+				}
 				cout << GREEN << "VEL_CONTROL_ENU, desired vel: [" << agent_cmd.desired_vel.linear.x << "," << agent_cmd.desired_vel.linear.y << "], desired yaw: " << agent_cmd.desired_vel.angular.z / M_PI * 180.0 << TAIL << endl;
 				break;
 
 			case 11:
                 agent_cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
-				agent_cmd.agent_id = 99;
-				agent_cmd_pub.publish(agent_cmd);
+				for(int i = 0; i < agent_num; i++) 
+				{
+					agent_cmd.agent_id = i+1;
+					agent_cmd_pub[i].publish(agent_cmd);
+				}
 				break;
 
 			case 12:
                 agent_cmd.control_state = sunray_msgs::agent_cmd::LAND;
-				agent_cmd.agent_id = 99;
-				agent_cmd_pub.publish(agent_cmd);
+				for(int i = 0; i < agent_num; i++) 
+				{
+					agent_cmd.agent_id = i+1;
+					agent_cmd_pub[i].publish(agent_cmd);
+				}
 				break;
 
 			case 99:
-				cout << GREEN << "orca_cmd: 0 for SET_HOME, 1 for RETURN_HOME, 2 for ORCA_SCENARIO_1, 3 for ORCA_SCENARIO_2, 4 for ORCA_SCENARIO_3, 5 for ORCA_SCENARIO_4, 6 for ORCA_SCENARIO_5" << TAIL << endl;
+				cout << GREEN << "orca_cmd: 0 for SET_HOME, 1 for RETURN_HOME, 3 for ORCA_STOP, 4 for ORCA_RESTART, 11 for ORCA_SCENARIO_1, 12 for ORCA_SCENARIO_2, 13 for ORCA_SCENARIO_3, 14 for ORCA_SCENARIO_4, 15 for ORCA_SCENARIO_5" << TAIL << endl;
 				cin >> start_cmd;
-				// if(start_cmd == 0)
-				// {
-				// 	orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
-				// }else if(start_cmd == 1)
-				// {
-				// 	orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME;
-				// }else if(start_cmd == 2)
-				// {
-				// 	orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_1;
-				// }else if(start_cmd == 3)
-				// {
-				// 	orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_2;
-				// }else if(start_cmd == 4)
-				// {
-				// 	orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_3;
-				// }else if(start_cmd == 5)
-				// {
-				// 	orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_4;
-				// }else if(start_cmd == 6)
-				// {
-				// 	orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_5;
-				// }
-				// orca_cmd_pub.publish(orca_cmd);
+				if(start_cmd == 0)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
+				}else if(start_cmd == 1)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME;
+				}else if(start_cmd == 3)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_STOP;
+				}else if(start_cmd == 4)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_RESTART;
+				}else if(start_cmd == 11)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_1;
+				}else if(start_cmd == 12)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_2;
+				}else if(start_cmd == 13)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_3;
+				}else if(start_cmd == 14)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_4;
+				}else if(start_cmd == 15)
+				{
+					orca_cmd.orca_cmd = sunray_msgs::orca_cmd::ORCA_SCENARIO_5;
+				}
+				orca_cmd_pub.publish(orca_cmd);
 
 				break;
 
