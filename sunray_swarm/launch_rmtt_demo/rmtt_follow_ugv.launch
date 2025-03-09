@@ -1,0 +1,6 @@
+<launch>
+	<node pkg="sunray_swarm" name="rmtt_follow_ugv" type="rmtt_follow_ugv" output="screen">
+		<param name="agent_id" value="1" />
+		<param name="target_name" value="ugv_1" />
+	</node>
+</launch>

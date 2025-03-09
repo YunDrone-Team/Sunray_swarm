@@ -15,11 +15,11 @@ ros::Publisher agent_cmd_pub[MAX_AGENT_NUM];    // 存储每个智能体的控�
 ros::Publisher text_info_pub;                   // 文字提示消息的发布者
 geometry_msgs::Point reference_point;           // 存储参考轨迹的点
 geometry_msgs::Point offset[MAX_AGENT_NUM];     // 存储各个智能体的偏移量
-bool received_start_cmd = false;                // 标记是否接收到开始命令
+bool demo_start_flag = false;                // 标记是否接收到开始命令
 // 处理触发命令的回调函数
 void swarm_leader_cmd_cb(const std_msgs::Bool::ConstPtr &msg)
 {
-    received_start_cmd = msg->data;             // 设置输入信息
+    demo_start_flag = msg->data;             // 设置输入信息
     start_cmd = 1;
 }
 // 主机轨迹生成函数（可以根据需要修改）
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         // 如果接收到开始命令
-        if (received_start_cmd)
+        if (demo_start_flag)
         {
             // 获取当前时间
             ros::Time current_time = ros::Time::now();

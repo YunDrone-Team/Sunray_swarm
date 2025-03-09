@@ -14,7 +14,7 @@ ros::Publisher orca_goal_pub[MAX_AGENT_NUM];   // 智能体目标点发布器
 std::vector<geometry_msgs::Point> triangle_formation;   //三角形队形的坐标
 std::vector<geometry_msgs::Point> line_formation;       //一字型队形的坐标
 ros::Subscriber swarm_formation_cmd_sub;                //触发条件的订阅者
-bool received_start_cmd = false;                        //标记是否接收到开始命令
+bool demo_start_flag = false;                        //标记是否接收到开始命令
 
 int agent_type;                                         // 代理类型，用于区分无人机和无人车
 
@@ -30,7 +30,7 @@ FORMATION_STATE formation_state;// 当前队形状态
 void swarm_formation_cb(const std_msgs::Bool::ConstPtr& msg) 
 {
     // 设置接收到的开始命令
-    received_start_cmd = msg->data; // 设置接收到的开始命令
+    demo_start_flag = msg->data; // 设置接收到的开始命令
 }
 
 // // ORCA状态回调函数
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         // 检查是否接收到开始命令
-        if(received_start_cmd)
+        if(demo_start_flag)
         {
             // 在三角形和一字型队形之间切换
             switch_formation(formation_state);

@@ -13,7 +13,7 @@ float desired_yaw;                               // 期望偏航角
 float circle_radius;                             // 圆的半径
 Eigen::Vector3f circle_center;                   // 圆心坐标
 float omega;                                     // 角速度
-bool received_start_cmd = false;                 // 标记是否接收到开始命令
+bool demo_start_flag = false;                 // 标记是否接收到开始命令
 sunray_msgs::orca_cmd orca_cmd;                         // ORCA指令
 
 float time_trajectory = 0.0;                     // 当前轨迹时间
@@ -49,7 +49,7 @@ void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg, int i) {
 
 // 处理画圈命令的回调函数
 void swarm_circle_cb(const std_msgs::Bool::ConstPtr &msg) {
-    received_start_cmd = msg->data; // 设置接收到的开始命令
+    demo_start_flag = msg->data; // 设置接收到的开始命令
     // 设置ORCA命令为HOME
     orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
     // 发布命令
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
     swarm_circle_cmd_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/swarm_circle", 1, swarm_circle_cb);
 
     while (ros::ok()) {
-        if (received_start_cmd) {
+        if (demo_start_flag) {
             // 重置轨迹时间
             time_trajectory = 0.0;
             // 计算第一个智能体的初始角度
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
                 ros::spinOnce();
                 rate.sleep();
             }
-            received_start_cmd = false;
+            demo_start_flag = false;
         }
         ros::spinOnce();
         rate.sleep();

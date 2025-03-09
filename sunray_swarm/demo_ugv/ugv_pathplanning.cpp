@@ -1,26 +1,58 @@
+/***********************************************************************************
+ *  文件名: ugv_pathplanning.cpp                                                          
+ *  作者: Yun Drone                                                                 
+ *  描述: 无人车demo：圆形轨迹移动
+ *     1、从参数列表里面获取圆形轨迹参数
+ *     2、等待demo启动指令
+ *     3、启动后根据时间计算圆形轨迹位置并发送到控制节点执行（POS_CONTROL模式）
+ *     4、可通过demo_start_flag暂停或恢复圆形轨迹
+ ***********************************************************************************/
+
 #include <ros/ros.h>    
 #include "printf_utils.h"
-#include "math_utils.h"
 #include "ros_msg_utils.h"
 
 using namespace std;
 
-ros::Publisher agent_cmd_pub;          // 发布无人机控制命令
+int agent_id;                           // 智能体编号
+bool demo_start_flag = false;           // 标记是否接收到开始命令
+geometry_msgs::Point target;            // 存储目标位置
+
+sunray_msgs::orca_cmd agent_orca_cmd;   //ORCA算法指令
+
+ros::Publisher orca_cmd_pub;           // ORCA算法指令
+ros::Publisher text_info_pub;          // 发布信息到地面站
+ros::Subscriber demo_start_flag_sub;   // 订阅开始命令
 ros::Publisher marker_pub;             // 发布RVIZ标记，用于显示障碍物
-ros::Publisher text_info_pub;          // 发布文字提示消息
-ros::Subscriber single_pathPlanning_sub; // 订阅单个路径规划触发信号
-
-bool received_start_cmd = false;       // 标记是否接收到开始命令
-geometry_msgs::Point target;           // 存储目标位置
-int agent_id;                          // 设置智能体编号
-float agent_height;                    // 设置无人机飞行高度
-string node_name;                       // 节点名称
-
 
 // 设置障碍物并发布到RVIZ进行可视化
 void setupObstacles()
 {
-    // 创建一个geometry_msgs::Point对象，用于存储障碍物的位置
+    cout << GREEN << "setup_obstacles" << TAIL << endl;
+
+    geometry_msgs::Point Point1, Point2, Point3, Point4;
+    Point1.x = 0.5;
+    Point1.y = 0.5;
+    Point2.x = -0.5;
+    Point2.y = 0.5;
+    Point3.x = -0.5;
+    Point3.y = 0.5;
+    Point4.x = 0.5;
+    Point4.y = -0.5;
+
+    // 在ORCA算法中添加固定障碍物
+    agent_orca_cmd.header.stamp = ros::Time::now();
+    agent_orca_cmd.header.frame_id = "world";
+    agent_orca_cmd.cmd_source = "ugv_pathplanning";
+    agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SETUP_OBS;
+    // 将顶点添加到障碍物指令中
+    agent_orca_cmd.obs_point.push_back(Point1);
+    agent_orca_cmd.obs_point.push_back(Point2);
+    agent_orca_cmd.obs_point.push_back(Point3);
+    agent_orca_cmd.obs_point.push_back(Point4);
+    orca_cmd_pub.publish(agent_orca_cmd);
+
+    // 障碍物在RVIZ中显示
     geometry_msgs::Point obstacle;
     // 设置障碍物的坐标
     obstacle.x = 2.0;
@@ -56,91 +88,69 @@ void setupObstacles()
 }
 
 // 触发路径规划的回调函数
-void single_pathPlanning_cb(const std_msgs::Bool::ConstPtr& msg) 
+void demo_start_flag_cb(const std_msgs::Bool::ConstPtr& msg) 
 {
-    received_start_cmd = msg->data;  // 当收到触发信号为true时，更新状态
+    demo_start_flag = msg->data;  
 }
 
+// 主函数
 int main(int argc, char **argv)
 {
     // 初始化ROS节点
-    ros::init(argc, argv, "ugv_pathPlanning");
+    ros::init(argc, argv, "ugv_pathplanning");
     // 创建节点句柄
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
     // 设置循环频率为10Hz
     ros::Rate rate(10);
-    // 获取当前节点名称
-    node_name = ros::this_node::getName();
 
-    // 【参数】从参数服务器设置高度,默认为1
-    nh.param<float>("agent_height", agent_height, 0.0f);
-    // 【参数】从参数服务器设置数量，默认为1
+    // 【参数】智能体编号
     nh.param<int>("agent_id", agent_id, 1);
     // 【参数】从参数服务器获取目标位置——TODO
     nh.param<double>("target_x", target.x, 0.0);
     nh.param<double>("target_y", target.y, 0.0);
-    // 【参数】使用智能体飞行高度作为z值
-    nh.param<float>("target_z", agent_height); 
+
+    cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;
+    cout << GREEN << "agent_id      : " << agent_id << TAIL << endl;
 
 
-    // 声明一个字符串变量存储代理前缀
-    string agent_name;
-    // 构造用于发布控制命令话题名称
-    agent_name = "/ugv_" + std::to_string(agent_id);
+    string agent_name = "/ugv_" + std::to_string(agent_id);
     // 【订阅】触发指令 外部 -> 本节点 
-    single_pathPlanning_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/ugv_pathplanning", 1, single_pathPlanning_cb);
-    // 【发布】控制指令 本节点 -> 控制节点
-    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
+    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/ugv_pathplanning", 1, demo_start_flag_cb);
+    // 【发布】ORCA算法指令 本节点 -> ORCA算法节点
+    orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm/ugv/orca_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 【发布】 初始化marker_pub发布者，发布RVIZ标记
-    marker_pub = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 10);
-    // 调用setupObstacles函数设置障碍物并发布到RVIZ
+    marker_pub = nh.advertise<visualization_msgs::Marker>("/sunray_swarm/demo/obs_marker", 10);
+
+    // 设置障碍物：1、ORCA算法指令设置障碍物 2、发布障碍物RVIZ显示效果
     setupObstacles();
-    // 定义并初始化z轴位置变量
-    float z = 0;
-    // 创建控制命令对象
-    sunray_msgs::agent_cmd cmd;
+
+    // 设置ORCA算法HOME点，并启动ORCA算法
+    agent_orca_cmd.header.stamp = ros::Time::now();
+    agent_orca_cmd.header.frame_id = "world";
+    agent_orca_cmd.cmd_source = "ugv_pathplanning";
+    agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
+    orca_cmd_pub.publish(agent_orca_cmd);
+
+    cout << GREEN << "start orca..." << TAIL << endl;
+
+
+    // 主循环
     while (ros::ok())
-    {     
-        if(received_start_cmd)
+    {    
+        // 等待demo启动
+        if(!demo_start_flag)
         {
-            // 设置为起飞状态
-            cmd.control_state = 11;
-            // 发送开始画圆信息
-            std_msgs::String start_info;
-            start_info.data = "Start Moving";
-            //终端打印信息
-            cout << GREEN << "Start Moving" << TAIL << endl;
-            // 发布信息
-            text_info_pub.publish(start_info);
-            
-            // 从参数服务器获取z
-            target.z = agent_height;
-            // 依据代理类型设置的ID
-            cmd.agent_id = 1;
-            // 设置控制状态为位置控制模式
-            cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-            // 设置指令来源
-            cmd.cmd_source = "ugv_pathplaning";
-            // 将目标位置赋值给消息的desired_pos字段
-            cmd.desired_pos = target;
-            // 设置默认的朝向角度为0.0
-            cmd.desired_yaw = 0.0;
-            // 发布控制命令
-            agent_cmd_pub.publish(cmd);
-            // 打印目标信息
-            std_msgs::String end_info;
-            end_info.data = "ending Moving";
-            //终端打印信息
-            cout << GREEN << "ending Moving" << TAIL << endl;
-            // 发布信息
-            text_info_pub.publish(end_info);
+            // 处理一次回调函数
+            ros::spinOnce();
+            // sleep
+            rate.sleep();
+            continue;
         }
-        // 处理回调函数
+        
         ros::spinOnce();
-        // 等待无人机行驶到目标点
-        ros::Duration(2.0).sleep();
+        rate.sleep();
     }
     return 0;
 }

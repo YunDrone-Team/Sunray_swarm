@@ -1,5 +1,0 @@
-<launch>
-	<node pkg="sunray_swarm" name="ugv_circle" type="ugv_circle" output="screen">
-		<rosparam command="load" file="$(find sunray_swarm)/config/ugv_params_single.yaml" />
-	</node>
-</launch>

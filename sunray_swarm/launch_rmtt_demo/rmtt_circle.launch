@@ -1,0 +1,8 @@
+<launch>
+	<node pkg="sunray_swarm" name="rmtt_circle" type="rmtt_circle" output="screen">
+		<param name="agent_id" value="1" />
+		<param name="desired_yaw" value="0.0" />
+		<param name="circle_radius" value="1.0" />
+		<param name="linear_vel" value="0.2" />
+	</node>
+</launch>

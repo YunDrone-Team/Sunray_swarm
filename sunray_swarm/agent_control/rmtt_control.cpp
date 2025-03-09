@@ -274,9 +274,9 @@ void RMTT_CONTROL::handle_cmd(const sunray_msgs::agent_cmd msg)
             desired_position.y = msg.desired_pos.y;
             desired_position.z = agent_height;
             desired_yaw = msg.desired_yaw;
-            text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: POS_CONTROL!";
-            cout << BLUE << "POS_REF [X Y Z] : " << desired_position.x   << " [ m ] " << desired_position.y   << " [ m ] " << desired_position.z   << " [ m ] " << TAIL << endl;
-            cout << BLUE << text_info.data << TAIL << endl;
+            // text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: POS_CONTROL!";
+            // cout << BLUE << "POS_REF [X Y Z] : " << desired_position.x   << " [ m ] " << desired_position.y   << " [ m ] " << desired_position.z   << " [ m ] " << TAIL << endl;
+            // cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到VEL_CONTROL_BODY指令：此处不做任何处理，在主循环中处理
         case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:

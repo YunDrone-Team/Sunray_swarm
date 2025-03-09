@@ -24,7 +24,7 @@ float omega;                                     // 角速度
 float direction;                                 // 方向，1或-1
 Eigen::Vector3f circle_center;                   // 圆心坐标
 int agent_time;                                  // 每次画圆的持续时间
-bool received_start_cmd = false;                 // 标记是否接收到开始命令
+bool demo_start_flag = false;                 // 标记是否接收到开始命令
 
 // 发布者和订阅者
 ros::Publisher ugv_cmd_pub[MAX_AGENT_NUM]; // 每个智能体的控制命令发布者
@@ -40,7 +40,7 @@ void mySigintHandler(int sig)
 // 处理画圈命令的回调函数
 void swarm_circle_cb(const std_msgs::Bool::ConstPtr &msg)
 {
-    received_start_cmd = msg->data; // 设置接收到的开始命令
+    demo_start_flag = msg->data; // 设置接收到的开始命令
 }
 // 打印参数值的函数
 void printf_params()
@@ -131,7 +131,7 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         // 检查是否接收到启动命令
-        if (received_start_cmd)
+        if (demo_start_flag)
         {
             // 重置轨迹时间
             time_trajectory = 0.0;
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
                 ros::Duration(0.01).sleep();
             }
             // 重置启动命令
-            received_start_cmd = false;
+            demo_start_flag = false;
         }
         // 回调函数,timer开始运行
         ros::spinOnce();

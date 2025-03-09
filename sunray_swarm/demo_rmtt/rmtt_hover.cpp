@@ -1,129 +1,125 @@
+/***********************************************************************************
+ *  文件名: rmtt_hover.cpp                                                          
+ *  作者: Yun Drone                                                                 
+ *  描述: 无人机demo：悬停
+ *     1、起飞，等待
+ *     2、移动到指定点，等待
+ *     3、悬停，等待
+ *     4、降落
+ ***********************************************************************************/
+
 #include <ros/ros.h>
 #include "ros_msg_utils.h"
 #include "printf_utils.h"
 
+int agent_id;                            // 智能体ID
+bool demo_start_flag = false;            // 接收到开始命令
+sunray_msgs::agent_cmd agent_cmd;        // 智能体控制指令
+std_msgs::String text_info;              // 打印消息
 
-int agent_id;                        // 设置智能体编号
-float hover_yaw;                     // 目标偏航角
-string node_name;                    // 节点名称
-geometry_msgs::Point position_hover; // 初始化位置
-bool received_start_cmd = false;     // 接收到开始命令
-
-std_msgs::Empty takeoff;
-std_msgs::Empty land;
-
-ros::Publisher agent_cmd_pub;     // 发布控制命令
-ros::Publisher text_info_pub;     // 发布文字提示消息
-ros::Subscriber single_hover_sub; // 触发条件
-ros::Time last_command_time;      // 上次命令时间
-
-ros::Publisher takeoff_pub;
-ros::Publisher land_pub;
-
-//TODO——起飞悬停设置
-// void set_desired_position()
-// {
-//     desired_pos.x = agent_state.pos[0];
-//     desired_pos.y = agent_state.pos[1];
-//     desired_pos.z = agent_height;
-// }
+ros::Publisher agent_cmd_pub;            // 发布控制命令
+ros::Publisher text_info_pub;            // 发布文字提示消息
+ros::Subscriber demo_start_flag_sub;     // demo启动订阅
 
 // 触发信号的回调函数，处理接收到的位置
-void single_hover_cb(const std_msgs::Bool::ConstPtr &msg)
+void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
 {
-    received_start_cmd = true; // 设置标志为true
-    last_command_time = ros::Time::now(); // 更新最后命令时间
+    demo_start_flag = msg->data; 
+
+    if(demo_start_flag)
+    {
+        text_info.data = "Get demo start cmd";
+        cout << GREEN << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
+    }
 }
 
+// 主函数
 int main(int argc, char **argv)
 {
+    // 初始化ROS节点
     ros::init(argc, argv, "rmtt_hover");
+    // 创建节点句柄
     ros::NodeHandle nh("~");
     // 设置循环频率为10Hz
     ros::Rate rate(10);
-    node_name = ros::this_node::getName();
 
     // 【参数】智能体编号
     nh.param<int>("agent_id", agent_id, 1);
-    // 【参数】目标点位置——TODO：从参数服务器获取位置x、y、z、yaw偏航角
-    nh.param<double>("hover_x", position_hover.x, 1.0);
-    nh.param<double>("hover_y", position_hover.y, 2.0f);
-    nh.param<double>("hover_z", position_hover.z, 1.0f);
-    nh.param<float>("hover_yaw", hover_yaw, 0.0f);
 
-    string agent_name;
-    agent_name = "/rmtt_" + std::to_string(agent_id);
+    string agent_name = "/rmtt_" + std::to_string(agent_id); 
     // 【订阅】触发指令 外部 -> 本节点
-    single_hover_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/rmtt_hover", 1, single_hover_cb);
-    // 【发布】控制指令 本节点 -> 控制节点
+    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/rmtt_hover", 1, demo_start_flag_cb);
+    // 【发布】控制指令 本节点 -> rmtt控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
-    // 【发布】无人机起飞指令 本节点 -> rmtt_driver
-    takeoff_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/takeoff", 1); 
-    // 【发布】无人机降落指令 本节点 -> rmtt_driver
-    land_pub = nh.advertise<std_msgs::Empty>("/sunray_swarm/" + agent_name + "/land", 1); 
 
+    cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;
 
-    // 构建并发送悬停指令
-    sunray_msgs::agent_cmd cmd;
-    // 设置agent_id
-    cmd.agent_id = agent_id;
-    // 设置为起飞状态
-    sunray_msgs::agent_cmd::TAKEOFF;
-    //发布起飞命令
-    takeoff_pub.publish(takeoff);
-    // 设置指令来源
-    cmd.cmd_source = "rmtt_hover";
-    // 发布话题
-    agent_cmd_pub.publish(cmd);
-    // 等待3秒以确保无人机起飞
-    ros::Duration(3.0).sleep(); 
+    sleep(5.0);
 
+    // 发送起飞指令
+    agent_cmd.header.stamp = ros::Time::now();
+    agent_cmd.header.frame_id = "world";
+    agent_cmd.agent_id = agent_id;
+    agent_cmd.cmd_source = "rmtt_hover";
+    agent_cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
+    agent_cmd_pub.publish(agent_cmd); 
 
-    // 主程序
-    while (ros::ok())
-    {
-        if (received_start_cmd)
-        {
-            // 起飞标志
-            bool received_takeoff_flag = false;
-            // 发送开始信息
-            std_msgs::String start_info;
-            start_info.data = "start hover";
-            // 终端打印信息
-            cout << GREEN << "start hover" << TAIL << endl;
-            // 发布信息
-            text_info_pub.publish(start_info);
+    text_info.data = "Takeoff...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
 
-            // 设置控制指令为POS_CONTROL
-            cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+    sleep(10.0);
 
+    // 发送移动到悬停点的指令
+    agent_cmd.header.stamp = ros::Time::now();
+    agent_cmd.header.frame_id = "world";
+    agent_cmd.agent_id = agent_id;
+    agent_cmd.cmd_source = "rmtt_hover";
+    agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+    // 设置目标位置为悬停点
+    agent_cmd.desired_pos.x = 0.0;
+    agent_cmd.desired_pos.y = 0.0;
+    agent_cmd.desired_pos.z = 1.0;
+    // 设置悬停点偏航角
+    agent_cmd.desired_yaw = 0.0;
+    agent_cmd_pub.publish(agent_cmd); 
 
-            // 设置目标位置为接收到的位置
-            cmd.desired_pos = position_hover;
-            // 可以设置偏航角，这里设置为0
-            cmd.desired_yaw = hover_yaw;
-            // 发布话题
-            agent_cmd_pub.publish(cmd);
-            // 记录命令时间,用于判断15无操作降落时间
-            last_command_time = ros::Time::now(); 
-            // 地面站打印
-            std_msgs::String text_info;
-            text_info.data = node_name + ": send a new hover position!";
-            text_info_pub.publish(text_info);
-            // 控制台打印
-            cout << GREEN << "POS_REF [X Y Z] : " << cmd.desired_pos.x << " m " << cmd.desired_pos.y << " m " << cmd.desired_pos.z << " m " << TAIL << endl;
-            
-            // 重置标志
-            received_start_cmd = false;
+    text_info.data = "Move to hover position...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
 
-        }
-        // 处理回调函数
-        ros::spinOnce();
-        // 休眠
-        rate.sleep();
-    }
+    sleep(5.0);
+
+    // 发送悬停指令
+    agent_cmd.header.stamp = ros::Time::now();
+    agent_cmd.header.frame_id = "world";
+    agent_cmd.agent_id = agent_id;
+    agent_cmd.cmd_source = "rmtt_hover";
+    agent_cmd.control_state = sunray_msgs::agent_cmd::HOLD;
+    agent_cmd_pub.publish(agent_cmd); 
+
+    text_info.data = "Hover at current position...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
+
+    sleep(10.0);
+
+    // 发送降落指令
+    agent_cmd.header.stamp = ros::Time::now();
+    agent_cmd.header.frame_id = "world";
+    agent_cmd.agent_id = agent_id;
+    agent_cmd.cmd_source = "rmtt_hover";
+    agent_cmd.control_state = sunray_msgs::agent_cmd::LAND;
+    agent_cmd_pub.publish(agent_cmd); 
+
+    text_info.data = "Land...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
+
+    sleep(5.0);
 
     return 0;
 }

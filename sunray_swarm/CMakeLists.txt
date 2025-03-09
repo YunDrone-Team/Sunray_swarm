@@ -100,9 +100,6 @@ add_executable(rmtt_tf
 )
 target_link_libraries(rmtt_tf ${catkin_LIBRARIES})
 
-
-
-
 ## RMTT_DEMO - 定点悬停
 add_executable(rmtt_hover demo_rmtt/rmtt_hover.cpp)
 add_dependencies(rmtt_hover sunray_swarm_gencpp)
@@ -116,13 +113,13 @@ add_executable(rmtt_waypoint demo_rmtt/rmtt_waypoint.cpp)
 add_dependencies(rmtt_waypoint sunray_swarm_gencpp)
 target_link_libraries(rmtt_waypoint ${catkin_LIBRARIES})
 ## RMTT_DEMO - 路径规划
-add_executable(rmtt_pathplanning demo_rmtt/rmtt_pathplanning.cpp)
-add_dependencies(rmtt_pathplanning sunray_swarm_gencpp)
-target_link_libraries(rmtt_pathplanning ${catkin_LIBRARIES})
+# add_executable(rmtt_pathplanning demo_rmtt/rmtt_pathplanning.cpp)
+# add_dependencies(rmtt_pathplanning sunray_swarm_gencpp)
+# target_link_libraries(rmtt_pathplanning ${catkin_LIBRARIES})
 # RMTT_DEMO - 无人机跟随无人车
-add_executable(rmtt_track_mission demo_rmtt/rmtt_track_mission.cpp)
-add_dependencies(rmtt_track_mission sunray_swarm_gencpp)
-target_link_libraries(rmtt_track_mission ${catkin_LIBRARIES})
+add_executable(rmtt_follow_ugv demo_rmtt/rmtt_follow_ugv.cpp)
+add_dependencies(rmtt_follow_ugv sunray_swarm_gencpp)
+target_link_libraries(rmtt_follow_ugv ${catkin_LIBRARIES})
 
 # UGV_DEMO - 无人车绕圆
 add_executable(ugv_circle demo_ugv/ugv_circle.cpp)

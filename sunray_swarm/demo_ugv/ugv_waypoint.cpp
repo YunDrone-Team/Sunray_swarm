@@ -1,111 +1,116 @@
+/***********************************************************************************
+ *  文件名: ugv_waypoint.cpp                                                          
+ *  作者: Yun Drone                                                                 
+ *  描述: 无人车demo：路径点移动
+ *     1、从参数列表里面获取目标点数目及目标点位置
+ *     2、等待demo启动指令
+ *     3、启动后逐个发送目标点至智能体控制节点执行（POS_CONTROL模式）
+ *     4、执行完后，重置状态位
+ ***********************************************************************************/
+
 #include <ros/ros.h>
 #include "printf_utils.h"
 #include "ros_msg_utils.h"
 
-
 using namespace std;
 
-ros::Publisher agent_cmd_pub;            // 发布控制命令
-vector<geometry_msgs::Point> waypoints;  // 航点列表
-int agent_id;                            // 代理编号
-float agent_height;                      // 无人机飞行高度
-bool received_start_cmd = false;         // 标记是否接收到开始命令
-ros::Publisher text_info_pub;            // 发布文字提示消息
-ros::Subscriber single_waypoint_sub;     // 订阅路径规划触发信号
-string node_name;
+int agent_id;                            // 智能体ID
+int waypoint_count;                      // 目标点数量
+vector<geometry_msgs::Point> waypoints;  // 目标点列表
+bool demo_start_flag = false;            // 标记是否接收到开始命令
+sunray_msgs::agent_cmd agent_cmd;        // 智能体控制指令
+std_msgs::String text_info;              // 打印消息
 
+ros::Publisher agent_cmd_pub;            // 发布控制命令
+ros::Publisher text_info_pub;            // 发布文字提示消息
+ros::Subscriber demo_start_flag_sub;     // demo启动订阅
 
 // 触发信号的回调函数，处理接收到的位置
-void single_waypoint_cb(const std_msgs::Bool::ConstPtr &msg) 
+void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg) 
 {
-    received_start_cmd = msg->data; // 设置输入信息
+    demo_start_flag = msg->data; 
+
+    if(demo_start_flag)
+    {
+        text_info.data = "Get demo start cmd";
+        cout << GREEN << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
+    }
 }
 
-int main(int argc, char **argv) {
+// 主函数
+int main(int argc, char **argv) 
+{
     // 初始化ROS节点
     ros::init(argc, argv, "ugv_waypoint");
     // 创建节点句柄
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
     // 设置循环频率为10Hz
     ros::Rate rate(10);
-    // 【参数】智能体高度
-    nh.param<float>("agent_height", agent_height, 0.0f);
+
+    cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;
+
     // 【参数】智能体编号
     nh.param<int>("agent_id", agent_id, 1);
+    // 【参数】目标点数量，默认为1
+    nh.param("waypoint_count", waypoint_count, 1); 
+    waypoints.resize(waypoint_count);
+    // 【参数】目标点数值
+    for (int i = 0; i < waypoint_count; ++i) 
+    {
+        string param_base = "waypoint_" + to_string(i+1); // 航点编号从1开始
+        nh.param(param_base + "_x", waypoints[i].x, 1.0);
+        nh.param(param_base + "_y", waypoints[i].y, 1.0);
+        waypoints[i].z = 0.1; 
+        cout << GREEN << "Get waypoints_" << i+1 << ": ["<< waypoints[i].x<< ", " << waypoints[i].y<< ", " << waypoints[i].z<<"]" << TAIL << endl;
+    }
 
-
-    string agent_name;
-    agent_name = "/ugv_" + std::to_string(agent_id);
+    string agent_name = "/ugv_" + std::to_string(agent_id); 
     // 【订阅】触发指令 外部 -> 本节点 
-    single_waypoint_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/ugv_waypoint", 1, single_waypoint_cb);
-    // 【发布】控制指令 本节点 -> 控制节点
+    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/ugv_waypoint", 1, demo_start_flag_cb);
+    // 【发布】控制指令 本节点 -> 无人车控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
-    // 设置航点列表
-    // 提取存储的航点数
-    int waypoint_count;
-    nh.param("waypoint_count", waypoint_count, 1); // 获取航点总数，默认为0
-    waypoints.resize(waypoint_count);
-    
-    for (int i = 0; i < waypoint_count; ++i) {
-        // 构造参数名称
-        string param_base = "waypoint_" + to_string(i + 1); // 航点编号从1开始
-        nh.param(param_base + "_x", waypoints[i].x, 1.0);
-        nh.param(param_base + "_y", waypoints[i].y, 1.0);
-        waypoints[i].z = agent_height; // 高度使用智能体设置的高度
-    }
-
-    sunray_msgs::agent_cmd cmd;
-    // 从用户输入获取航点位置
+    // 主循环
     while (ros::ok()) 
     {
-        if(received_start_cmd)
+        if(!demo_start_flag)
         {
-            // 设置为起飞状态
-            cmd.control_state = 11;
-            // 发送开始导航信息
-            std_msgs::String start_info;
-            start_info.data = "Start Moving";
-            // 终端打印信息
-            cout << GREEN << "Start Moving" << TAIL << endl;
-            // 发布信息
-            text_info_pub.publish(start_info);
-            // 向每个航点发送导航命令
-            for (auto &waypoint : waypoints) {
-                
-                cmd.agent_id = agent_id;
-                cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-                cmd.cmd_source = "ugv_waypoint";
-                cmd.desired_pos = waypoint;
-                cmd.desired_yaw = 0.0; // 偏航角通常在导航过程中另行计算
-
-                agent_cmd_pub.publish(cmd); // 发布控制命令
-
-                // 发送提示消息
-                std_msgs::String text_info;
-                text_info.data = "Navigating to waypoint: x=" + to_string(waypoint.x) + " y=" + to_string(waypoint.y) + " z=" + to_string(waypoint.z);
-                text_info_pub.publish(text_info);
-
-                // 等待模拟到达该点，这里使用暂停6秒
-                ros::Duration(6.0).sleep();
-            }
-            // 重置开始命令状态
-            received_start_cmd = false; 
-            // 打印信息
-            std_msgs::String end_info;
-            end_info.data = "ending Moving";
-            // 终端打印信息
-            cout << GREEN << "ending Moving" << TAIL << endl;
-            // 发布信息
-            text_info_pub.publish(end_info);
+            // 处理一次回调函数
+            ros::spinOnce();
+            // sleep
+            rate.sleep();
+            continue;
         }
-        // 处理一次回调函数
-        ros::spinOnce();
-        // 等待无人机行驶到目标点
-        rate.sleep();
-        
+
+        // 逐个发送目标点，发送后睡眠等待，然后发送下一个，直到遍历完所有目标点
+        for (auto &waypoint : waypoints) 
+        {
+            agent_cmd.header.stamp = ros::Time::now();
+            agent_cmd.header.frame_id = "world";
+            agent_cmd.agent_id = agent_id;
+            agent_cmd.cmd_source = "ugv_waypoint";
+            agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agent_cmd.desired_pos = waypoint;
+            agent_cmd.desired_yaw = 0.0;    
+            agent_cmd_pub.publish(agent_cmd); 
+
+            // 发送提示消息
+            text_info.data = "Moving to waypoints: [" + to_string(waypoint.x) + ", " + to_string(waypoint.y) + ", " + to_string(waypoint.z)+"]...";
+            cout << GREEN << text_info.data << TAIL << endl;
+            text_info_pub.publish(text_info);
+
+            // 等待智能体移动（注：可以改为判断来确定是否发送下一个目标点）
+            ros::Duration(6.0).sleep();
+        }
+
+        // 执行完所有的目标点后，重置状态位
+        demo_start_flag = false; 
+        text_info.data = "demo finished.";
+        cout << GREEN << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
     }
 
     return 0;

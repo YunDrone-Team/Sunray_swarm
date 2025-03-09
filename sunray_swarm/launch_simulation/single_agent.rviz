@@ -3,7 +3,8 @@ Panels:
     Help Height: 81
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Obstacle1/Status1
       Splitter Ratio: 0.692307710647583
     Tree Height: 929
   - Class: rviz/Selection
@@ -54,7 +55,7 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        rmtt_1/base_link:
+        ugv_1/base_link:
           Value: true
         world:
           Value: true
@@ -66,7 +67,7 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          rmtt_1/base_link:
+          ugv_1/base_link:
             {}
       Update Interval: 0
       Value: true
@@ -75,7 +76,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_1/mesh
       Name: rmtt1_mesh
       Namespaces:
-        mesh: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -107,7 +108,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_1/goal_point_rviz
       Name: rmtt1_goal
       Namespaces:
-        goal: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -130,7 +131,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/ugv_1/mesh
       Name: UGV_mesh
       Namespaces:
-        {}
+        mesh: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -162,7 +163,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/ugv_1/goal_point_rviz
       Name: UGV_goal
       Namespaces:
-        {}
+        goal: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -179,6 +180,14 @@ Visualization Manager:
       Queue Size: 10
       Topic: /sunray_swarm/ugv_1/vel_rviz
       Unreliable: false
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /sunray_swarm/demo/obs_marker
+      Name: Obstacle
+      Namespaces:
+        {}
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
