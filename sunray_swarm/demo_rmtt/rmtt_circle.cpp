@@ -68,11 +68,11 @@ int main(int argc, char **argv)
 
     //【参数】智能体编号
     nh.param<int>("agent_id", agent_id, 1);
-    //【参数】从参数服务器获取圆周轨迹的半径，默认为1.0米
+    //【参数】圆形轨迹参数：圆周轨迹的半径，默认为1.0米
     nh.param<float>("circle_radius", circle_radius, 1.0f);
-    //【参数】从参数服务器获取线速度，默认为0.3米/秒
+    //【参数】圆形轨迹参数：线速度，默认为0.3米/秒
     nh.param<float>("linear_vel", linear_vel, 0.3f);
-    //【参数】从参数服务器获取期望的偏航角，默认为0.0
+    //【参数】期望的偏航角，默认为0.0
     nh.param<float>("desired_yaw", desired_yaw, 0.0f);
 
     cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;

@@ -15,7 +15,7 @@ void ORCA::init(ros::NodeHandle& nh)
     // 【参数】数字越大，智能体响应相邻智能体的碰撞越快，但速度可选的自由度越小
     nh.param<float>("orca_params/timeHorizon", orca_params.timeHorizon, 2.0);
     // 【参数】数字越大，智能体响应障碍物的碰撞越快，但速度可选的自由度越小
-    nh.param<float>("orca_params/timeHorizonObst", orca_params.timeHorizonObst, 4.0);
+    nh.param<float>("orca_params/timeHorizonObst", orca_params.timeHorizonObst, 1.0);
     // 【参数】智能体体积半径
     nh.param<float>("orca_params/radius", orca_params.radius, 0.35);
     // 【参数】智能体最大移动速度
@@ -348,9 +348,9 @@ void ORCA::agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i)
 
     // 在ORCA算法中设置目标点
     sim->setAgentGoal(i, RVO::Vector2(agent_goal[i].x, agent_goal[i].y));
-    cout << BLUE << node_name << ": Set agents_" << i+1 << " goal at [" << agent_goal[i].x << "," << agent_goal[i].y << "]"<< TAIL << endl;
-    text_info.data = "[ORCA] Set agents_"+std::to_string(i+1)+" goal";
-    text_info_pub.publish(text_info);
+    // cout << BLUE << node_name << ": Set agents_" << i+1 << " goal at [" << agent_goal[i].x << "," << agent_goal[i].y << "]"<< TAIL << endl;
+    // text_info.data = "[ORCA] Set agents_"+std::to_string(i+1)+" goal";
+    // text_info_pub.publish(text_info);
 }
 
 // 回调函数：ORCA算法指令回调函数，根据msg->orca_cmd的值来判断处理

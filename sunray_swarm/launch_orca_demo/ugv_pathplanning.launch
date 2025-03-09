@@ -1,0 +1,6 @@
+<launch>
+	<node pkg="sunray_swarm" name="path_planning_ugv" type="path_planning" output="screen">
+		<param name="agent_type" value="1" />
+	</node>
+</launch>
+

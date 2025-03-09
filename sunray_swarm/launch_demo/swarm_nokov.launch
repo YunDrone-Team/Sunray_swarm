@@ -1,5 +1,0 @@
-<launch>
-	<node pkg="sunray_swarm" name="swarm_nokov" type="swarm_nokov" output="screen">
-		<rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" />
-	</node>
-</launch>

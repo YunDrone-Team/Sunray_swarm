@@ -112,10 +112,6 @@ target_link_libraries(rmtt_circle ${catkin_LIBRARIES})
 add_executable(rmtt_waypoint demo_rmtt/rmtt_waypoint.cpp)
 add_dependencies(rmtt_waypoint sunray_swarm_gencpp)
 target_link_libraries(rmtt_waypoint ${catkin_LIBRARIES})
-## RMTT_DEMO - 路径规划
-# add_executable(rmtt_pathplanning demo_rmtt/rmtt_pathplanning.cpp)
-# add_dependencies(rmtt_pathplanning sunray_swarm_gencpp)
-# target_link_libraries(rmtt_pathplanning ${catkin_LIBRARIES})
 # RMTT_DEMO - 无人机跟随无人车
 add_executable(rmtt_follow_ugv demo_rmtt/rmtt_follow_ugv.cpp)
 add_dependencies(rmtt_follow_ugv sunray_swarm_gencpp)
@@ -125,45 +121,28 @@ target_link_libraries(rmtt_follow_ugv ${catkin_LIBRARIES})
 add_executable(ugv_circle demo_ugv/ugv_circle.cpp)
 add_dependencies(ugv_circle sunray_swarm_gencpp)
 target_link_libraries(ugv_circle ${catkin_LIBRARIES})
-# UGV_DEMO - 无人车路径规划
-add_executable(ugv_pathplanning demo_ugv/ugv_pathplanning.cpp)
-add_dependencies(ugv_pathplanning sunray_swarm_gencpp)
-target_link_libraries(ugv_pathplanning ${catkin_LIBRARIES})
 # UGV_DEMO - 无人车航点
 add_executable(ugv_waypoint demo_ugv/ugv_waypoint.cpp)
 add_dependencies(ugv_waypoint sunray_swarm_gencpp)
 target_link_libraries(ugv_waypoint ${catkin_LIBRARIES})
 
+# ORCA_DEMO - 固定障碍物路径规划
+add_executable(path_planning orca/path_planning.cpp)
+add_dependencies(path_planning sunray_swarm_gencpp)
+target_link_libraries(path_planning ${catkin_LIBRARIES})
 
-
-## SWARM_DEMO - 三智能体绕圈
-add_executable(swarm_circle demo_swarm/swarm_circle_orca.cpp)
+## SWARM_DEMO - 集群绕圆
+add_executable(swarm_circle demo_swarm/swarm_circle.cpp)
 add_dependencies(swarm_circle sunray_swarm_gencpp)
 target_link_libraries(swarm_circle ${catkin_LIBRARIES})
-## SWARM_DEMO 编队控制，三角形、一自行转换
-add_executable(swarm_formation_control demo_swarm/swarm_formation_control_orca.cpp)
-add_dependencies(swarm_formation_control sunray_swarm_gencpp)
-target_link_libraries(swarm_formation_control ${catkin_LIBRARIES})
-## SWARM_DEMO - 智能体跟随
-add_executable(swarm_leader_follower demo_swarm/swarm_leader_follower_orca.cpp)
+## SWARM_DEMO - 固定阵型变换
+add_executable(swarm_formation demo_swarm/swarm_formation.cpp)
+add_dependencies(swarm_formation sunray_swarm_gencpp)
+target_link_libraries(swarm_formation ${catkin_LIBRARIES})
+## SWARM_DEMO - 领从阵型变换
+add_executable(swarm_leader_follower demo_swarm/swarm_leader_follower.cpp)
 add_dependencies(swarm_leader_follower sunray_swarm_gencpp)
 target_link_libraries(swarm_leader_follower ${catkin_LIBRARIES})
-# ## SWARM_DEMO - NOKOV队形变换
-add_executable(swarm_nokov demo_swarm/swarm_nokov.cpp)
-add_dependencies(swarm_nokov sunray_swarm_gencpp)
-target_link_libraries(swarm_nokov ${catkin_LIBRARIES})
-## SWARM_DEMO - CXY队形变换
-add_executable(swarm_cxy demo_swarm/swarm_CXY.cpp)
-add_dependencies(swarm_cxy sunray_swarm_gencpp)
-target_link_libraries(swarm_cxy ${catkin_LIBRARIES})
-## SWARM_DEMO - 避障
-add_executable(swarm_with_obstacles demo_swarm/swarm_with_obstacles.cpp)
-add_dependencies(swarm_with_obstacles sunray_swarm_gencpp)
-target_link_libraries(swarm_with_obstacles ${catkin_LIBRARIES})
-
-
-
-
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
