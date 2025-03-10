@@ -1,6 +1,7 @@
-<div align=center> <img src="/img/logo.png" width="220" height="220">
-<h3>云纵科技是一家专业从事无人机软硬件和解决方案定制的公司，拥有丰富的行业经验和技术优势。我们的团队致力于为客户提供个性化的服务，在无人机及其周边领域打造顶尖服务。</h3>
-</div>
+<img src="https://secure2.wostatic.cn/static/hcaeDkWdRzxMAAPKXtExv1/%E4%BA%91%E7%BA%B5%E9%95%BF%E5%9B%BEv.3.png?auth_key=1741593922-4r2Te4x2KyTc4v38gKjtq5-0-30459699ce61d0634b5150884196bd43&download=%E4%BA%91%E7%BA%B5%E9%95%BF%E5%9B%BEv.3.png" alt="yundrone logo" align="right" height="100" />
+
+# Sunray_swarm - 多智能体集群控制开源项目
+
 
 # 前言
 
