@@ -1,4 +1,4 @@
-<img src="https://secure2.wostatic.cn/static/hcaeDkWdRzxMAAPKXtExv1/%E4%BA%91%E7%BA%B5%E9%95%BF%E5%9B%BEv.3.png?auth_key=1741593922-4r2Te4x2KyTc4v38gKjtq5-0-30459699ce61d0634b5150884196bd43&download=%E4%BA%91%E7%BA%B5%E9%95%BF%E5%9B%BEv.3.png" alt="yundrone logo" align="right" height="100" />
+<img src="https://pic1.imgdb.cn/item/67ceabdf066befcec6e26c70.png" alt="yundrone logo" align="right" height="100" />
 
 ## Sunray_swarm - 多智能体集群控制开源项目
 
@@ -32,7 +32,7 @@ Sunray_swarm是室内多智能体集群编队实验平台“智群·RMTT”的�
   - 微信公众号：打开微信搜索“云纵科技”或扫描下方二维码
 
 <div style="text-align:center">
-  <img src="https://secure2.wostatic.cn/static/iDJLgdZNTmE7GHTWagXeBA/image.png?auth_key=1741595392-nXYzuLMqtWPrLdFFXkm8PK-0-02179e22265bc3578cc83929c7b3b293&download=image.png" alt="Markdown Logo" style="width:150px; height:auto;" />
+  <img src="https://cdn.yun.sooce.cn/6/53163/png/172973873083794134484fbe345a37638dc620eaf6e50.png?imageMogr2/thumbnail/80x&version=0" alt="Markdown Logo" style="width:150px; height:auto;" />
 </div>
 
 
