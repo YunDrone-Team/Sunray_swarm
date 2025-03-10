@@ -1,4 +1,4 @@
-<img src="https://pic1.imgdb.cn/item/67ceabdf066befcec6e26c70.png" alt="yundrone logo" align="right" height="100" />
+<img src="https://pic1.imgdb.cn/item/67ceabf3066befcec6e26c76.png" alt="yundrone logo" align="right" height="100" />
 
 ## Sunray_swarm - 多智能体集群控制开源项目
 
@@ -23,17 +23,18 @@ Sunray_swarm是室内多智能体集群编队实验平台“智群·RMTT”的�
 ### 联系我们
 广州云纵科技有限公司是一家专业从事无人机软硬件和解决方案定制的公司。项目合作、无人机软硬件、实验室整体解决方案定制，请添加微信“19120231228”（备注消息：智群RMTT）。
 - 公司地址：[广州市南沙区悦方中心1203房](https://map.baidu.com/poi/%E5%B9%BF%E5%B7%9E%E4%BA%91%E7%BA%B5%E7%A7%91%E6%8A%80%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8/@12635819.79948515,2593492.005733868,19z?uid=32c1e91366ffdbb7ad045788&ugc_type=3&ugc_ver=1&device_ratio=1&compat=1&pcevaname=pc4.1&querytype=detailConInfo&da_src=shareurl)
+
+<img src="https://cdn.yun.sooce.cn/6/53163/png/172973873083794134484fbe345a37638dc620eaf6e50.png?imageMogr2/thumbnail/80x&version=0" alt="yundrone logo" align="right" height="150" />
+
 - 相关链接：
   - [云纵科技官网](http://www.yundrone.cn/index.html)
   - [云纵科技产品文档](https://wiki.yundrone.cn/)
   - [云纵科技淘宝店](https://5q239j0txjkacow9mk5tofi9dvxs6st.taobao.com/index.htm?spm=a1z10.1-c-s.w5002-25336597030.2.5c854fd4rOYblf)
   - [云纵科技Bilibili](https://space.bilibili.com/3546736714844413)
   - 小红书：打开小红书搜索“云纵科技”
-  - 微信公众号：打开微信搜索“云纵科技”或扫描下方二维码
+  - 微信公众号：打开微信搜索“云纵科技”或扫描右方二维码
 
-<div style="text-align:center">
-  <img src="https://cdn.yun.sooce.cn/6/53163/png/172973873083794134484fbe345a37638dc620eaf6e50.png?imageMogr2/thumbnail/80x&version=0" alt="Markdown Logo" style="width:150px; height:auto;" />
-</div>
+
 
 
 ### 致谢
