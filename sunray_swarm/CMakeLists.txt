@@ -46,11 +46,9 @@ catkin_package(
 ###########
 include_directories(
   include
-  sim
   agent_control
   orca
   ${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
 )
 
 ###############################
@@ -86,13 +84,6 @@ add_executable(orca_node
 	orca/RVOSimulator.cpp
 	)
 target_link_libraries(orca_node ${catkin_LIBRARIES})
-
-## 仿真
-add_executable(agent_sim_node
-  sim/agent_sim.cpp	
-  sim/agent_sim_node.cpp
-)
-target_link_libraries(agent_sim_node ${catkin_LIBRARIES})
 
 ## 地图pose
 add_executable(rmtt_tf

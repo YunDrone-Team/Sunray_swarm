@@ -71,7 +71,7 @@ void generate_reference_trajectory(geometry_msgs::Point &point, double time)
 {
     point.x = 1.0 * sin(0.1 * time);            // 根据时间生成参考点的X坐标
     point.y = 1.0 * cos(0.1 * time);            // 根据时间生成参考点的Y坐标
-    point.z = agent_height;                     // 设置参考点的高度为智能体的高度
+    point.z = 0.0;                              // 根据时间生成参考点的YAW
 }
 
 int main(int argc, char **argv)
@@ -159,7 +159,7 @@ int main(int argc, char **argv)
             geometry_msgs::Point goal_point;
             goal_point.x = leader_pos.x + formation_offset[i].x; // 设置目标位置X坐标
             goal_point.y = leader_pos.y + formation_offset[i].y; // 设置目标位置Y坐标
-            goal_point.z = leader_pos.z; // 设置目标位置Z坐标
+            goal_point.z = leader_pos.z + formation_offset[i].z; // 设置目标YAW
             orca_goal_pub[i].publish(goal_point); // 发布目标点
             sleep(0.1);  
         }
@@ -177,19 +177,25 @@ void setup_formation()
     // 1号智能体
     formation_offset[0].x = 0.0;
     formation_offset[0].y = 0.0;
+    formation_offset[0].z = 0.0;
     // 2号智能体
     formation_offset[1].x = 1.0;
     formation_offset[1].y = 0.5;
+    formation_offset[1].z = 0.0;
     // 3号智能体
     formation_offset[2].x = 1.0;
     formation_offset[2].y = -0.5;
+    formation_offset[2].z = 0.0;
     // 4号智能体
     formation_offset[3].x = -1.0;
     formation_offset[3].y = 1.0;
+    formation_offset[3].z = 0.0;
     // 5号智能体
     formation_offset[4].x = -1.0;
     formation_offset[4].y = 0.0;
+    formation_offset[4].z = 0.0;
     // 6号智能体
     formation_offset[5].x = -1.0;
     formation_offset[5].y = -1.0;
+    formation_offset[5].z = 0.0;
 }

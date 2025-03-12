@@ -16,14 +16,5 @@
         <param name="agent_id" value="3" />
         <rosparam command="load" file="$(find sunray_swarm)/config/ugv_params.yaml" />
     </node>
-
-
-    <!-- Rviz config -->
-    <arg name="rviz_enable" default="false"/>
-    <arg name="rivz_config" default="$(find sunray_swarm)/launch_sim/multi_agent.rviz"/>
-	<!-- 启动Rviz-->
-	<group if="$(arg rviz_enable)">
-        <node type="rviz" name="rviz" pkg="rviz" args="-d $(arg rivz_config)"/>
-    </group>
 </launch>
 

@@ -1,0 +1,5 @@
+<launch>
+	<node pkg="sunray_swarm" name="rmtt_hover" type="rmtt_hover" output="screen">
+		<param name="agent_id" value="1" />
+	</node>
+</launch>

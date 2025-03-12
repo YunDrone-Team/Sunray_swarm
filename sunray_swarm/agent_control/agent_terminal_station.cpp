@@ -141,21 +141,21 @@ int main(int argc, char **argv)
 				break;
 
 			case 4:
-				cout << GREEN << "VEL_CONTROL_ENU, Pls input the desired vel and yaw rate" << TAIL << endl;
+				cout << GREEN << "VEL_CONTROL_ENU, Pls input the desired vel and yaw" << TAIL << endl;
 				cout << GREEN << "desired vel: --- x [m/s] "  << TAIL << endl;
 				cin >> agent_cmd.desired_vel.linear.x;
 				cout << GREEN << "desired vel: --- y [m/s]"  << TAIL << endl;
 				cin >> agent_cmd.desired_vel.linear.y;
-				cout << GREEN << "desired yaw_rate: --- yaw [deg/s]:"  << TAIL << endl;
-				cin >> agent_cmd.desired_vel.angular.z;
-				agent_cmd.desired_vel.angular.z = agent_cmd.desired_vel.angular.z / 180.0 * M_PI;
+				cout << GREEN << "desired yaw: --- yaw [deg]:"  << TAIL << endl;
+				cin >> agent_cmd.desired_yaw;
+				agent_cmd.desired_yaw = agent_cmd.desired_yaw / 180.0 * M_PI;
 				agent_cmd.control_state = sunray_msgs::agent_cmd::VEL_CONTROL_ENU;
 				for(int i = 0; i < agent_num; i++) 
 				{
 					agent_cmd.agent_id = i+1;
 					agent_cmd_pub[i].publish(agent_cmd);
 				}
-				cout << GREEN << "VEL_CONTROL_ENU, desired vel: [" << agent_cmd.desired_vel.linear.x << "," << agent_cmd.desired_vel.linear.y << "], desired yaw: " << agent_cmd.desired_vel.angular.z / M_PI * 180.0 << TAIL << endl;
+				cout << GREEN << "VEL_CONTROL_ENU, desired vel: [" << agent_cmd.desired_vel.linear.x << "," << agent_cmd.desired_vel.linear.y << "], desired yaw: " << agent_cmd.desired_yaw / M_PI * 180.0 << TAIL << endl;
 				break;
 
 			case 11:

@@ -1,0 +1,14 @@
+<launch>
+	<node pkg="sunray_swarm" name="ugv_waypoint" type="ugv_waypoint" output="screen">
+		<param name="agent_id" value="1" />
+		<param name="waypoint_count" value="4" />
+		<param name="waypoint_1_x" value="1.0" />
+		<param name="waypoint_1_y" value="1.0" />
+		<param name="waypoint_2_x" value="-1.0" />
+		<param name="waypoint_2_y" value="1.0" />
+		<param name="waypoint_3_x" value="-1.0" />
+		<param name="waypoint_3_y" value="-1.0" />
+		<param name="waypoint_4_x" value="1.0" />
+		<param name="waypoint_4_y" value="-1.0" />
+	</node>
+</launch>

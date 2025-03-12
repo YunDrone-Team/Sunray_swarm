@@ -86,6 +86,8 @@ int main(int argc, char **argv)
         cin >> goal.x;
         cout << GREEN << "goal: --- y [m]"  << TAIL << endl;
         cin >> goal.y;
+        cout << GREEN << "goal: --- yaw [rad]"  << TAIL << endl;
+        cin >> goal.z;
 
         agent_goal_pub.publish(goal);
         

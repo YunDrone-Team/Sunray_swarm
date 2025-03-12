@@ -29,6 +29,7 @@ float linear_vel;                      // 圆参数：线速度
 float omega;                           // 圆参数：角速度
 float direction;                       // 圆参数：方向，1或-1
 float time_trajectory = 0.0;           // 圆参数：轨迹时间计数器
+float desired_yaw;                     // 期望偏航角
 
 sunray_msgs::orca_cmd agent_orca_cmd;  // ORCA指令
 std_msgs::String text_info;            // 打印消息
@@ -94,6 +95,9 @@ int main(int argc, char **argv)
     nh.param<float>("linear_vel", linear_vel, 0.1f);
     // 【参数】圆形轨迹参数：圆的方向 1或-1
     nh.param<float>("direction", direction, 1.0f);
+    // 【参数】期望偏航角
+    nh.param<float>("desired_yaw", desired_yaw, 0.0f);
+
     // 计算角速度
     if (circle_radius != 0)
     {
@@ -161,7 +165,7 @@ int main(int argc, char **argv)
         geometry_msgs::Point goal_point;
         goal_point.x = circle_center[0] + circle_radius * cos(angle);
         goal_point.y = circle_center[1] + circle_radius * sin(angle);
-        goal_point.z = circle_center[2];
+        goal_point.z = desired_yaw;
         orca_goal_pub[i].publish(goal_point);
     }
     sleep(10.0);
@@ -188,7 +192,7 @@ int main(int argc, char **argv)
                 geometry_msgs::Point goal_point;
                 goal_point.x = circle_center[0] + circle_radius * cos(angle);
                 goal_point.y = circle_center[1] + circle_radius * sin(angle);
-                goal_point.z = circle_center[2];
+                goal_point.z = desired_yaw;
                 orca_goal_pub[i].publish(goal_point);
             }
             // 更新时间计数器，由于循环频率为10Hz，因此设置为0.1秒

@@ -48,11 +48,24 @@ class ORCA
         };
         orca_param orca_params;
 
+        struct agent_pose
+        {
+            float x;
+            float y;
+            float yaw;
+        };
+
+        // 智能体的home点
+        agent_pose home_pose[MAX_NUM];
+
+        // 智能体的目标点
+        agent_pose goal_pose[MAX_NUM];
+
         // 智能体当前状态
         sunray_msgs::agent_state agent_state[MAX_NUM];
         // 智能体控制指令 - 待发布
         sunray_msgs::agent_cmd agent_cmd[MAX_NUM];
-        // 智能体的home点
+        // 智能体的home点（home_point.x和home_point.y代表位置，home_point.z代表偏航角）
         geometry_msgs::Point home_point[MAX_NUM];
 
         // ORCA算法类
@@ -61,8 +74,11 @@ class ORCA
         sunray_msgs::orca_state agent_orca_state[MAX_NUM];
         // ORCA目标点        
         std::vector<RVO::Vector2> goals;  
-        // 收到的外部目标点
+        // 收到的外部目标点（agent_goal.x和agent_goal.y代表目标点位置，agent_goal.z代表期望偏航角）
         geometry_msgs::Point agent_goal[MAX_NUM];  
+
+
+
         // ORCA算法中每个智能体是否到达目标点
         bool arrived_goal[MAX_NUM];        
         // ORCA算法中所有智能体是否到达目标点

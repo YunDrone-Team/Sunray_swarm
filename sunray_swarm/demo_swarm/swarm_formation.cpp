@@ -286,59 +286,77 @@ void setup_formation()
     // 1号智能体
     fomation_line[0].x = 0.0; 
     fomation_line[0].y = -0.5;
+    fomation_line[0].z = -0.0;
     // 2号智能体
     fomation_line[1].x = 0.0; 
     fomation_line[1].y = 0.5;
+    fomation_line[1].z = -0.0;
     // 3号智能体
     fomation_line[2].x = 0.0; 
     fomation_line[2].y = -1.5;
+    fomation_line[2].z = -0.0;
     // 4号智能体
     fomation_line[3].x = 0.0; 
     fomation_line[3].y = 1.5;
+    fomation_line[3].z = -0.0;
     // 5号智能体
     fomation_line[4].x = 0.0; 
     fomation_line[4].y = -2.5;
+    fomation_line[4].z = -0.0;
     // 6号智能体
     fomation_line[5].x = 0.0; 
     fomation_line[5].y = 2.5;
+    fomation_line[5].z = -0.0;
 
     // 三角阵型
     // 1号智能体
     fomation_triangle[0].x = 1.0; 
     fomation_triangle[0].y = -0.5;
+    fomation_triangle[0].z = -0.0;
     // 2号智能体
     fomation_triangle[1].x = 1.0; 
     fomation_triangle[1].y = 0.5;
+    fomation_triangle[1].z = -0.0;
     // 3号智能体
     fomation_triangle[2].x = 0.0; 
     fomation_triangle[2].y = -1.5;
+    fomation_triangle[2].z = -0.0;
     // 4号智能体
     fomation_triangle[3].x = 0.0; 
     fomation_triangle[3].y = 1.5;
+    fomation_triangle[3].z = -0.0;
     // 5号智能体
     fomation_triangle[4].x = -1.0; 
     fomation_triangle[4].y = -2.5;
+    fomation_triangle[4].z = -0.0;
     // 6号智能体
     fomation_triangle[5].x = -1.0; 
     fomation_triangle[5].y = 2.5;
+    fomation_triangle[5].z = -0.0;
 
     // 方形阵型
     // 1号智能体
     fomation_square[0].x = 1.0; 
     fomation_square[0].y = 1.5;
+    fomation_square[0].z = 0.0;
     // 2号智能体
     fomation_square[1].x = 1.0; 
     fomation_square[1].y = 0.0;
+    fomation_square[1].z = 0.0;
     // 3号智能体
     fomation_square[2].x = 1.0; 
     fomation_square[2].y = -1.5;
+    fomation_square[2].z = 0.0;
     // 4号智能体
     fomation_square[3].x = -1.0; 
     fomation_square[3].y = 1.5;
+    fomation_square[3].z = 0.0;
     // 5号智能体
     fomation_square[4].x = -1.0; 
     fomation_square[4].y = -0.0;
+    fomation_square[4].z = 0.0;
     // 6号智能体
     fomation_square[5].x = -1.0; 
     fomation_square[5].y = -1.5;
+    fomation_square[5].z = 0.0;
 }

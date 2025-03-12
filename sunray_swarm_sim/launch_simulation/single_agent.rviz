@@ -3,8 +3,7 @@ Panels:
     Help Height: 81
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Obstacle1/Status1
+      Expanded: ~
       Splitter Ratio: 0.692307710647583
     Tree Height: 929
   - Class: rviz/Selection
@@ -55,7 +54,7 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        ugv_1/base_link:
+        rmtt_1/base_link:
           Value: true
         world:
           Value: true
@@ -67,7 +66,7 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          ugv_1/base_link:
+          rmtt_1/base_link:
             {}
       Update Interval: 0
       Value: true
@@ -76,7 +75,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_1/mesh
       Name: rmtt1_mesh
       Namespaces:
-        {}
+        mesh: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -108,7 +107,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/rmtt_1/goal_point_rviz
       Name: rmtt1_goal
       Namespaces:
-        {}
+        goal: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -131,7 +130,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/ugv_1/mesh
       Name: UGV_mesh
       Namespaces:
-        mesh: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -163,7 +162,7 @@ Visualization Manager:
       Marker Topic: /sunray_swarm/ugv_1/goal_point_rviz
       Name: UGV_goal
       Namespaces:
-        goal: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -225,17 +224,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.6830542087554932
-        Y: -0.2501906156539917
-        Z: -1.4001139402389526
+        X: 2.022819757461548
+        Y: 0.3221365213394165
+        Z: -0.20121923089027405
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 0.8397966027259827
       Target Frame: <Fixed Frame>
-      Yaw: 3.1467502117156982
+      Yaw: 3.1367502212524414
     Saved: ~
 Window Geometry:
   Displays:
