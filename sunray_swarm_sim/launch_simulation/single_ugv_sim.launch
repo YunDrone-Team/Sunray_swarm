@@ -8,7 +8,7 @@
 
     <!-- 第二个节点：启动1号无人车仿真节点 - ugv_sim_node -->
     <!-- 注意配置初始位置 -->
-    <node pkg="sunray_swarm" type="agent_sim_node" name="agent_sim_node_1" output="screen">
+    <node pkg="sunray_swarm_sim" type="agent_sim_node" name="agent_sim_node_1" output="screen">
         <param name="agent_type" type="int" value="1" />
         <param name="agent_id" type="int" value="1" />
         <param name="init_pos_x" type="double" value="2.0" />

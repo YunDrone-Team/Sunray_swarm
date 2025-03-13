@@ -126,6 +126,16 @@ target_link_libraries(path_planning ${catkin_LIBRARIES})
 add_executable(swarm_circle demo_swarm/swarm_circle.cpp)
 add_dependencies(swarm_circle sunray_swarm_gencpp)
 target_link_libraries(swarm_circle ${catkin_LIBRARIES})
+## SWARM_DEMO - 集群绕8
+add_executable(swarm_lemniscate demo_swarm/swarm_lemniscate.cpp)
+add_dependencies(swarm_lemniscate sunray_swarm_gencpp)
+target_link_libraries(swarm_lemniscate ${catkin_LIBRARIES})
+## SWARM_DEMO - swarm_dance
+add_executable(swarm_dance demo_swarm/swarm_dance.cpp)
+add_dependencies(swarm_dance sunray_swarm_gencpp)
+target_link_libraries(swarm_dance ${catkin_LIBRARIES})
+
+
 ## SWARM_DEMO - 固定阵型变换
 add_executable(swarm_formation demo_swarm/swarm_formation.cpp)
 add_dependencies(swarm_formation sunray_swarm_gencpp)

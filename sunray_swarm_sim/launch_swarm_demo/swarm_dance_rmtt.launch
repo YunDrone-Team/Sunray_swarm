@@ -1,0 +1,12 @@
+<launch>
+	<node pkg="sunray_swarm" name="swarm_dance_rmtt" type="swarm_dance" output="screen">
+		<param name="agent_type" value="0" />
+		<param name="agent_num" value="6" />
+		<param name="circle_center_x" value="0.0" />
+		<param name="circle_center_y" value="0.0" />
+		<param name="circle_radius" value="3.0" />
+		<param name="linear_vel" value="0.3" />
+		<param name="direction" value="1.0" />
+		<param name="desired_yaw" value="0.0" />
+	</node>
+</launch>
