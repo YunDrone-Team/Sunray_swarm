@@ -116,6 +116,10 @@ target_link_libraries(ugv_circle ${catkin_LIBRARIES})
 add_executable(ugv_waypoint demo_ugv/ugv_waypoint.cpp)
 add_dependencies(ugv_waypoint sunray_swarm_gencpp)
 target_link_libraries(ugv_waypoint ${catkin_LIBRARIES})
+# UGV_DEMO - 无人车跟随无人机
+add_executable(ugv_follow_rmtt demo_ugv/ugv_follow_rmtt.cpp)
+add_dependencies(ugv_follow_rmtt sunray_swarm_gencpp)
+target_link_libraries(ugv_follow_rmtt ${catkin_LIBRARIES})
 
 # ORCA_DEMO - 固定障碍物路径规划
 add_executable(path_planning orca/path_planning.cpp)
