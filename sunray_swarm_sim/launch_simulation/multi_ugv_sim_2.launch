@@ -68,7 +68,7 @@
     </node>
 
     <!-- 第三个节点：启动RVIZ，对应的配置文件为multi_agent.rviz -->
-    <arg name="rviz_enable" default="true"/>
+    <arg name="rviz_enable" default="false"/>
     <arg name="rivz_config" default="$(find sunray_swarm_sim)/launch_simulation/multi_agent.rviz"/>
 	<!-- 启动Rviz-->
 	<group if="$(arg rviz_enable)">
