@@ -9,7 +9,7 @@ desired_yaw : 0.0
 target_name : "target"
 mled_text : "CXY"
 # 定位数据源 1：动捕  2：dji地图定位
-pose_source: 2
+pose_source: 1
 
 hover_x: 2.0
 hover_y: 4.0
