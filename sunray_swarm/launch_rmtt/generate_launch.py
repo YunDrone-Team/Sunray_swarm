@@ -20,10 +20,9 @@ from robomaster import robot
 from multi_robomaster import tool
 import re
 
-
-# SN_LIST = ["0TQZM43CNT035Y", "0TQZM3QCNT00ZF", "0TQZM43CNT03JP", "0TQZM48CNT06MZ", "0TQZM48CNT06MY", "0TQZM48CNT06N4", "0TQZM48CNT06LS", "0TQZM47CNT0482"]
-# SN_LIST = ["0TQZM47CNT046P", "0TQZM48CNT06PF", "0TQZM48CNT06PY", "0TQZJADCNT18QU", "0TQZM43CNT03UU", "0TQZM43CNT03FC", "0TQZM43CNT03RR", "0TQZJADCNT1A6Z"]
+# RMTT无人机SN号列表，几台无人机就填写几个
 SN_LIST = ["0TQZM3QCNT00ZV", "0TQZM48CNT06PF", "0TQZM48CNT06PY", "0TQZJADCNT18QU", "0TQZM43CNT03UU", "0TQZM43CNT03FC", "0TQZM43CNT03RR", "0TQZJADCNT1A6Z"]
+# local IP指开发主机的IP？
 local_ip = "192.168.25.218"
 
 if __name__ == '__main__':
@@ -85,6 +84,7 @@ if __name__ == '__main__':
 
     client.close()
 
+    # 生成rmtt_all_drone.launch脚本
     with open("rmtt_all_drone.launch","w") as f:
         f.write('<?xml version="1.0"?>\n')
         f.write("<launch>\n")
@@ -98,7 +98,8 @@ if __name__ == '__main__':
             port = robot_sn_dict[sn][1]
             f.write(f'\t<!-- 第{idx+1}台无人机 -->\n')
             f.write(f'\t<group ns="/sunray_swarm/rmtt_{idx +1}">\n')
-            f.write(f'\t\t<node pkg="rmtt_driver" name="rmtt_driver" type="rmtt_node.py" output="screen">\n')
+            f.write(f'\t\t<!-- 启动rmtt_driver -->\n')
+            f.write(f'\t\t<node pkg="rmtt_driver" type="rmtt_node.py" name="rmtt_driver" output="screen">\n')
             f.write(f'\t\t\t<param name="drone_sn" type="string" value="{sn}" />\n')
             f.write(f'\t\t\t<param name="drone_ip" type="string" value="{ip}" />\n')
             f.write(f'\t\t\t<param name="drone_port" type="string" value="{port}" />\n')
@@ -108,7 +109,7 @@ if __name__ == '__main__':
             f.write(f'\t\t\t<param name="enable_camera" type="bool" value="true" />\n')
             f.write(f'\t\t</node>\n')
             f.write(f'\t\t<!-- 启动rmtt_control_node -->\n')
-            f.write(f'\t\t<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_{idx+1}" output="screen">\n')
+            f.write(f'\t\t<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node" output="screen">\n')
             f.write(f'\t\t\t<param name="agent_id" value="{idx+1}" />\n')
             f.write(f'\t\t\t<param name="agent_ip" value="{ip}" />\n')
             f.write(f'\t\t\t<rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" />\n')
