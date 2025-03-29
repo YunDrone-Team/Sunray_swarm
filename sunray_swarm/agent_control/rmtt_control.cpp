@@ -19,19 +19,19 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     nh.param<float>("led_color/a", led_color.a, 1.0);
     // 【参数】RMTT上方mled字符
     nh.param<string>("mled_text", mled_text.data, "YunDrone");
-    // 【参数】是否打印
+    // 【参数】终端是否打印调试信息
     nh.param<bool>("flag_printf", flag_printf, true);
-    // 【参数】悬停控制参数 - xy
+    // 【参数】位置环控制参数 - xy
     nh.param<float>("rmtt_control_param/Kp_xy", rmtt_control_param.Kp_xy, 1.4);
-    // 【参数】悬停控制参数 - z
+    // 【参数】位置环控制参数 - z
     nh.param<float>("rmtt_control_param/Kp_z", rmtt_control_param.Kp_z, 1.4);
-    // 【参数】悬停控制参数 - yaw
+    // 【参数】位置环控制参数 - yaw
     nh.param<float>("rmtt_control_param/Kp_yaw", rmtt_control_param.Kp_yaw, 0.9);
-    // 【参数】悬停控制参数 - max_vel_xy
+    // 【参数】位置环控制参数 - max_vel_xy
     nh.param<float>("rmtt_control_param/max_vel_xy", rmtt_control_param.max_vel_xy, 0.5);
-    // 【参数】悬停控制参数 - max_vel_z
+    // 【参数】位置环控制参数 - max_vel_z
     nh.param<float>("rmtt_control_param/max_vel_z", rmtt_control_param.max_vel_z, 0.3);
-    // 【参数】悬停控制参数 - max_vel_yaw
+    // 【参数】位置环控制参数 - max_vel_yaw
     nh.param<float>("rmtt_control_param/max_vel_yaw", rmtt_control_param.max_vel_yaw, 40.0/180.0*M_PI);
     // 【参数】地理围栏参数（超出围栏自动降落）
     nh.param<float>("rmtt_geo_fence/max_x", rmtt_geo_fence.max_x, 100.0);

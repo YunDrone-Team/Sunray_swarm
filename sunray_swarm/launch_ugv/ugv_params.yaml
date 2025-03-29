@@ -1,0 +1,41 @@
+## UGV 
+## ugv_control_node节点参数
+## 智能体类型，0代表RMTT，1代表UGV
+agent_type : 1
+## 智能体编号，默认都为1，如果外部有指定则以外部为准
+agent_id : 1
+## 智能体位置来源（1：代表动捕、2代表SLAM）
+pose_source: 1
+## 终端是否打印调试信息
+flag_printf : true
+## 无人车位置环控制参数
+ugv_control_param:
+  Kp_xy : 1.4
+  Kp_yaw : 0.9
+  max_vel_xy : 0.5
+  max_vel_yaw : 0.5
+## 地理围栏参数（超出围栏自动停止），请根据场地实际情况设置！
+ugv_geo_fence:
+  min_x: -5.0
+  max_x: 5.0
+  min_y: -5.0
+  max_y: 5.0
+  min_z: -0.5
+  max_z: 1.5
+
+## ORCA算法参数
+## 智能体数量（无人车），默认为3，如果外部有指定则以外部为准
+agent_num: 3
+orca_params:
+  ## 智能体之间的假象感知距离
+  neighborDist : 1.5
+  # 数字越大，智能体响应相邻智能体的碰撞越快，但速度可选的自由度越小
+  timeHorizon : 2.0
+  ## 数字越大，智能体响应障碍物的碰撞越快，但速度可选的自由度越小
+  timeHorizonObst : 2.0
+  ## 智能体体积半径
+  radius : 0.35
+  ## 智能体最大速度
+  maxSpeed : 0.2
+  ## 时间步长 不确定有啥用
+  time_step : 0.1

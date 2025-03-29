@@ -10,7 +10,7 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     nh.param<std::string>("agent_ip", agent_ip, "192.168.1.1");
     // 【参数】智能体的固定高度
     nh.param<float>("agent_height", agent_height, 0.1);
-    // 【参数】智能体位置来源（1：代表动捕、2代表地图）
+    // 【参数】智能体位置来源（1：代表动捕、2代表SLAM数据）
     nh.param<int>("pose_source", pose_source, 1);
     // 【参数】是否打印
     nh.param<bool>("flag_printf", flag_printf, true);

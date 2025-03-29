@@ -5,7 +5,7 @@
     <!-- 启动ugv_control_node -->
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_$(arg ugv_id)" output="screen">
         <param name="agent_id" value="$(arg ugv_id)" />
-        <rosparam command="load" file="$(find sunray_swarm)/config/ugv_params.yaml" />
+        <rosparam command="load" file="$(find sunray_swarm)/launch_ugv/ugv_params.yaml" />
     </node>
 </launch>
 

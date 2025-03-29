@@ -112,7 +112,7 @@ if __name__ == '__main__':
             f.write(f'\t\t<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node" output="screen">\n')
             f.write(f'\t\t\t<param name="agent_id" value="{idx+1}" />\n')
             f.write(f'\t\t\t<param name="agent_ip" value="{ip}" />\n')
-            f.write(f'\t\t\t<rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" />\n')
+            f.write(f'\t\t\t<rosparam command="load" file="$(find sunray_swarm)/launch_rmtt/rmtt_params.yaml" />\n')
             f.write(f'\t\t</node>\n')
             f.write(f'\t</group>\n')
             f.write('\n')

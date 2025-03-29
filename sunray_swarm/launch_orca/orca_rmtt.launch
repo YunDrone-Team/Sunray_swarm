@@ -1,6 +1,7 @@
 <launch>
-	<node pkg="sunray_swarm" name="orca_node" type="orca_node" output="screen">
-        <rosparam command="load" file="$(find sunray_swarm)/config/rmtt_params.yaml" />
+	<node pkg="sunray_swarm" name="orca_node_rmtt" type="orca_node" output="screen">
+		<param name="agent_num" value="6" />
+		<rosparam command="load" file="$(find sunray_swarm)/launch_rmtt/rmtt_params.yaml" />
 	</node>
 </launch>
 
