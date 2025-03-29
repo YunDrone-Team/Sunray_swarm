@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <launch>
+    <!-- 无人车ID -->
     <arg name="ugv_id" default="1"/>
 
-    <group>
-        <!-- 开启底层单片机控制节点 -->
-        <node pkg="turn_on_wheeltec_robot" type="wheeltec_robot_node" name="wheeltec_robot_node" output="screen">
-            <remap from="/cmd_vel"        to="/sunray_swarm/ugv_$(arg ugv_id)/cmd_vel"/>
-            <remap from="/PowerVoltage"        to="/sunray_swarm/ugv_$(arg ugv_id)/battery"/>
-            <param name="usart_port_name" type="string" value="/dev/ttyACM0"/>  
-            <param name="serial_baud_rate" type="int" value="115200"/>
-        </node>
-    </group>
+    <!-- 开启底层单片机控制节点 -->
+    <node pkg="turn_on_wheeltec_robot" type="wheeltec_robot_node" name="wheeltec_robot_node_$(arg ugv_id)" output="screen">
+        <remap from="/cmd_vel"        to="/sunray_swarm/ugv_$(arg ugv_id)/cmd_vel"/>
+        <remap from="/PowerVoltage"        to="/sunray_swarm/ugv_$(arg ugv_id)/battery"/>
+        <param name="usart_port_name" type="string" value="/dev/ttyACM0"/>  
+        <param name="serial_baud_rate" type="int" value="115200"/>
+    </node>
 </launch>
