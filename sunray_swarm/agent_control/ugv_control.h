@@ -66,7 +66,8 @@ class UGV_CONTROL
         sunray_msgs::agent_state agent_state_last; 
         // 智能体获得上一帧定位数据的时间（用于检查定位数据获取是否超时）
         ros::Time get_odom_time{0};
-
+        // 智能体获得上一帧电量数据的时间（用于检查driver数据获取是否超时）
+        ros::Time get_battery_time{0};
         // 智能体当前控制指令
         sunray_msgs::agent_cmd current_agent_cmd;
         // 智能体当前期望位置+偏航角（来自外部控制指令赋值）    

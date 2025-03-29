@@ -479,6 +479,12 @@ void RMTT_CONTROL::timercb_state(const ros::TimerEvent &e)
     // 发布 agent_state
     agent_state.header.stamp = ros::Time::now();
 
+    // 如果电池数据获取超时1秒，则认为智能体driver挂了
+    if((ros::Time::now() - get_battery_time).toSec() > 1.0)
+    {
+        agent_state.connected = false;
+    }
+
     // 如果位姿数据获取超时，则认为odom失效了
     if((ros::Time::now() - get_odom_time).toSec() > ODOM_TIMEOUT)
     {
@@ -538,6 +544,8 @@ void RMTT_CONTROL::map_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg)
 // 回调函数：电池电量
 void RMTT_CONTROL::battery_cb(const std_msgs::Float32ConstPtr& msg)
 {
+    // 记录获取电池（从驱动）的时间，用于判断智能体驱动是否正常
+    get_battery_time = ros::Time::now();
     agent_state.connected = true;
     agent_state.battery = msg->data;
 }
