@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="tianbot_led" type="led_cover_driver.py" name="tianbot_led_driver" output="screen"/>
+    <node pkg="tianbot_led" type="led_cover_test.py" name="tianbot_led" output="screen"/>
+</launch>
