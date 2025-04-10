@@ -6,7 +6,7 @@ import serial
 
 # 设置串口
 ser = serial.Serial('/dev/ttyUSB0', 115200)  # 请根据实际情况修改串口名称和波特率
-
+#topic_name=rospy.resolve_name('leds')
 def led_callback(data):
     led_values = data.data
     for i in range(16):
