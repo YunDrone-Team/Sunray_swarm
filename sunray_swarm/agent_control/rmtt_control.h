@@ -54,6 +54,9 @@ class RMTT_CONTROL
             float max_vel_xy;
             float max_vel_z;
             float max_vel_yaw;
+            float deadzone_vel_xy;
+            float deadzone_vel_z;
+            float deadzone_vel_yaw;
         };
         control_param rmtt_control_param;
 

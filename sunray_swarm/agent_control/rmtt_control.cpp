@@ -28,6 +28,12 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     nh.param<float>("rmtt_control_param/max_vel_z", rmtt_control_param.max_vel_z, 0.3);
     // 【参数】位置环控制参数 - max_vel_yaw
     nh.param<float>("rmtt_control_param/max_vel_yaw", rmtt_control_param.max_vel_yaw, 40.0/180.0*M_PI);
+    // 【参数】位置环控制参数 - deadzone_vel_xy
+    nh.param<float>("rmtt_control_param/deadzone_vel_xy", rmtt_control_param.deadzone_vel_xy, 0.0);
+    // 【参数】位置环控制参数 - deadzone_vel_z
+    nh.param<float>("rmtt_control_param/deadzone_vel_z", rmtt_control_param.deadzone_vel_z, 0.0);
+    // 【参数】位置环控制参数 - deadzone_vel_yaw
+    nh.param<float>("rmtt_control_param/deadzone_vel_yaw", rmtt_control_param.deadzone_vel_yaw, 1.0/180.0*M_PI);
     // 【参数】地理围栏参数（超出围栏自动降落）
     nh.param<float>("rmtt_geo_fence/max_x", rmtt_geo_fence.max_x, 100.0);
     nh.param<float>("rmtt_geo_fence/min_x", rmtt_geo_fence.min_x, -100.0);
@@ -360,11 +366,12 @@ void RMTT_CONTROL::pos_control(geometry_msgs::Point pos_ref, double yaw_ref)
     // 控制指令计算：使用简易P控制 - YAW
     desired_vel.angular.z = yaw_error * rmtt_control_param.Kp_yaw;
 
-    // 控制指令限幅
-    desired_vel.linear.x = constrain_function(desired_vel.linear.x, rmtt_control_param.max_vel_xy, 0.0);
-    desired_vel.linear.y = constrain_function(desired_vel.linear.y, rmtt_control_param.max_vel_xy, 0.0);
-    desired_vel.linear.z = constrain_function(desired_vel.linear.z, rmtt_control_param.max_vel_z, 0.0);
-    desired_vel.angular.z = constrain_function(desired_vel.angular.z, rmtt_control_param.max_vel_yaw, 0.01);
+    // 控制指令限幅，传入的参数依次是 原始数据、最大值、死区值
+    // 功能：将原始数据限制在最大值之内；如果小于死区值，则直接设置为0
+    desired_vel.linear.x = constrain_function(desired_vel.linear.x, rmtt_control_param.max_vel_xy, rmtt_control_param.deadzone_vel_xy);
+    desired_vel.linear.y = constrain_function(desired_vel.linear.y, rmtt_control_param.max_vel_xy, rmtt_control_param.deadzone_vel_xy);
+    desired_vel.linear.z = constrain_function(desired_vel.linear.z, rmtt_control_param.max_vel_z, rmtt_control_param.deadzone_vel_z);
+    desired_vel.angular.z = constrain_function(desired_vel.angular.z, rmtt_control_param.max_vel_yaw, rmtt_control_param.deadzone_vel_yaw);
 
     // 发布控制指令
     agent_cmd_vel_pub.publish(desired_vel);
@@ -719,6 +726,7 @@ geometry_msgs::Twist RMTT_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
     body_cmd.linear.x = cmd_body[0];
     body_cmd.linear.y = cmd_body[1];
     body_cmd.linear.z = enu_cmd.linear.z;
+
     body_cmd.angular.x = 0.0;
     body_cmd.angular.y = 0.0;
     // 控制指令计算：使用简易P控制 - YAW
@@ -777,6 +785,9 @@ void RMTT_CONTROL::printf_param()
     cout << GREEN << "max_vel_xy : " << rmtt_control_param.max_vel_xy << " [m/s]" << TAIL << endl;
     cout << GREEN << "max_vel_z : " << rmtt_control_param.max_vel_z << " [m/s]" << TAIL << endl;
     cout << GREEN << "max_vel_yaw : " << rmtt_control_param.max_vel_yaw << " [rad/s]" << TAIL << endl;
+    cout << GREEN << "deadzone_vel_xy : " << rmtt_control_param.deadzone_vel_xy << " [m/s]" << TAIL << endl;
+    cout << GREEN << "deadzone_vel_z : " << rmtt_control_param.deadzone_vel_z << " [m/s]" << TAIL << endl;
+    cout << GREEN << "deadzone_vel_yaw : " << rmtt_control_param.deadzone_vel_yaw << " [rad/s]" << TAIL << endl;
 
     // 地理围栏参数
     cout << GREEN << "geo_fence max_x : " << rmtt_geo_fence.max_x << " [m]" << TAIL << endl;
