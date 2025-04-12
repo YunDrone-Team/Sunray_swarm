@@ -192,7 +192,13 @@ int main(int argc, char **argv)
                 geometry_msgs::Point goal_point;
                 goal_point.x = circle_center[0] + circle_radius * cos(angle);
                 goal_point.y = circle_center[1] + circle_radius * sin(angle);
-                goal_point.z = desired_yaw;
+
+                // 偏航角跟随圆形轨迹计算
+                double vx,vy;
+                vx = -omega * circle_radius * sin(angle);
+                vy = omega * circle_radius * cos(angle);
+                goal_point.z = atan2(vy, vx);
+                // goal_point.z = desired_yaw;
                 orca_goal_pub[i].publish(goal_point);
             }
             // 更新时间计数器，由于循环频率为10Hz，因此设置为0.1秒

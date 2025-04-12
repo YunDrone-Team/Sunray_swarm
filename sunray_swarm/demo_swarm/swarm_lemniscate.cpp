@@ -163,7 +163,7 @@ int main(int argc, char **argv)
         float theta = dynamic_phase + base_phase;
         geometry_msgs::Point goal_point;
         goal_point.x = circle_center[0] + circle_radius * sin(theta);
-        goal_point.y = circle_center[1] + circle_radius * sin(2*theta) * 0.5;
+        goal_point.y = circle_center[1] + circle_radius * sin(2*theta) * 0.5;      
         goal_point.z = desired_yaw;
         orca_goal_pub[i].publish(goal_point);
     }
@@ -194,7 +194,11 @@ int main(int argc, char **argv)
                 geometry_msgs::Point goal_point;
                 goal_point.x = circle_center[0] + circle_radius * sin(theta);
                 goal_point.y = circle_center[1] + circle_radius * sin(2*theta) * 0.5;
-                goal_point.z = desired_yaw;
+                // 偏航角跟随圆形轨迹计算
+                double vx,vy;
+                vx = omega * circle_radius * cos(theta);
+                vy = omega * circle_radius * cos(2*theta);
+                goal_point.z = atan2(vy, vx);  
                 orca_goal_pub[i].publish(goal_point);
             }
 
