@@ -737,7 +737,7 @@ geometry_msgs::Twist RMTT_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
     body_cmd.linear.x = constrain_function(body_cmd.linear.x, rmtt_control_param.max_vel_xy, 0.0);
     body_cmd.linear.y = constrain_function(body_cmd.linear.y, rmtt_control_param.max_vel_xy, 0.0);
     body_cmd.linear.z = constrain_function(body_cmd.linear.z, rmtt_control_param.max_vel_z, 0.0);
-    body_cmd.angular.z = constrain_function(body_cmd.angular.z, rmtt_control_param.max_vel_yaw, 0.01);
+    body_cmd.angular.z = constrain_function(desired_vel.angular.z, rmtt_control_param.max_vel_yaw, rmtt_control_param.deadzone_vel_yaw);
 
     return body_cmd;
 }
