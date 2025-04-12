@@ -1,6 +1,8 @@
 <launch>
+    <arg name="agent_num" default="6"/>
+
 	<node pkg="sunray_swarm" name="orca_node_ugv" type="orca_node" output="screen">
-		<param name="agent_num" value="6" />
+		<param name="agent_num" value="$(arg agent_num)" />
 		<rosparam command="load" file="$(find sunray_swarm)/launch_ugv/ugv_params.yaml" />
 	</node>
 </launch>

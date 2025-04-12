@@ -12,15 +12,15 @@ mled_text : "Yundrone"
 flag_printf : true
 ## RMTT位置环控制参数
 rmtt_control_param:
-  Kp_xy: 1.4
-  Kp_z: 1.4
+  Kp_xy: 1.0
+  Kp_z: 1.5
   Kp_yaw: 0.9
   max_vel_xy: 0.5
   max_vel_z: 0.3
   max_vel_yaw: 0.5
-  deadzone_vel_xy: 0.01
-  deadzone_vel_z: 0.02
-  deadzone_vel_yaw: 0.01
+  deadzone_vel_xy: 0.05
+  deadzone_vel_z: 0.07
+  deadzone_vel_yaw: 0.05
 
 ## 地理围栏参数（超出围栏自动降落），请根据场地实际情况设置！
 rmtt_geo_fence:

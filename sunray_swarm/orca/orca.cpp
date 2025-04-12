@@ -169,7 +169,6 @@ bool ORCA::orca_run()
         agent_orca_state[i].goal[0] = rvo_goal.x();
         agent_orca_state[i].goal[1] = rvo_goal.y();
         agent_orca_state[i].yaw = goal_pose[i].yaw;
-        RVO::Vector2 vel = sim->getAgentVelCMD(i);
         agent_orca_state[i].vel_orca[0] = agent_cmd[i].desired_vel.linear.x;
         agent_orca_state[i].vel_orca[1] = agent_cmd[i].desired_vel.linear.y;
         agent_orca_state[i].home_pos[0] = home_pose[i].x;
