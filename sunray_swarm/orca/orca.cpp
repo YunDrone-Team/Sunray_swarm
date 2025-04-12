@@ -6,9 +6,11 @@ void ORCA::init(ros::NodeHandle& nh)
     //  由于无人机和无人车不在一个平面，无人机和无人车需要分别启动两个不同的ORCA算法节点
     nh.param<int>("agent_type", agent_type, 1);
     // 【参数】ORCA算法智能体数量
-    nh.param<int>("agent_num", agent_num, 8);
+    nh.param<int>("agent_num", agent_num, 6);
     // 【参数】智能体的固定高度
     nh.param<float>("agent_height", agent_height, 1.0);
+    // 【参数】终端是否打印调试信息
+    nh.param<bool>("flag_printf", flag_printf, false);
     // 【参数】智能体之间的假想感知距离
     nh.param<float>("orca_params/neighborDist", orca_params.neighborDist, 2.0);
     orca_params.maxNeighbors = agent_num;
@@ -67,6 +69,12 @@ void ORCA::init(ros::NodeHandle& nh)
     // 初始化 goal_reached_printed
     goal_reached_printed.resize(agent_num, false);  
 
+    sleep(1.0);
+    node_name = "[" + ros::this_node::getName() + "] ---> ";
+    text_info.data = node_name + "ORCA init!";
+    text_info_pub.publish(text_info);
+    cout << BLUE << text_info.data << TAIL << endl;
+
     // 打印本节点参数，用于检查
     printf_param();
 
@@ -74,14 +82,6 @@ void ORCA::init(ros::NodeHandle& nh)
     setup_agents();
     // ORCA算法初始化 - 添加障碍物
     // setup_obstacles();
-
-    // 设置仿真时RVIZ中不同智能体目标点的颜色，与真机无关
-    setup_color();
-
-    node_name = ros::this_node::getName();
-    text_info.data = node_name + ": ORCA init!";
-    text_info_pub.publish(text_info);
-    cout << BLUE << text_info.data << TAIL << endl;
 }
 
 bool ORCA::orca_run()
@@ -133,9 +133,9 @@ bool ORCA::orca_run()
             // 当智能体抵达目标点时，会打印一次
             if (!goal_reached_printed[i])
             {
-                text_info.data = "agent_" + std::to_string(i+1) + " Arrived.";
+                text_info.data = node_name + "agent_" + std::to_string(i+1) + " Arrived.";
                 cout << BLUE << text_info.data << TAIL << endl;
-                text_info_pub.publish(text_info);
+                // text_info_pub.publish(text_info);
                 goal_reached_printed[i] = true;
             }
 		}
@@ -172,6 +172,9 @@ bool ORCA::orca_run()
         RVO::Vector2 vel = sim->getAgentVelCMD(i);
         agent_orca_state[i].vel_orca[0] = agent_cmd[i].desired_vel.linear.x;
         agent_orca_state[i].vel_orca[1] = agent_cmd[i].desired_vel.linear.y;
+        agent_orca_state[i].home_pos[0] = home_pose[i].x;
+        agent_orca_state[i].home_pos[1] = home_pose[i].y;
+        agent_orca_state[i].home_yaw = home_pose[i].yaw;
         agent_orca_state_pub[i].publish(agent_orca_state[i]);
 
         // 发布目标点mesh - RVIZ（仿真用）
@@ -192,7 +195,11 @@ bool ORCA::orca_run()
         goal_marker.scale.x = 0.2;
         goal_marker.scale.y = 0.2;
         goal_marker.scale.z = 0.2;
-        goal_marker.color = goal_point_color[i];
+        goal_marker.color.a = 1.0;
+        // 根据uav_id生成对应的颜色
+        goal_marker.color.r = static_cast<float>(((i+1) * 123) % 256) / 255.0;
+        goal_marker.color.g = static_cast<float>(((i+1) * 456) % 256) / 255.0;
+        goal_marker.color.b = static_cast<float>(((i+1) * 789) % 256) / 255.0;
         goal_marker.mesh_use_embedded_materials = false;
         goal_point_pub[i].publish(goal_marker);
     }
@@ -217,7 +224,9 @@ void ORCA::setup_agents()
         cout << BLUE << node_name << " ORCA add agents_" << i+1 << " at [" << agent_state[i].pos[0] << "," << agent_state[i].pos[1] << "]"<< TAIL << endl;
 	}
 
-    cout << BLUE << node_name << ": Set agents success!" << TAIL << endl;
+    text_info.data = node_name + "ORCA setup agents success!!";
+    text_info_pub.publish(text_info);
+    cout << BLUE << text_info.data << TAIL << endl;
 }
 
 // ORCA算法初始化 - 设置障碍物
@@ -256,12 +265,18 @@ void ORCA::setup_obstacles()
 	// 在算法中处理障碍物信息
 	sim->processObstacles();
 
-    cout << BLUE << node_name << ":  Set obstacles success!" << TAIL << endl;
+    text_info.data = node_name + "ORCA Set obstacles success!";
+    text_info_pub.publish(text_info);
+    cout << BLUE << text_info.data << TAIL << endl;
 }
 
 // 定时器回调函数 - 打印状态信息
 void ORCA::timercb_debug(const ros::TimerEvent &e)
 {
+    if(!flag_printf)
+    {
+        return;
+    }
     //固定的浮点显示
     cout.setf(ios::fixed);
     // setprecision(n) 设显示小数精度为n位
@@ -348,9 +363,6 @@ void ORCA::agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i)
 
     // 在ORCA算法中设置目标点
     sim->setAgentGoal(i, RVO::Vector2(goal_pose[i].x, goal_pose[i].y));
-    // cout << BLUE << node_name << ": Set agents_" << i+1 << " goal at [" << goal_pose[i].x << "," << goal_pose[i].y << "]"<< TAIL << endl;
-    // text_info.data = "[ORCA] Set agents_"+std::to_string(i+1)+" goal";
-    // text_info_pub.publish(text_info);
 }
 
 // 回调函数：ORCA算法指令回调函数，根据msg->orca_cmd的值来判断处理
@@ -366,12 +378,13 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
             home_pose[i].x = agent_state[i].pos[0];
             home_pose[i].y = agent_state[i].pos[1];
             home_pose[i].yaw = agent_state[i].att[2];
-            cout << BLUE << node_name << ":  Set agents_" << i+1 << " home at [" << home_pose[i].x << "," << home_pose[i].y << "] with "<< home_pose[i].yaw * 180 / M_PI << "deg" << TAIL << endl;
+            cout << BLUE << node_name << " Set agents_" << i+1 << " home at [" << home_pose[i].x << "," << home_pose[i].y << "] with "<< home_pose[i].yaw * 180 / M_PI << "deg" << TAIL << endl;
         }
         // ORCA算法初始化 - 添加当前为目标点（意味着当ORCA没有收到新的目标点时，智能体已经抵达对应目标点）
         setup_init_goals();
-        text_info.data = "Get orca_cmd: SET_HOME, ORCA start!"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+        text_info.data = node_name + "Get orca_cmd: SET_HOME, ORCA start!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
     }
 
     // 当orca_cmd为RETURN_HOME时，将每个智能体的home点设置为目标点，智能体会直接返回初始位置
@@ -400,12 +413,14 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
             if (i < goals.size()) 
             {
                 sim->setAgentGoal(i, goals[i]);
-                cout << BLUE << node_name << ":  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
+                cout << BLUE << node_name << "  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
             }
             
         }
-        text_info.data = "Get orca_cmd: RETURN_HOME"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+        text_info.data = node_name + "Get orca_cmd: RETURN_HOME!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
+
     }
 
     // 当orca_cmd为SETUP_OBS时，在ORCA算法中设置障碍物
@@ -423,8 +438,11 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         // 在算法中处理障碍物信息
         sim->processObstacles();
 
-        text_info.data = "Received orca_cmd: SETUP_OBS"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+
+        text_info.data = node_name + "Get orca_cmd: SETUP_OBS!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
+
     }
 
     // 当orca_cmd为ORCA_STOP时，不更改目标点，但是停止ORCA算法运行
@@ -439,16 +457,21 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
             agent_cmd[i].cmd_source = "ORCA";
             agent_cmd_pub[i].publish(agent_cmd[i]);
         }
-        text_info.data = "Get orca_cmd: ORCA_STOP!"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+
+        text_info.data = node_name + "Get orca_cmd: ORCA_STOP!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
+
     }
 
     // 当orca_cmd为ORCA_RESTART时，不更改此前目标点，继续运行ORCA算法
     if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_RESTART)
     {
         start_flag = true;
-        text_info.data = "Get orca_cmd: ORCA_RESTART!"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+        text_info.data = node_name + "Get orca_cmd: ORCA_RESTART!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
+
     }
 
     // ORCA_SCENARIO_1 - ORCA_SCENARIO_5 : 直接使用预设好的5组目标点
@@ -460,8 +483,10 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         }
         arrived_all_goal = false;
         setup_scenario_1();
-        text_info.data = "Received orca_cmd: ORCA_SCENARIO_1"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+
+        text_info.data = node_name + "Get orca_cmd: ORCA_SCENARIO_1!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
     }
 
     if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_2)
@@ -472,8 +497,9 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         }
         arrived_all_goal = false;
         setup_scenario_2();
-        text_info.data = "Received orca_cmd: ORCA_SCENARIO_2"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+        text_info.data = node_name + "Get orca_cmd: ORCA_SCENARIO_2!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
     }
 
     if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_3)
@@ -484,8 +510,9 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         }
         arrived_all_goal = false;
         setup_scenario_3();
-        text_info.data = "Received orca_cmd: ORCA_SCENARIO_3"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+        text_info.data = node_name + "Get orca_cmd: ORCA_SCENARIO_3!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
     }
 
     if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_4)
@@ -496,8 +523,9 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         }
         arrived_all_goal = false;
         setup_scenario_4();
-        text_info.data = "Received orca_cmd: ORCA_SCENARIO_4"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+        text_info.data = node_name + "Get orca_cmd: ORCA_SCENARIO_4!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
     }
 
     if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_5)
@@ -508,8 +536,9 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         }
         arrived_all_goal = false;
         setup_scenario_5();
-        text_info.data = "Received orca_cmd: ORCA_SCENARIO_5"; 
-        cout << BLUE << node_name << text_info.data << TAIL << endl;
+        text_info.data = node_name + "Get orca_cmd: ORCA_SCENARIO_5!";
+        cout << BLUE << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
     }
 
     text_info_pub.publish(text_info); 
@@ -560,48 +589,14 @@ void ORCA::setup_init_goals()
     {   
         if (i < goals.size()) {
             sim->setAgentGoal(i, goals[i]);
-            cout << BLUE << node_name << ":  Set agents_" << i+1 << " init goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
+            cout << BLUE << node_name << "  Set agents_" << i+1 << " init goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
         }
         goal_reached_printed[i] = false;
     }
 
-    cout << BLUE << node_name << ":  set init goals success!" << TAIL << endl;
-}
-
-void ORCA::setup_color()
-{
-    goal_point_color[0].a = 1.0;
-    goal_point_color[0].r = 1.0;
-    goal_point_color[0].g = 0.0;
-    goal_point_color[0].b = 0.0;
-    goal_point_color[1].a = 1.0;
-    goal_point_color[1].r = 0.0;
-    goal_point_color[1].g = 1.0;
-    goal_point_color[1].b = 0.0;
-    goal_point_color[2].a = 1.0;
-    goal_point_color[2].r = 0.0;
-    goal_point_color[2].g = 0.0;
-    goal_point_color[2].b = 1.0;
-    goal_point_color[3].a = 1.0;
-    goal_point_color[3].r = 1.0;
-    goal_point_color[3].g = 1.0;
-    goal_point_color[3].b = 0.0;
-    goal_point_color[4].a = 1.0;
-    goal_point_color[4].r = 1.0;
-    goal_point_color[4].g = 0.0;
-    goal_point_color[4].b = 1.0;
-    goal_point_color[5].a = 1.0;
-    goal_point_color[5].r = 0.0;
-    goal_point_color[5].g = 1.0;
-    goal_point_color[5].b = 1.0;
-    goal_point_color[6].a = 1.0;
-    goal_point_color[6].r = 0.5;
-    goal_point_color[6].g = 0.5;
-    goal_point_color[6].b = 0.5;
-    goal_point_color[7].a = 1.0;
-    goal_point_color[7].r = 0.3;
-    goal_point_color[7].g = 0.7;
-    goal_point_color[7].b = 0.2;
+    text_info.data = node_name + "ORCA set init goals success!";
+    text_info_pub.publish(text_info);
+    cout << BLUE << text_info.data << TAIL << endl;
 }
 
 void ORCA::setup_scenario_1()
@@ -663,12 +658,14 @@ void ORCA::setup_scenario_1()
     {   
         if (i < goals.size()) {
             sim->setAgentGoal(i, goals[i]);
-            cout << BLUE << node_name << ":  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
+            cout << BLUE << node_name << "  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
         }
         goal_reached_printed[i] = false;
     }
 
-    cout << BLUE << node_name << ":  setup_scenario_1 goals success!" << TAIL << endl;
+    text_info.data = node_name + "ORCA set setup_scenario_1 goals success!";
+    text_info_pub.publish(text_info);
+    cout << BLUE << text_info.data << TAIL << endl;
 }
 
 void ORCA::setup_scenario_2()
@@ -731,12 +728,14 @@ void ORCA::setup_scenario_2()
     {   
         if (i < goals.size()) {
             sim->setAgentGoal(i, goals[i]);
-            cout << BLUE << node_name << ":  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
+            cout << BLUE << node_name << " Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
         }
         goal_reached_printed[i] = false;
     }
 
-    cout << BLUE << node_name << ":  setup_scenario_2 goals success!" << TAIL << endl;
+   text_info.data = node_name + "ORCA set setup_scenario_2 goals success!";
+    text_info_pub.publish(text_info);
+    cout << BLUE << text_info.data << TAIL << endl;
 }
 
 void ORCA::setup_scenario_3()
@@ -798,12 +797,14 @@ void ORCA::setup_scenario_3()
     {   
         if (i < goals.size()) {
             sim->setAgentGoal(i, goals[i]);
-            cout << BLUE << node_name << ":  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
+            cout << BLUE << node_name << "  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
         }
         goal_reached_printed[i] = false;
     }
 
-    cout << BLUE << node_name << ":  setup_scenario_3 goals success!" << TAIL << endl;
+   text_info.data = node_name + "ORCA set setup_scenario_3 goals success!";
+    text_info_pub.publish(text_info);
+    cout << BLUE << text_info.data << TAIL << endl;
 }
 
 void ORCA::setup_scenario_4()
@@ -865,12 +866,13 @@ void ORCA::setup_scenario_4()
     {   
         if (i < goals.size()) {
             sim->setAgentGoal(i, goals[i]);
-            cout << BLUE << node_name << ":  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
+            cout << BLUE << node_name << " Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
         }
         goal_reached_printed[i] = false;
     }
-
-    cout << BLUE << node_name << ":  setup_scenario_4 goals success!" << TAIL << endl;
+   text_info.data = node_name + "ORCA set setup_scenario_4 goals success!";
+    text_info_pub.publish(text_info);
+    cout << BLUE << text_info.data << TAIL << endl;
 }
 
 void ORCA::setup_scenario_5()
@@ -933,10 +935,11 @@ void ORCA::setup_scenario_5()
     {   
         if (i < goals.size()) {
             sim->setAgentGoal(i, goals[i]);
-            cout << BLUE << node_name << ":  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
+            cout << BLUE << node_name << "  Set agents_" << i+1 << " goal at [" << goals[i].x() << "," << goals[i].y() << "]"<< TAIL << endl;
         }
         goal_reached_printed[i] = false;
     }
 
-    cout << BLUE << node_name << ":  setup_scenario_5 goals success!" << TAIL << endl;
-}
+   text_info.data = node_name + "ORCA set setup_scenario_5 goals success!";
+    text_info_pub.publish(text_info);
+    cout << BLUE << text_info.data << TAIL << endl;}

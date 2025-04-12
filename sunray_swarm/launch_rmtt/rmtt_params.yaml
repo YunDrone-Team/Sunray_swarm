@@ -1,19 +1,11 @@
-## RMTT 
 ## rmtt_control_node节点参数
-## 智能体类型，0代表RMTT，1代表UGV
-agent_type : 0
+
 ## 智能体编号，默认都为1，如果外部有指定则以外部为准
 agent_id : 1
 ## 智能体固定的飞行高度，建议不修改
 agent_height : 1.0
 ## 智能体位置来源（1：代表动捕、2代表地图）
 pose_source: 1
-## RMTT上方LED灯颜色
-led_color:
-  r : 255
-  g : 255
-  b : 255
-  a : 1
 ## RMTT上方mled字符
 mled_text : "Yundrone"
 ## 终端是否打印调试信息
@@ -35,6 +27,9 @@ rmtt_geo_fence:
   min_z: -0.5
   max_z: 1.5
 
+
+## 智能体类型，0代表RMTT，1代表UGV
+agent_type : 0
 ## ORCA算法参数
 ## 智能体数量（无人车），默认为3，如果外部有指定则以外部为准
 agent_num: 3

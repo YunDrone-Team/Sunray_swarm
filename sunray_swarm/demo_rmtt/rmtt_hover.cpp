@@ -16,6 +16,7 @@ int agent_id;                            // 智能体ID
 bool demo_start_flag = false;            // 接收到开始命令
 sunray_msgs::agent_cmd agent_cmd;        // 智能体控制指令
 std_msgs::String text_info;              // 打印消息
+string node_name;              // 节点名称
 
 ros::Publisher agent_cmd_pub;            // 发布控制命令
 ros::Publisher text_info_pub;            // 发布文字提示消息
@@ -55,7 +56,12 @@ int main(int argc, char **argv)
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
-    cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;
+    sleep(1.0);
+    node_name = "[" + ros::this_node::getName() + "] ---> ";
+
+    text_info.data = node_name + "Demo init...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
 
     sleep(5.0);
 
@@ -67,7 +73,7 @@ int main(int argc, char **argv)
     agent_cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
     agent_cmd_pub.publish(agent_cmd); 
 
-    text_info.data = "Takeoff...";
+    text_info.data = node_name + "Takeoff...";
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
 
@@ -87,7 +93,7 @@ int main(int argc, char **argv)
     agent_cmd.desired_yaw = 0.0;
     agent_cmd_pub.publish(agent_cmd); 
 
-    text_info.data = "Move to hover position...";
+    text_info.data = node_name + "Move to hover position...";
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
 
@@ -101,7 +107,7 @@ int main(int argc, char **argv)
     agent_cmd.control_state = sunray_msgs::agent_cmd::HOLD;
     agent_cmd_pub.publish(agent_cmd); 
 
-    text_info.data = "Hover at current position...";
+    text_info.data = node_name + "Hover at current position...";
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
 
@@ -115,7 +121,7 @@ int main(int argc, char **argv)
     agent_cmd.control_state = sunray_msgs::agent_cmd::LAND;
     agent_cmd_pub.publish(agent_cmd); 
 
-    text_info.data = "Land...";
+    text_info.data = node_name + "Land...";
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
 

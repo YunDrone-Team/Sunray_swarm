@@ -25,6 +25,10 @@ class ORCA
         bool orca_run();
         // 算法是否启动
         bool start_flag{false};
+        // 以下为辅助变量
+        std_msgs::String text_info;
+        ros::Publisher text_info_pub;
+
 
     private:
         // 节点名称
@@ -35,6 +39,7 @@ class ORCA
         int agent_num;
         // 智能体的固定高度 - 通过参数配置
         float agent_height;
+        bool flag_printf;
         // ORCA算法参数 - 通过参数配置
         struct orca_param
         {
@@ -55,18 +60,14 @@ class ORCA
             float yaw;
         };
 
-        // 智能体的home点
-        agent_pose home_pose[MAX_NUM];
-
-        // 智能体的目标点
-        agent_pose goal_pose[MAX_NUM];
-
         // 智能体当前状态
         sunray_msgs::agent_state agent_state[MAX_NUM];
         // 智能体控制指令 - 待发布
         sunray_msgs::agent_cmd agent_cmd[MAX_NUM];
-        // 智能体的home点（home_point.x和home_point.y代表位置，home_point.z代表偏航角）
-        geometry_msgs::Point home_point[MAX_NUM];
+        // 智能体的home点
+        agent_pose home_pose[MAX_NUM];
+        // 智能体的目标点
+        agent_pose goal_pose[MAX_NUM];
 
         // ORCA算法类
         RVO::RVOSimulator *sim = new RVO::RVOSimulator();
@@ -74,22 +75,13 @@ class ORCA
         sunray_msgs::orca_state agent_orca_state[MAX_NUM];
         // ORCA目标点        
         std::vector<RVO::Vector2> goals;  
-        // 收到的外部目标点（agent_goal.x和agent_goal.y代表目标点位置，agent_goal.z代表期望偏航角）
-        geometry_msgs::Point agent_goal[MAX_NUM];  
-
-
 
         // ORCA算法中每个智能体是否到达目标点
         bool arrived_goal[MAX_NUM];        
         // ORCA算法中所有智能体是否到达目标点
         bool arrived_all_goal = false;    
-        // ORCA算法目标点颜色（用于RVIZ中区分）
-        std_msgs::ColorRGBA goal_point_color[MAX_NUM];
         // 达到目标点打印状态量
         std::vector<bool> goal_reached_printed;
-
-        // 以下为辅助变量
-        std_msgs::String text_info;
 
         // 订阅话题
         ros::Subscriber agent_state_sub[MAX_NUM];
@@ -99,7 +91,6 @@ class ORCA
         ros::Publisher agent_cmd_pub[MAX_NUM];
         ros::Publisher agent_orca_state_pub[MAX_NUM];
         ros::Publisher goal_point_pub[MAX_NUM];
-        ros::Publisher text_info_pub;
         // 定时器
         ros::Timer timer_debug;
 
@@ -118,6 +109,5 @@ class ORCA
         void setup_scenario_5();
         bool reachedGoal(int i);
         void printf_param();
-        void setup_color();
 };
 #endif

@@ -39,7 +39,7 @@ class RMTT_CONTROL
         float agent_height;
         // 智能体位置来源（1：代表动捕、2代表地图） - 通过参数配置
         int pose_source;
-        // RMTT上方LED灯颜色 - 通过参数配置
+        // RMTT上方LED灯颜色(同样也是RVIZ仿真中的MESH颜色)
         std_msgs::ColorRGBA led_color;
         // RMTT上方mled字符 - 通过参数配置
         std_msgs::String mled_text;

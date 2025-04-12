@@ -22,6 +22,7 @@ string target_name;                    // 目标名称
 sunray_msgs::agent_cmd agent_cmd;      // 控制命令消息
 geometry_msgs::PoseStamped target_pos; // 无人车位置
 double target_yaw{0.0};                // 无人车yaw
+string node_name;                      // 节点名称
 
 ros::Subscriber target_pos_sub;        // 订阅目标位置
 ros::Publisher agent_cmd_pub;          // 发布控制命令
@@ -34,12 +35,12 @@ void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
 
     if(demo_start_flag)
     {
-        text_info.data = "Get demo start cmd";
+        text_info.data = node_name + "Get demo start cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }else
     {
-        text_info.data = "Get demo stop cmd";
+        text_info.data = node_name + "Get demo stop cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }
@@ -85,6 +86,12 @@ int main(int argc, char **argv)
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
+    sleep(1.0);
+    node_name = "[" + ros::this_node::getName() + "] ---> ";
+
+    text_info.data = node_name + "Demo init...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
     sleep(5.0);
 
     // 发送起飞指令
@@ -95,7 +102,7 @@ int main(int argc, char **argv)
     agent_cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
     agent_cmd_pub.publish(agent_cmd); 
 
-    text_info.data = "Takeoff...";
+    text_info.data = node_name + "Takeoff...";
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
     

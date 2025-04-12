@@ -69,6 +69,12 @@ add_executable(rmtt_control_node
 )
 target_link_libraries(rmtt_control_node ${catkin_LIBRARIES})
 
+## RMTT地图
+add_executable(rmtt_tf
+  agent_control/rmtt_tf.cpp
+)
+target_link_libraries(rmtt_tf ${catkin_LIBRARIES})
+
 ## 终端地面站
 add_executable(agent_terminal_station agent_control/agent_terminal_station.cpp)
 add_dependencies(agent_terminal_station sunray_swarm_gencpp)
@@ -85,11 +91,10 @@ add_executable(orca_node
 	)
 target_link_libraries(orca_node ${catkin_LIBRARIES})
 
-## 地图pose
-add_executable(rmtt_tf
-  agent_control/rmtt_tf.cpp
-)
-target_link_libraries(rmtt_tf ${catkin_LIBRARIES})
+# ORCA_DEMO - 固定障碍物路径规划
+add_executable(path_planning orca/path_planning.cpp)
+add_dependencies(path_planning sunray_swarm_gencpp)
+target_link_libraries(path_planning ${catkin_LIBRARIES})
 
 ## RMTT_DEMO - 定点悬停
 add_executable(rmtt_hover demo_rmtt/rmtt_hover.cpp)
@@ -121,11 +126,6 @@ add_executable(ugv_follow_rmtt demo_ugv/ugv_follow_rmtt.cpp)
 add_dependencies(ugv_follow_rmtt sunray_swarm_gencpp)
 target_link_libraries(ugv_follow_rmtt ${catkin_LIBRARIES})
 
-# ORCA_DEMO - 固定障碍物路径规划
-add_executable(path_planning orca/path_planning.cpp)
-add_dependencies(path_planning sunray_swarm_gencpp)
-target_link_libraries(path_planning ${catkin_LIBRARIES})
-
 ## SWARM_DEMO - 集群绕圆
 add_executable(swarm_circle demo_swarm/swarm_circle.cpp)
 add_dependencies(swarm_circle sunray_swarm_gencpp)
@@ -138,8 +138,6 @@ target_link_libraries(swarm_lemniscate ${catkin_LIBRARIES})
 add_executable(swarm_dance demo_swarm/swarm_dance.cpp)
 add_dependencies(swarm_dance sunray_swarm_gencpp)
 target_link_libraries(swarm_dance ${catkin_LIBRARIES})
-
-
 ## SWARM_DEMO - 固定阵型变换
 add_executable(swarm_formation demo_swarm/swarm_formation.cpp)
 add_dependencies(swarm_formation sunray_swarm_gencpp)

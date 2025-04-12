@@ -25,7 +25,6 @@ int main(int argc, char **argv)
     ros::spinOnce();
     ros::Duration(1.0).sleep();
 
-
     // 主循环
     while (ros::ok())
     {

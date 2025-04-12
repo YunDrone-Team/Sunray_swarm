@@ -498,57 +498,10 @@ void UGV_CONTROL::battery_cb(const std_msgs::Float32ConstPtr& msg)
 void UGV_CONTROL::setup_rviz_color()
 {
     led_color.a = 1.0;
-    switch(agent_id) 
-    {
-        case 1:
-            led_color.r = 1.0;
-            led_color.g = 0.0;
-            led_color.b = 0.0;
-            break;
-        case 2:
-            led_color.r = 0.0;
-            led_color.g = 1.0;
-            led_color.b = 0.0;
-            break;
-        case 3:
-            led_color.r = 0.0;
-            led_color.g = 0.0;
-            led_color.b = 1.0;
-            break;
-        case 4:
-            led_color.r = 1.0;
-            led_color.g = 1.0;
-            led_color.b = 0.0;
-            break;
-        case 5:
-            led_color.r = 1.0;
-            led_color.g = 0.0;
-            led_color.b = 1.0;
-            break;
-        case 6:
-            led_color.r = 0.0;
-            led_color.g = 1.0;
-            led_color.b = 1.0;
-            break;
-        case 7:
-            led_color.r = 0.5;
-            led_color.g = 0.5;
-            led_color.b = 0.5;
-            break;
-        case 8:
-            led_color.r = 0.3;
-            led_color.g = 0.7;
-            led_color.b = 0.2;
-            break;
-        default:
-            led_color.r = 1.0;
-            led_color.g = 1.0;
-            led_color.b = 1.0;
-            break;
-    }
-    // led_color.r = int(led_color.r * 255);
-    // led_color.g = int(led_color.g * 255);
-    // led_color.b = int(led_color.b * 255);
+    // 根据uav_id生成对应的颜色
+    led_color.r = static_cast<float>((agent_id * 123) % 256) / 255.0;
+    led_color.g = static_cast<float>((agent_id * 456) % 256) / 255.0;
+    led_color.b = static_cast<float>((agent_id * 789) % 256) / 255.0;
 }
 
 void UGV_CONTROL::setup_led()

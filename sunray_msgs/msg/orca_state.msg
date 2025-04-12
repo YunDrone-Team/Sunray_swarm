@@ -16,7 +16,9 @@ float32[2] goal                 ## [m]
 float32 yaw                     ## [deg]
 ## 当前智能体的ORCA期望速度（ORCA算法计算得到）
 float32[2] vel_orca                 ## [m/s]
-
+## 当前智能体的Home点
+float32[2] home_pos                 ## [m]
+float32 home_yaw                    ## [deg]
 
 
 

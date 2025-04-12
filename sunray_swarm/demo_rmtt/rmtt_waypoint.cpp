@@ -21,6 +21,7 @@ vector<geometry_msgs::Point> waypoints;  // 目标点列表
 bool demo_start_flag = false;            // 标记是否接收到开始命令
 sunray_msgs::agent_cmd agent_cmd;        // 智能体控制指令
 std_msgs::String text_info;              // 打印消息
+string node_name;                        // 节点名称
 
 ros::Publisher agent_cmd_pub;            // 发布控制命令
 ros::Publisher text_info_pub;            // 发布文字提示消息
@@ -33,7 +34,7 @@ void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
 
     if(demo_start_flag)
     {
-        text_info.data = "Get demo start cmd";
+        text_info.data = node_name + "Get demo start cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }
@@ -72,6 +73,13 @@ int main(int argc, char **argv)
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
+    
+    sleep(1.0);
+    node_name = "[" + ros::this_node::getName() + "] ---> ";
+
+    text_info.data = node_name + "Demo init...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
 
     // 主循环
     while (ros::ok()) 
@@ -93,7 +101,7 @@ int main(int argc, char **argv)
         agent_cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
         agent_cmd_pub.publish(agent_cmd); 
 
-        text_info.data = "Takeoff...";
+        text_info.data = node_name + "Takeoff...";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
         
@@ -112,7 +120,7 @@ int main(int argc, char **argv)
             agent_cmd_pub.publish(agent_cmd); 
 
             // 发送提示消息
-            text_info.data = "Moving to waypoints: [" + to_string(waypoint.x) + ", " + to_string(waypoint.y) + ", " + to_string(waypoint.z)+"]...";
+            text_info.data = node_name + "Moving to waypoints: [" + to_string(waypoint.x) + ", " + to_string(waypoint.y) + ", " + to_string(waypoint.z)+"]...";
             cout << GREEN << text_info.data << TAIL << endl;
             text_info_pub.publish(text_info);
 
@@ -128,7 +136,7 @@ int main(int argc, char **argv)
         agent_cmd.control_state = sunray_msgs::agent_cmd::LAND;
         agent_cmd_pub.publish(agent_cmd); 
 
-        text_info.data = "Land...";
+        text_info.data = node_name + "Land...";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
 
@@ -136,7 +144,7 @@ int main(int argc, char **argv)
 
         // 执行完所有的目标点后，重置状态位
         demo_start_flag = false; 
-        text_info.data = "demo finished.";
+        text_info.data = node_name + "Demo finished.";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }
