@@ -48,6 +48,8 @@ class UGV_CONTROL
             float Kp_yaw;
             float max_vel_xy;
             float max_vel_yaw;
+            float deadzone_vel_xy;
+            float deadzone_vel_yaw;
         };
         control_param ugv_control_param;
         // 地理围栏 - 通过参数配置

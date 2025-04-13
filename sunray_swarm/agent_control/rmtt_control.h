@@ -103,7 +103,6 @@ class RMTT_CONTROL
         // 订阅话题
         ros::Subscriber mocap_pos_sub;
         ros::Subscriber mocap_vel_sub;
-        ros::Subscriber map_pose_sub;
         ros::Subscriber agent_cmd_sub;
         ros::Subscriber agent_gs_cmd_sub;
         ros::Subscriber battery_sub;
@@ -155,7 +154,6 @@ class RMTT_CONTROL
         void setup_led();
         void setup_mled();
         void setup_rviz_color();
-        void map_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg);
         void handle_cmd(const sunray_msgs::agent_cmd msg);
 };
 #endif

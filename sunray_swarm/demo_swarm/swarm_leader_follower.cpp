@@ -23,6 +23,7 @@ int agent_num;                                          // 智能体数量
 float agent_height;                                     // 智能体高度
 bool demo_start_flag = false;                           // 是否接收到开始命令
 std_msgs::String text_info;                             // 打印消息
+string node_name;                                       // 节点名称
 
 sunray_msgs::orca_cmd agent_orca_cmd;                   // ORCA指令
 sunray_msgs::orca_state orca_state[MAX_AGENT_NUM];      // ORCA状态
@@ -54,12 +55,12 @@ void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
 
     if(demo_start_flag)
     {
-        text_info.data = "Get demo start cmd";
+        text_info.data = node_name + "Get demo start cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }else
     {
-        text_info.data = "Get demo stop cmd";
+        text_info.data = node_name + "Get demo stop cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }
@@ -121,7 +122,14 @@ int main(int argc, char **argv)
         orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm/" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb, _1, i));
     }
 
-    // 设置阵型便宜量
+    sleep(1.0);
+    node_name = "[" + ros::this_node::getName() + "] ---> ";
+
+    text_info.data = node_name + "Demo init...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
+
+    // 设置阵型偏移量
     setup_formation();
 
     sleep(5.0);
@@ -132,8 +140,9 @@ int main(int argc, char **argv)
     agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
     orca_cmd_pub.publish(agent_orca_cmd);
 
-    cout << GREEN << "start orca..." << TAIL << endl;
-    sleep(3.0);
+    text_info.data = node_name + "Start orca...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);    sleep(3.0);
 
     float time = 0.0;
     // 主程序
@@ -167,7 +176,9 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
-    
+    text_info.data = node_name + "Demo finished...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
     return 0;
 }
 

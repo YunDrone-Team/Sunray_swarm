@@ -22,7 +22,8 @@
  sunray_msgs::agent_cmd agent_cmd;      // 控制命令消息
  geometry_msgs::PoseStamped target_pos; // 位置
  double target_yaw{0.0};                // 无人机yaw
- 
+ string node_name;                      // 节点名称
+
  ros::Subscriber target_pos_sub;        // 订阅目标位置
  ros::Publisher agent_cmd_pub;          // 发布控制命令
  ros::Subscriber demo_start_flag_sub;   // 订阅开始命令
@@ -30,90 +31,99 @@
  
  void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
  {
-     demo_start_flag = msg->data;    
+    demo_start_flag = msg->data;    
  
-     if(demo_start_flag)
-     {
-         text_info.data = "Get demo start cmd";
-         cout << GREEN << text_info.data << TAIL << endl;
-         text_info_pub.publish(text_info);
-     }else
-     {
-         text_info.data = "Get demo stop cmd";
-         cout << GREEN << text_info.data << TAIL << endl;
-         text_info_pub.publish(text_info);
-     }
+    if(demo_start_flag)
+    {
+        text_info.data = node_name + "Get demo start cmd";
+        cout << GREEN << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
+    }else
+    {
+        text_info.data = node_name + "Get demo stop cmd";
+        cout << GREEN << text_info.data << TAIL << endl;
+        text_info_pub.publish(text_info);
+    }
  }
  
  // 目标位置回调函数
  void mocap_pos_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
  {
-     target_pos = *msg;
-     // 将目标位置转换为欧拉角,获取四元数
-     Eigen::Quaterniond q_mocap = Eigen::Quaterniond(msg->pose.orientation.w, msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z);
-     // 转换为欧拉角
-     Eigen::Vector3d target_att = quaternion_to_euler(q_mocap);
-     // 获取目标的偏航角
-     target_yaw = target_att.z();
+    target_pos = *msg;
+    // 将目标位置转换为欧拉角,获取四元数
+    Eigen::Quaterniond q_mocap = Eigen::Quaterniond(msg->pose.orientation.w, msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z);
+    // 转换为欧拉角
+    Eigen::Vector3d target_att = quaternion_to_euler(q_mocap);
+    // 获取目标的偏航角
+    target_yaw = target_att.z();
  }
  
  // 主函数
  int main(int argc, char **argv)
  {
-     // 初始化ROS节点
-     ros::init(argc, argv, "ugv_follow_rmtt");
-     // 创建节点句柄
-     ros::NodeHandle nh("~");
-     // 设置节点的执行频率为10Hz
-     ros::Rate rate(10);
+    // 初始化ROS节点
+    ros::init(argc, argv, "ugv_follow_rmtt");
+    // 创建节点句柄
+    ros::NodeHandle nh("~");
+    // 设置节点的执行频率为10Hz
+    ros::Rate rate(10);
+
+    // 【参数】智能体编号
+    nh.param<int>("agent_id", agent_id, 1);
+    // 【参数】目标名称（动捕中设置）
+    nh.param<string>("target_name", target_name, "rmtt_1");
+
+    cout << GREEN << "target_name      : " << target_name << TAIL << endl;
+
+    string agent_name = "/ugv_" + std::to_string(agent_id);
+    // 【订阅】无人机位置 VRPN（动捕） -> 本节点目标位置
+    target_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ target_name + "/pose", 1, mocap_pos_cb);
+    // 【订阅】触发指令 外部 -> 本节点 
+    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/ugv_follow_rmtt", 1, demo_start_flag_cb);
+    // 【发布】控制指令 本节点 -> 无人车控制节点
+    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
+    // 【发布】文字提示消息  本节点 -> 地面站
+    text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
+
+    sleep(1.0);
+    node_name = "[" + ros::this_node::getName() + "] ---> ";
+
+    text_info.data = node_name + "Demo init...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
+
+    sleep(5.0);
+
+    // 主循环
+    while (ros::ok())
+    {
+        // 等待demo启动
+        if(!demo_start_flag)
+        {
+            // 处理一次回调函数
+            ros::spinOnce();
+            // sleep
+            rate.sleep();
+            continue;
+        }
+
+        agent_cmd.header.stamp = ros::Time::now();
+        agent_cmd.header.frame_id = "world";
+        agent_cmd.agent_id = agent_id;
+        agent_cmd.cmd_source = ros::this_node::getName();
+        agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+        agent_cmd.desired_pos.x = target_pos.pose.position.x;
+        agent_cmd.desired_pos.y = target_pos.pose.position.y;
+        agent_cmd.desired_pos.z = 0.1;
+        agent_cmd.desired_yaw = target_yaw;  
+        agent_cmd_pub.publish(agent_cmd);
+
+        ros::spinOnce();
+        rate.sleep();
+    }
  
-     // 【参数】智能体编号
-     nh.param<int>("agent_id", agent_id, 1);
-     // 【参数】目标名称（动捕中设置）
-     nh.param<string>("target_name", target_name, "rmtt_1");
- 
-     cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;
-     cout << GREEN << "target_name      : " << target_name << TAIL << endl;
- 
-     string agent_name = "/ugv_" + std::to_string(agent_id);
-     // 【订阅】无人机位置 VRPN（动捕） -> 本节点目标位置
-     target_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ target_name + "/pose", 1, mocap_pos_cb);
-     // 【订阅】触发指令 外部 -> 本节点 
-     demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/ugv_follow_rmtt", 1, demo_start_flag_cb);
-     // 【发布】控制指令 本节点 -> 无人车控制节点
-     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
-     // 【发布】文字提示消息  本节点 -> 地面站
-     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
- 
-     sleep(5.0);
- 
-     // 主循环
-     while (ros::ok())
-     {
-         // 等待demo启动
-         if(!demo_start_flag)
-         {
-             // 处理一次回调函数
-             ros::spinOnce();
-             // sleep
-             rate.sleep();
-             continue;
-         }
- 
-         agent_cmd.header.stamp = ros::Time::now();
-         agent_cmd.header.frame_id = "world";
-         agent_cmd.agent_id = agent_id;
-         agent_cmd.cmd_source = ros::this_node::getName();
-         agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-         agent_cmd.desired_pos.x = target_pos.pose.position.x;
-         agent_cmd.desired_pos.y = target_pos.pose.position.y;
-         agent_cmd.desired_pos.z = 0.1;
-         agent_cmd.desired_yaw = target_yaw;  
-         agent_cmd_pub.publish(agent_cmd);
- 
-         ros::spinOnce();
-         rate.sleep();
-     }
- 
-     return 0;
+    text_info.data = node_name + "Demo finished...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
+    return 0;
  }

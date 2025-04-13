@@ -137,41 +137,6 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     cout << BLUE << text_info.data << TAIL << endl;
 }
 
-void RMTT_CONTROL::timercb_get_map_pose(const ros::TimerEvent &e)
-{
-    // 设定地图框架和程序框架的名称
-    string map_frame = "sunray_swarm/" + agent_name + "/map";        // 地图框架
-    string program_frame = "sunray_swarm/" + agent_name + "/base_link"; // 程序框架
-
-    try
-    {
-        // 获取从地图到程序框架的变换
-        geometry_msgs::TransformStamped transform_stamped =
-            tf_buffer.lookupTransform(map_frame, program_frame, ros::Time(0));
-
-        get_odom_time = ros::Time::now(); // 记录时间戳，防止超时
-        agent_state.pos[0] = transform_stamped.transform.translation.x;
-        agent_state.pos[1] = transform_stamped.transform.translation.y;
-        agent_state.pos[2] = transform_stamped.transform.translation.z;
-        agent_state.attitude_q = transform_stamped.transform.rotation;
-
-        Eigen::Quaterniond q_mocap = Eigen::Quaterniond(agent_state.attitude_q.w, agent_state.attitude_q.x, agent_state.attitude_q.y, agent_state.attitude_q.z);
-        Eigen::Vector3d agent_att = quaternion_to_euler(q_mocap);
-
-        agent_state.att[0] = agent_att.x();
-        agent_state.att[1] = agent_att.y();
-        agent_state.att[2] = agent_att.z();
-
-        agent_state.odom_valid = true;
-    }
-    catch (const tf2::TransformException& ex)
-    {
-        text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " map tf error!";
-        text_info_pub.publish(text_info);
-        cout << RED << text_info.data << TAIL << endl;
-    }
-}
-
 // 主循环函数
 void RMTT_CONTROL::mainloop()
 {
@@ -240,11 +205,11 @@ void RMTT_CONTROL::mainloop()
             agent_cmd_vel_pub.publish(desired_vel);
             break;  
 
-        // TAKEOFF：起飞 - 在回调函数中处理
+        // TAKEOFF：起飞 - 起飞逻辑在回调函数中处理，此处不做任何处理
         case sunray_msgs::agent_cmd::TAKEOFF:
             break;
 
-        // LAND：降落 - 在回调函数中处理
+        // LAND：降落 - 降落逻辑在回调函数中处理，此处不做任何处理
         case sunray_msgs::agent_cmd::LAND:
             break;
 
@@ -273,6 +238,9 @@ void RMTT_CONTROL::agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
 }
 
 // 控制指令回调函数 - 来自地面站
+// 为什么RMTT要单独写一个地面站指令处理的回调？因为启动了ORCA算法后，ORCA算法会一直抢占agent_cmd_cb()这个函数（ORCA算法发布的频率很高）
+// 如果在运行ORCA算法的同时，想通过地面站来降落无人机的话，起飞降落的指令会被淹没，因此要单独处理地面站的指令消息
+// 但是就算是这样，地面站发送除了起飞降落之外指令，还是会被ORCA算法占用，因此正常一般是要先暂停ORCA算法
 void RMTT_CONTROL::agent_gs_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
 {
     if(msg->agent_id != agent_id && msg->agent_id != 99)
@@ -356,8 +324,6 @@ void RMTT_CONTROL::handle_cmd(const sunray_msgs::agent_cmd msg)
             cout << RED << text_info.data << TAIL << endl;
             break;
     }
-
-    // text_info_pub.publish(text_info); 
 }
 
 // 将智能体当前的点设置为期望点
@@ -419,6 +385,34 @@ void RMTT_CONTROL::rotation_yaw(double yaw_angle, float body_frame[2], float enu
     body_frame[1] = -enu_frame[0] * sin(yaw_angle) + enu_frame[1] * cos(yaw_angle);
 }
 
+// 惯性系->机体系
+geometry_msgs::Twist RMTT_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
+{
+    geometry_msgs::Twist body_cmd;
+    // 惯性系 -> body frame 
+    float cmd_body[2];
+    float cmd_enu[2];
+    cmd_enu[0] = enu_cmd.linear.x;
+    cmd_enu[1] = enu_cmd.linear.y;
+    rotation_yaw(agent_state.att[2], cmd_body, cmd_enu);   
+    body_cmd.linear.x = cmd_body[0];
+    body_cmd.linear.y = cmd_body[1];
+    body_cmd.linear.z = enu_cmd.linear.z;
+    body_cmd.angular.x = 0.0;
+    body_cmd.angular.y = 0.0;
+    // 控制指令计算：使用简易P控制 - YAW
+    double yaw_error = get_yaw_error(current_agent_cmd.desired_yaw, agent_state.att[2]);
+    body_cmd.angular.z = yaw_error * rmtt_control_param.Kp_yaw;
+
+    // 控制指令限幅
+    body_cmd.linear.x = constrain_function(body_cmd.linear.x, rmtt_control_param.max_vel_xy, 0.0);
+    body_cmd.linear.y = constrain_function(body_cmd.linear.y, rmtt_control_param.max_vel_xy, 0.0);
+    body_cmd.linear.z = constrain_function(body_cmd.linear.z, rmtt_control_param.max_vel_z, 0.0);
+    body_cmd.angular.z = constrain_function(desired_vel.angular.z, rmtt_control_param.max_vel_yaw, rmtt_control_param.deadzone_vel_yaw);
+
+    return body_cmd;
+}
+
 // 定时器回调函数：定时打印
 void RMTT_CONTROL::timercb_debug(const ros::TimerEvent &e)
 {
@@ -446,7 +440,7 @@ void RMTT_CONTROL::timercb_debug(const ros::TimerEvent &e)
         cout << YELLOW << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
     }else
     {
-        cout << GREEN << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
+        cout << GREEN << "Low Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
     }
 
     cout << GREEN << "RMTT_pos [X Y Z] : " << agent_state.pos[0] << " [ m ] " << agent_state.pos[1] << " [ m ] " << agent_state.pos[2] << " [ m ] " << TAIL << endl;
@@ -559,23 +553,39 @@ void RMTT_CONTROL::mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg)
 	agent_state.vel[2] = msg->twist.linear.z;
 }
 
-// 回调函数：地图odom
-void RMTT_CONTROL::map_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg)
+void RMTT_CONTROL::timercb_get_map_pose(const ros::TimerEvent &e)
 {
-    get_odom_time = ros::Time::now(); // 记录时间戳，防止超时
-	agent_state.pos[0] = msg->pose.position.x;
-    agent_state.pos[1] = msg->pose.position.y;
-	agent_state.pos[2] = msg->pose.position.z;
-    agent_state.attitude_q = msg->pose.orientation;
+    // 设定地图框架和程序框架的名称
+    string map_frame = "sunray_swarm/" + agent_name + "/map";        // 地图框架
+    string program_frame = "sunray_swarm/" + agent_name + "/base_link"; // 程序框架
 
-    Eigen::Quaterniond q_mocap = Eigen::Quaterniond(msg->pose.orientation.w, msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z);
-    Eigen::Vector3d agent_att = quaternion_to_euler(q_mocap);
+    try
+    {
+        // 获取从地图到程序框架的变换
+        geometry_msgs::TransformStamped transform_stamped =
+            tf_buffer.lookupTransform(map_frame, program_frame, ros::Time(0));
 
-	agent_state.att[0] = agent_att.x();
-    agent_state.att[1] = agent_att.y();
-	agent_state.att[2] = agent_att.z();
+        get_odom_time = ros::Time::now(); // 记录时间戳，防止超时
+        agent_state.pos[0] = transform_stamped.transform.translation.x;
+        agent_state.pos[1] = transform_stamped.transform.translation.y;
+        agent_state.pos[2] = transform_stamped.transform.translation.z;
+        agent_state.attitude_q = transform_stamped.transform.rotation;
 
-    agent_state.odom_valid = true;
+        Eigen::Quaterniond q_mocap = Eigen::Quaterniond(agent_state.attitude_q.w, agent_state.attitude_q.x, agent_state.attitude_q.y, agent_state.attitude_q.z);
+        Eigen::Vector3d agent_att = quaternion_to_euler(q_mocap);
+
+        agent_state.att[0] = agent_att.x();
+        agent_state.att[1] = agent_att.y();
+        agent_state.att[2] = agent_att.z();
+
+        agent_state.odom_valid = true;
+    }
+    catch (const tf2::TransformException& ex)
+    {
+        text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " map tf error!";
+        text_info_pub.publish(text_info);
+        cout << RED << text_info.data << TAIL << endl;
+    }
 }
 
 // 回调函数：电池电量
@@ -746,35 +756,6 @@ bool RMTT_CONTROL::check_geo_fence()
         return 1;
     }
     return 0;
-}
-
-// 惯性系->机体系
-geometry_msgs::Twist RMTT_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
-{
-    geometry_msgs::Twist body_cmd;
-    // 惯性系 -> body frame 
-    float cmd_body[2];
-    float cmd_enu[2];
-    cmd_enu[0] = enu_cmd.linear.x;
-    cmd_enu[1] = enu_cmd.linear.y;
-    rotation_yaw(agent_state.att[2], cmd_body, cmd_enu);   
-    body_cmd.linear.x = cmd_body[0];
-    body_cmd.linear.y = cmd_body[1];
-    body_cmd.linear.z = enu_cmd.linear.z;
-
-    body_cmd.angular.x = 0.0;
-    body_cmd.angular.y = 0.0;
-    // 控制指令计算：使用简易P控制 - YAW
-    double yaw_error = get_yaw_error(current_agent_cmd.desired_yaw, agent_state.att[2]);
-    body_cmd.angular.z = yaw_error * rmtt_control_param.Kp_yaw;
-
-    // 控制指令限幅
-    body_cmd.linear.x = constrain_function(body_cmd.linear.x, rmtt_control_param.max_vel_xy, 0.0);
-    body_cmd.linear.y = constrain_function(body_cmd.linear.y, rmtt_control_param.max_vel_xy, 0.0);
-    body_cmd.linear.z = constrain_function(body_cmd.linear.z, rmtt_control_param.max_vel_z, 0.0);
-    body_cmd.angular.z = constrain_function(desired_vel.angular.z, rmtt_control_param.max_vel_yaw, rmtt_control_param.deadzone_vel_yaw);
-
-    return body_cmd;
 }
 
 // 四元数转欧拉角

@@ -34,6 +34,7 @@ float desired_yaw;                     // 期望偏航角
 sunray_msgs::orca_cmd agent_orca_cmd;  // ORCA指令
 std_msgs::String text_info;            // 打印消息
 sunray_msgs::orca_state orca_state[MAX_AGENT_NUM];      // ORCA状态
+string node_name;                      // 节点名称
 
 ros::Subscriber demo_start_flag_sub;             // 订阅开始命令
 ros::Subscriber orca_state_sub[MAX_AGENT_NUM];   // ORCA算法状态订阅
@@ -60,12 +61,12 @@ void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
 
     if(demo_start_flag)
     {
-        text_info.data = "Get demo start cmd";
+        text_info.data = node_name + "Get demo start cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }else
     {
-        text_info.data = "Get demo stop cmd";
+        text_info.data = node_name + "Get demo stop cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }
@@ -147,6 +148,13 @@ int main(int argc, char **argv)
         orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm/" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb, _1, i));
     }
 
+    sleep(1.0);
+    node_name = "[" + ros::this_node::getName() + "] ---> ";
+
+    text_info.data = node_name + "Demo init...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
+
     sleep(5.0);
     // 设置ORCA算法HOME点，并启动ORCA算法
     agent_orca_cmd.header.stamp = ros::Time::now();
@@ -155,7 +163,9 @@ int main(int argc, char **argv)
     agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
     orca_cmd_pub.publish(agent_orca_cmd);
 
-    cout << GREEN << "start orca..." << TAIL << endl;
+    text_info.data = node_name + "Start orca...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
     sleep(3.0);
 
     // 将智能体移动到初始位置
@@ -207,7 +217,9 @@ int main(int argc, char **argv)
             rate.sleep();
         }
     }
-
+    text_info.data = node_name + "Demo finished...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
     return 0;
 }
 

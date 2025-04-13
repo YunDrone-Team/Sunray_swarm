@@ -13,7 +13,7 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     // 【参数】智能体位置来源（1：代表动捕、2代表SLAM数据）
     nh.param<int>("pose_source", pose_source, 1);
     // 【参数】是否打印
-    nh.param<bool>("flag_printf", flag_printf, true);
+    nh.param<bool>("flag_printf", flag_printf, false);
     // 【参数】设置获取数据源
     nh.param<int>("pose_source", pose_source, 1);
     // 【参数】悬停控制参数 - xy
@@ -24,7 +24,11 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     nh.param<float>("ugv_control_param/max_vel_xy", ugv_control_param.max_vel_xy, 0.5);
     // 【参数】悬停控制参数 - max_vel_yaw
     nh.param<float>("ugv_control_param/max_vel_yaw", ugv_control_param.max_vel_yaw, 50.0/180.0*M_PI);
-    // 【参数】地理围栏参数（超出围栏自动降落）
+    // 【参数】位置环控制参数 - deadzone_vel_xy
+    nh.param<float>("ugv_control_param/deadzone_vel_xy", ugv_control_param.deadzone_vel_xy, 0.0);
+    // 【参数】位置环控制参数 - deadzone_vel_yaw
+    nh.param<float>("ugv_control_param/deadzone_vel_yaw", ugv_control_param.deadzone_vel_yaw, 1.0/180.0*M_PI);
+    // 【参数】地理围栏参数（超出围栏自动停止）
     nh.param<float>("ugv_geo_fence/max_x", ugv_geo_fence.max_x, 100.0);
     nh.param<float>("ugv_geo_fence/min_x", ugv_geo_fence.min_x, -100.0);
     nh.param<float>("ugv_geo_fence/max_y", ugv_geo_fence.max_y, 100.0);
@@ -50,8 +54,6 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
         cout << RED << "Pose source: Unknown" << TAIL << endl;
     }   
 
-    // 【订阅】智能体控制指令 地面站/ORCA等上层算法 -> 本节点
-    ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/ugv/agent_cmd", 50, &UGV_CONTROL::agnet_cmd_cb, this);
     // 【订阅】智能体控制指令 ORCA算法 -> 本节点
     ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &UGV_CONTROL::agnet_cmd_cb, this);
     // 【订阅】ugv电池的数据 ugv_driver -> 本节点
@@ -233,34 +235,6 @@ void UGV_CONTROL::agnet_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
             return;
             break;
     }
-    // text_info_pub.publish(text_info);
-}
-
-// 惯性系->机体系
-geometry_msgs::Twist UGV_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
-{
-    geometry_msgs::Twist body_cmd;
-    // 惯性系 -> body frame 
-    float cmd_body[2];
-    float cmd_enu[2];
-    cmd_enu[0] = enu_cmd.linear.x;
-    cmd_enu[1] = enu_cmd.linear.y;
-    rotation_yaw(agent_state.att[2], cmd_body, cmd_enu);   
-    body_cmd.linear.x = cmd_body[0];
-    body_cmd.linear.y = cmd_body[1];
-    body_cmd.linear.z = 0.0;
-    body_cmd.angular.x = 0.0;
-    body_cmd.angular.y = 0.0;
-    // 控制指令计算：使用简易P控制 - YAW
-    double yaw_error = get_yaw_error(current_agent_cmd.desired_yaw, agent_state.att[2]);
-    body_cmd.angular.z = yaw_error * ugv_control_param.Kp_yaw;
-
-    // 控制指令限幅
-    body_cmd.linear.x = constrain_function(body_cmd.linear.x, ugv_control_param.max_vel_xy, 0.0);
-    body_cmd.linear.y = constrain_function(body_cmd.linear.y, ugv_control_param.max_vel_xy, 0.0);
-    body_cmd.angular.z = constrain_function(body_cmd.angular.z, ugv_control_param.max_vel_yaw, 0.01);
-
-    return body_cmd;
 }
 
 void UGV_CONTROL::set_desired_position()
@@ -303,10 +277,11 @@ void UGV_CONTROL::pos_control(geometry_msgs::Point pos_ref, double yaw_ref)
     // 控制指令计算：使用简易P控制 - YAW
     desired_vel.angular.z = yaw_error * ugv_control_param.Kp_yaw;
 
-    // 控制指令限幅
-    desired_vel.linear.x = constrain_function(desired_vel.linear.x, ugv_control_param.max_vel_xy, 0.0);
-    desired_vel.linear.y = constrain_function(desired_vel.linear.y, ugv_control_param.max_vel_xy, 0.0);
-    desired_vel.angular.z = constrain_function(desired_vel.angular.z, ugv_control_param.max_vel_yaw, 0.01);
+    // 控制指令限幅，传入的参数依次是 原始数据、最大值、死区值
+    // 功能：将原始数据限制在最大值之内；如果小于死区值，则直接设置为0
+    desired_vel.linear.x = constrain_function(desired_vel.linear.x, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
+    desired_vel.linear.y = constrain_function(desired_vel.linear.y, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
+    desired_vel.angular.z = constrain_function(desired_vel.angular.z, ugv_control_param.max_vel_yaw, ugv_control_param.deadzone_vel_yaw);
 
     // 发布控制指令
     agent_cmd_vel_pub.publish(desired_vel);
@@ -317,6 +292,33 @@ void UGV_CONTROL::rotation_yaw(double yaw_angle, float body_frame[2], float enu_
 {
     body_frame[0] = enu_frame[0] * cos(yaw_angle) + enu_frame[1] * sin(yaw_angle);
     body_frame[1] = -enu_frame[0] * sin(yaw_angle) + enu_frame[1] * cos(yaw_angle);
+}
+
+// 惯性系->机体系
+geometry_msgs::Twist UGV_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
+{
+    geometry_msgs::Twist body_cmd;
+    // 惯性系 -> body frame 
+    float cmd_body[2];
+    float cmd_enu[2];
+    cmd_enu[0] = enu_cmd.linear.x;
+    cmd_enu[1] = enu_cmd.linear.y;
+    rotation_yaw(agent_state.att[2], cmd_body, cmd_enu);   
+    body_cmd.linear.x = cmd_body[0];
+    body_cmd.linear.y = cmd_body[1];
+    body_cmd.linear.z = 0.0;
+    body_cmd.angular.x = 0.0;
+    body_cmd.angular.y = 0.0;
+    // 控制指令计算：使用简易P控制 - YAW
+    double yaw_error = get_yaw_error(current_agent_cmd.desired_yaw, agent_state.att[2]);
+    body_cmd.angular.z = yaw_error * ugv_control_param.Kp_yaw;
+
+    // 控制指令限幅
+    body_cmd.linear.x = constrain_function(body_cmd.linear.x, ugv_control_param.max_vel_xy, 0.0);
+    body_cmd.linear.y = constrain_function(body_cmd.linear.y, ugv_control_param.max_vel_xy, 0.0);
+    body_cmd.angular.z = constrain_function(body_cmd.angular.z, ugv_control_param.max_vel_yaw, ugv_control_param.deadzone_vel_yaw);
+
+    return body_cmd;
 }
 
 // 定时器回调函数：定时打印
@@ -337,38 +339,21 @@ void UGV_CONTROL::timercb_debug(const ros::TimerEvent &e)
     cout.setf(ios::showpoint);
     // 强制显示符号
     cout.setf(ios::showpos);
-    if(agent_type == 0)
+
+    if(11.3f < agent_state.battery < 13.0f)
     {
-        if(agent_state.battery < 15.0f)
-        {
-            cout << RED << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
-        }else if(agent_state.battery < 30.0f)
-        {
-            cout << YELLOW << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
-        }else
-        {
-            cout << GREEN << "Battery: " << agent_state.battery << " [%] <<<<<<<<<<<<<" << TAIL << endl;
-        }
+        cout << GREEN << "Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
+    }else if(11.0f < agent_state.battery < 11.3f)
+    {
+        cout << YELLOW << "Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
+    }else
+    {
+        cout << RED << "Low Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
     }
 
-
-    if(agent_type == 1 || agent_type == 2)
-    {
-        if(11.3f < agent_state.battery < 13.0f)
-        {
-            cout << GREEN << "Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
-        }else if(11.0f < agent_state.battery < 11.3f)
-        {
-            cout << YELLOW << "Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
-        }else
-        {
-            cout << RED << "Low Battery: " << agent_state.battery << " [V] <<<<<<<<<<<<<" << TAIL << endl;
-        }
-    }
-
-    cout << GREEN << "UAV_pos [X Y] : " << agent_state.pos[0] << " [ m ] " << agent_state.pos[1] << " [ m ] " << TAIL << endl;
-    cout << GREEN << "UAV_vel [X Y] : " << agent_state.vel[0] << " [m/s] " << agent_state.vel[1] << " [m/s] " << TAIL << endl;
-    cout << GREEN << "UAV_att [Yaw] : " << agent_state.att[2] * 180 / M_PI << " [deg] " << TAIL << endl;
+    cout << GREEN << "UGV_pos [X Y] : " << agent_state.pos[0] << " [ m ] " << agent_state.pos[1] << " [ m ] " << TAIL << endl;
+    cout << GREEN << "UGV_vel [X Y] : " << agent_state.vel[0] << " [m/s] " << agent_state.vel[1] << " [m/s] " << TAIL << endl;
+    cout << GREEN << "UGV_att [Yaw] : " << agent_state.att[2] * 180 / M_PI << " [deg] " << TAIL << endl;
 
     // 动捕丢失情况下，不执行控制指令，直到动捕恢复
     if(!agent_state.odom_valid)
@@ -690,6 +675,8 @@ void UGV_CONTROL::printf_param()
     cout << GREEN << "Kp_yaw : " << ugv_control_param.Kp_yaw << TAIL << endl;
     cout << GREEN << "max_vel_xy : " << ugv_control_param.max_vel_xy << " [m/s]" << TAIL << endl;
     cout << GREEN << "max_vel_yaw : " << ugv_control_param.max_vel_yaw << " [rad/s]" << TAIL << endl;
+    cout << GREEN << "deadzone_vel_xy : " << ugv_control_param.deadzone_vel_xy << " [m/s]" << TAIL << endl;
+    cout << GREEN << "deadzone_vel_yaw : " << ugv_control_param.deadzone_vel_yaw << " [rad/s]" << TAIL << endl;
 
     // 地理围栏参数
     cout << GREEN << "geo_fence max_x : " << ugv_geo_fence.max_x << " [m]" << TAIL << endl;

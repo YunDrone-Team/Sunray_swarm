@@ -127,5 +127,8 @@ int main(int argc, char **argv)
 
     sleep(5.0);
 
+    text_info.data = node_name + "Demo finished...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
     return 0;
 }

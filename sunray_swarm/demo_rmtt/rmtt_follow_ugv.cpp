@@ -73,7 +73,6 @@ int main(int argc, char **argv)
     // 【参数】目标名称（动捕中设置）
     nh.param<string>("target_name", target_name, "ugv_1");
 
-    cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;
     cout << GREEN << "target_name      : " << target_name << TAIL << endl;
 
     string agent_name = "/rmtt_" + std::to_string(agent_id);
@@ -136,5 +135,8 @@ int main(int argc, char **argv)
         rate.sleep();
     }
 
+    text_info.data = node_name + "Demo finished...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
     return 0;
 }

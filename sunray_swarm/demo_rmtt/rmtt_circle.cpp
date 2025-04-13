@@ -76,13 +76,10 @@ int main(int argc, char **argv)
     //【参数】期望的偏航角，默认为0.0
     nh.param<float>("desired_yaw", desired_yaw, 0.0f);
 
-    cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;
-
     cout << GREEN << "agent_id      : " << agent_id << TAIL << endl;
     cout << GREEN << "circle_radius : " << circle_radius << TAIL << endl;
     cout << GREEN << "linear_vel    : " << linear_vel << TAIL << endl;
     cout << GREEN << "desired_yaw   : " << desired_yaw << TAIL << endl;
-
 
     string agent_name = "/rmtt_" + std::to_string(agent_id);
     // 【订阅】触发指令 外部 -> 本节点 
@@ -142,8 +139,12 @@ int main(int argc, char **argv)
             agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
             agent_cmd.desired_pos.x = circle_radius * cos(angle);  // 计算当前x坐标
             agent_cmd.desired_pos.y = circle_radius * sin(angle);  // 计算当前y坐标
-            agent_cmd.desired_pos.z = 0.1;
-            agent_cmd.desired_yaw = desired_yaw;  
+            agent_cmd.desired_pos.z = 1.0;
+            // 偏航角跟随圆形轨迹计算
+            double vx,vy;
+            vx = -omega * circle_radius * sin(angle);
+            vy = omega * circle_radius * cos(angle);
+            agent_cmd.desired_yaw = atan2(vy, vx);
             agent_cmd_pub.publish(agent_cmd);
             // 更新时间计数器，由于循环频率为10Hz，因此设置为0.1秒
             time_trajectory += 0.1;
@@ -151,6 +152,10 @@ int main(int argc, char **argv)
             rate.sleep();
         }
     }
+
+    text_info.data = node_name + "Demo finished...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
 
     return 0;
 }

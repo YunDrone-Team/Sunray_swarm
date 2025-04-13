@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 
         // 执行完所有的目标点后，重置状态位
         demo_start_flag = false; 
-        text_info.data = node_name + "Demo finished.";
+        text_info.data = node_name + "Demo finished...";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }

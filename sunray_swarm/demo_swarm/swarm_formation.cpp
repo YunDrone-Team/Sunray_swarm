@@ -23,6 +23,7 @@ int agent_num;                                          // 智能体数量
 float agent_height;                                     // 智能体高度
 bool demo_start_flag = false;                           // 是否接收到开始命令
 std_msgs::String text_info;                             // 打印消息
+string node_name;                                       // 节点名称
 
 sunray_msgs::orca_cmd agent_orca_cmd;                   // ORCA指令
 sunray_msgs::orca_state orca_state[MAX_AGENT_NUM];      // ORCA状态
@@ -66,12 +67,12 @@ void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
 
     if(demo_start_flag)
     {
-        text_info.data = "Get demo start cmd";
+        text_info.data = node_name + "Get demo start cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }else
     {
-        text_info.data = "Get demo stop cmd";
+        text_info.data = node_name + "Get demo stop cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }
@@ -130,6 +131,13 @@ int main(int argc, char **argv)
         orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm/" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb, _1, i));
     }
 
+    sleep(1.0);
+    node_name = "[" + ros::this_node::getName() + "] ---> ";
+
+    text_info.data = node_name + "Demo init...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
+
     // 设置阵型
     setup_formation();
     // 初始化队形状态
@@ -145,7 +153,9 @@ int main(int argc, char **argv)
     agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
     orca_cmd_pub.publish(agent_orca_cmd);
 
-    cout << GREEN << "start orca..." << TAIL << endl;
+    text_info.data = node_name + "Start orca...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
     sleep(3.0);
 
     // 主循环
@@ -170,7 +180,10 @@ int main(int argc, char **argv)
             case FORMATION_STATE::LINE:
                 if(!pub_formation)
                 {
-                    cout << BLUE <<  " Formation: fomation_line" << TAIL << endl;
+                    text_info.data = node_name + "Formation: fomation_line...";
+                    cout << GREEN << text_info.data << TAIL << endl;
+                    text_info_pub.publish(text_info);
+
                     for(int i = 0; i < agent_num; i++) 
                     {
                         // 通过ORCA目标点发布队形目标点
@@ -199,7 +212,9 @@ int main(int argc, char **argv)
             case FORMATION_STATE::TRIANGLE:
                 if(!pub_formation)
                 {
-                    cout << BLUE <<  " Formation: fomation_triangle" << TAIL << endl;
+                    text_info.data = node_name + "Formation: fomation_triangle...";
+                    cout << GREEN << text_info.data << TAIL << endl;
+                    text_info_pub.publish(text_info);                    
                     for(int i = 0; i < agent_num; i++) 
                     {
                         // 通过ORCA目标点发布队形目标点
@@ -228,7 +243,9 @@ int main(int argc, char **argv)
             case FORMATION_STATE::SQAURE:
                 if(!pub_formation)
                 {
-                    cout << BLUE <<  " Formation: fomation_square" << TAIL << endl;
+                    text_info.data = node_name + "Formation: fomation_square...";
+                    cout << GREEN << text_info.data << TAIL << endl;
+                    text_info_pub.publish(text_info); 
                     for(int i = 0; i < agent_num; i++) 
                     {
                         // 通过ORCA目标点发布队形目标点
@@ -257,7 +274,9 @@ int main(int argc, char **argv)
             case FORMATION_STATE::RETURN_HOME:
                 if(!pub_formation)
                 {
-                    cout << BLUE <<  " ORCA: RETURN_HOME" << TAIL << endl;
+                    text_info.data = node_name + "ORCA: RETURN_HOME...";
+                    cout << GREEN << text_info.data << TAIL << endl;
+                    text_info_pub.publish(text_info); 
                     agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME; // 设置ORCA命令为返回起点
                     orca_cmd_pub.publish(agent_orca_cmd);                         // 发布命令
                     pub_formation = true;                                   // 标志设置为已发布
@@ -276,6 +295,9 @@ int main(int argc, char **argv)
         rate.sleep();
     }
 
+    text_info.data = node_name + "Demo finished...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
     return 0;
 
 }

@@ -23,6 +23,7 @@ bool demo_start_flag = false;          // 是否接收到开始命令
 sunray_msgs::agent_cmd agent_cmd;      // 智能体控制指令
 float desired_yaw;                     // 期望的偏航角
 std_msgs::String text_info;            // 打印消息
+string node_name;                      // 节点名称
 
 ros::Publisher agent_cmd_pub;          // 发布控制命令
 ros::Subscriber demo_start_flag_sub;   // 订阅开始命令
@@ -40,12 +41,12 @@ void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
 
     if(demo_start_flag)
     {
-        text_info.data = "Get demo start cmd";
+        text_info.data = node_name + "Get demo start cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }else
     {
-        text_info.data = "Get demo stop cmd";
+        text_info.data = node_name + "Get demo stop cmd";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
     }
@@ -70,13 +71,10 @@ int main(int argc, char **argv)
     //【参数】从参数服务器获取期望的偏航角，默认为0.0
     nh.param<float>("desired_yaw", desired_yaw, 0.0f);
 
-    cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;
-
     cout << GREEN << "agent_id      : " << agent_id << TAIL << endl;
     cout << GREEN << "circle_radius : " << circle_radius << TAIL << endl;
     cout << GREEN << "linear_vel    : " << linear_vel << TAIL << endl;
     cout << GREEN << "desired_yaw   : " << desired_yaw << TAIL << endl;
-
 
     string agent_name = "/ugv_" + std::to_string(agent_id);
     // 【订阅】触发指令 外部 -> 本节点 
@@ -85,6 +83,13 @@ int main(int argc, char **argv)
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
+
+    sleep(1.0);
+    node_name = "[" + ros::this_node::getName() + "] ---> ";
+
+    text_info.data = node_name + "Demo init...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
 
     // 重置时间计数器，准备执行圆周运动
     time_trajectory = 0.0;  
@@ -114,7 +119,11 @@ int main(int argc, char **argv)
             agent_cmd.desired_pos.x = circle_radius * cos(angle);  // 计算当前x坐标
             agent_cmd.desired_pos.y = circle_radius * sin(angle);  // 计算当前y坐标
             agent_cmd.desired_pos.z = 0.1;
-            agent_cmd.desired_yaw = desired_yaw;  
+            // 偏航角跟随圆形轨迹计算
+            double vx,vy;
+            vx = -omega * circle_radius * sin(angle);
+            vy = omega * circle_radius * cos(angle);
+            agent_cmd.desired_yaw = atan2(vy, vx);
             agent_cmd_pub.publish(agent_cmd);
             // 更新时间计数器，由于循环频率为10Hz，因此设置为0.1秒
             time_trajectory += 0.1;
@@ -122,6 +131,10 @@ int main(int argc, char **argv)
             rate.sleep();
         }
     }
+
+    text_info.data = node_name + "Demo finished...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
 
     return 0;
 }
