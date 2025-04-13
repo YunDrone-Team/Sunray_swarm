@@ -18,7 +18,7 @@ class RMTT_CONTROL
 {
     public:
         // 构造函数
-        RMTT_CONTROL(){};
+        RMTT_CONTROL():tf_buffer(),tf_listener(tf_buffer){};
         // 初始化函数
         void init(ros::NodeHandle& nh);
         // 主循环函数
@@ -45,6 +45,10 @@ class RMTT_CONTROL
         std_msgs::String mled_text;
         // 是否打印 - 通过参数配置
         bool flag_printf;
+        // 定位地图
+        tf2_ros::Buffer tf_buffer;
+        tf2_ros::TransformListener tf_listener;
+
         // 悬停控制参数 - 通过参数配置
         struct control_param
         {
@@ -124,6 +128,7 @@ class RMTT_CONTROL
         ros::Timer timer_state_pub;
         ros::Timer timer_rivz;
         ros::Timer timer_debug;
+        ros::Timer timer_get_map_pose;
 
         // 内部函数
         void mocap_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg);
@@ -136,6 +141,7 @@ class RMTT_CONTROL
         void timercb_state(const ros::TimerEvent &e);
         void timercb_rviz(const ros::TimerEvent &e);
         void timercb_debug(const ros::TimerEvent &e);
+        void timercb_get_map_pose(const ros::TimerEvent &e);
         void printf_param();
         void set_desired_position();
         bool check_geo_fence();

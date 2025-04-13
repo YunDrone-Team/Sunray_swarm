@@ -52,9 +52,9 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
         cout << BLUE << "Pose source: Mocap" << TAIL << endl;
     }
     else if (pose_source == 2)
-    {
-        // 【订阅】订阅rmtt地图的定位数据(位置) rmtt_driver -> 本节点
-        map_pose_sub = nh.subscribe("/sunray_swarm/" + agent_name + "/map_pose", 1, &RMTT_CONTROL::map_pos_cb,this);
+    {       
+        // 【定时器】 通过TF获取定位地图的地位信息
+        timer_get_map_pose = nh.createTimer(ros::Duration(0.05), &RMTT_CONTROL::timercb_get_map_pose, this);
         cout << BLUE << "Pose source: Map" << TAIL << endl;
     }
     else
@@ -135,6 +135,41 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " init!";
     // text_info_pub.publish(text_info);
     cout << BLUE << text_info.data << TAIL << endl;
+}
+
+void RMTT_CONTROL::timercb_get_map_pose(const ros::TimerEvent &e)
+{
+    // 设定地图框架和程序框架的名称
+    string map_frame = "sunray_swarm/" + agent_name + "/map";        // 地图框架
+    string program_frame = "sunray_swarm/" + agent_name + "/base_link"; // 程序框架
+
+    try
+    {
+        // 获取从地图到程序框架的变换
+        geometry_msgs::TransformStamped transform_stamped =
+            tf_buffer.lookupTransform(map_frame, program_frame, ros::Time(0));
+
+        get_odom_time = ros::Time::now(); // 记录时间戳，防止超时
+        agent_state.pos[0] = transform_stamped.transform.translation.x;
+        agent_state.pos[1] = transform_stamped.transform.translation.y;
+        agent_state.pos[2] = transform_stamped.transform.translation.z;
+        agent_state.attitude_q = transform_stamped.transform.rotation;
+
+        Eigen::Quaterniond q_mocap = Eigen::Quaterniond(agent_state.attitude_q.w, agent_state.attitude_q.x, agent_state.attitude_q.y, agent_state.attitude_q.z);
+        Eigen::Vector3d agent_att = quaternion_to_euler(q_mocap);
+
+        agent_state.att[0] = agent_att.x();
+        agent_state.att[1] = agent_att.y();
+        agent_state.att[2] = agent_att.z();
+
+        agent_state.odom_valid = true;
+    }
+    catch (const tf2::TransformException& ex)
+    {
+        text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " map tf error!";
+        text_info_pub.publish(text_info);
+        cout << RED << text_info.data << TAIL << endl;
+    }
 }
 
 // 主循环函数

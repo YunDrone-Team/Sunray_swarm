@@ -69,12 +69,6 @@ add_executable(rmtt_control_node
 )
 target_link_libraries(rmtt_control_node ${catkin_LIBRARIES})
 
-## RMTT地图
-add_executable(rmtt_tf
-  agent_control/rmtt_tf.cpp
-)
-target_link_libraries(rmtt_tf ${catkin_LIBRARIES})
-
 ## 终端地面站
 add_executable(agent_terminal_station agent_control/agent_terminal_station.cpp)
 add_dependencies(agent_terminal_station sunray_swarm_gencpp)
