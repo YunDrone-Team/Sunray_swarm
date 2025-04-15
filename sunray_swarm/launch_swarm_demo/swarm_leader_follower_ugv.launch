@@ -1,6 +1,8 @@
 <launch>
+	<arg name="agent_num" default="6" />
+	
 	<node pkg="sunray_swarm" name="swarm_leader_follower_ugv" type="swarm_leader_follower" output="screen">
 		<param name="agent_type" value="1" />
-		<param name="agent_num" value="6" />
+		<param name="agent_num" value="$(arg agent_num)" />
 	</node>
 </launch>
