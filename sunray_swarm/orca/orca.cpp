@@ -161,6 +161,7 @@ bool ORCA::orca_run()
     // 循环遍历每个智能体，更新并发布ORCA状态信息
     for(int i = 0; i < agent_num; i++) 
     {
+        agent_orca_state[i].orca_cmd = orca_cmd.orca_cmd;
         agent_orca_state[i].agent_num = agent_num;
         agent_orca_state[i].agent_id = i+1;
         agent_orca_state[i].arrived_goal = arrived_goal[i];
@@ -367,6 +368,7 @@ void ORCA::agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i)
 // 回调函数：ORCA算法指令回调函数，根据msg->orca_cmd的值来判断处理
 void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
 {
+    orca_cmd = *msg;
     // 当orca_cmd为SET_HOME时，将每个智能体的当前所在点设置为home点，并同时启动ORCA算法
     if(msg->orca_cmd == sunray_msgs::orca_cmd::SET_HOME)
     {

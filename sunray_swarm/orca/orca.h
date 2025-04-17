@@ -71,6 +71,8 @@ class ORCA
 
         // ORCA算法类
         RVO::RVOSimulator *sim = new RVO::RVOSimulator();
+        // ORCA算法指令
+        sunray_msgs::orca_cmd orca_cmd;
         // 智能体ORCA算法状态
         sunray_msgs::orca_state agent_orca_state[MAX_NUM];
         // ORCA目标点        

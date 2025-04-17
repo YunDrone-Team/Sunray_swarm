@@ -402,13 +402,14 @@ geometry_msgs::Twist RMTT_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
     body_cmd.angular.y = 0.0;
     // 控制指令计算：使用简易P控制 - YAW
     double yaw_error = get_yaw_error(current_agent_cmd.desired_yaw, agent_state.att[2]);
+
     body_cmd.angular.z = yaw_error * rmtt_control_param.Kp_yaw;
 
     // 控制指令限幅
     body_cmd.linear.x = constrain_function(body_cmd.linear.x, rmtt_control_param.max_vel_xy, 0.0);
     body_cmd.linear.y = constrain_function(body_cmd.linear.y, rmtt_control_param.max_vel_xy, 0.0);
     body_cmd.linear.z = constrain_function(body_cmd.linear.z, rmtt_control_param.max_vel_z, 0.0);
-    body_cmd.angular.z = constrain_function(desired_vel.angular.z, rmtt_control_param.max_vel_yaw, rmtt_control_param.deadzone_vel_yaw);
+    body_cmd.angular.z = constrain_function(body_cmd.angular.z, rmtt_control_param.max_vel_yaw, rmtt_control_param.deadzone_vel_yaw);
 
     return body_cmd;
 }

@@ -2,7 +2,8 @@
 
 ## 消息header
 std_msgs/Header header
-
+## ORCA指令
+uint8 orca_cmd
 ## ORCA算法中智能体数量
 uint8 agent_num               
 ## 当前智能体ID
