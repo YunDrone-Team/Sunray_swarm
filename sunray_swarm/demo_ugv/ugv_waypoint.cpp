@@ -17,27 +17,12 @@ using namespace std;
 int agent_id;                            // 智能体ID
 int waypoint_count;                      // 目标点数量
 vector<geometry_msgs::Point> waypoints;  // 目标点列表
-bool demo_start_flag = false;            // 标记是否接收到开始命令
 sunray_msgs::agent_cmd agent_cmd;        // 智能体控制指令
 std_msgs::String text_info;              // 打印消息
 string node_name;                        // 节点名称
 
 ros::Publisher agent_cmd_pub;            // 发布控制命令
 ros::Publisher text_info_pub;            // 发布文字提示消息
-ros::Subscriber demo_start_flag_sub;     // demo启动订阅
-
-// 触发信号的回调函数，处理接收到的位置
-void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg) 
-{
-    demo_start_flag = msg->data; 
-
-    if(demo_start_flag)
-    {
-        text_info.data = node_name + "Get demo start cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }
-}
 
 // 主函数
 int main(int argc, char **argv) 
@@ -67,8 +52,6 @@ int main(int argc, char **argv)
     }
 
     string agent_name = "/ugv_" + std::to_string(agent_id); 
-    // 【订阅】触发指令 外部 -> 本节点 
-    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/ugv_waypoint", 1, demo_start_flag_cb);
     // 【发布】控制指令 本节点 -> 无人车控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
@@ -84,14 +67,6 @@ int main(int argc, char **argv)
     // 主循环
     while (ros::ok()) 
     {
-        if(!demo_start_flag)
-        {
-            // 处理一次回调函数
-            ros::spinOnce();
-            // sleep
-            rate.sleep();
-            continue;
-        }
 
         // 逐个发送目标点，发送后睡眠等待，然后发送下一个，直到遍历完所有目标点
         for (auto &waypoint : waypoints) 
@@ -114,8 +89,6 @@ int main(int argc, char **argv)
             ros::Duration(6.0).sleep();
         }
 
-        // 执行完所有的目标点后，重置状态位
-        demo_start_flag = false; 
         text_info.data = node_name + "Demo finished...";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);

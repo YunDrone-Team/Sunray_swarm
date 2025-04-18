@@ -6,8 +6,7 @@
  *     2、如果是无人机，请使用地面站一键起飞所有无人机（无人车集群忽略这一步）
  *     3、等待demo启动指令
  *     4、启动后根据阵型变化指令并发送到控制节点执行（POS_CONTROL模式）
- *     5、可通过demo_start_flag暂停或恢复阵型变换移动
- *     6、本程序没有设置自动降落，可以停止移动后，通过地面站降落
+ *     5、本程序没有设置自动降落，可以停止移动后，通过地面站降落
  ***********************************************************************************/
 
 #include <ros/ros.h>
@@ -21,7 +20,6 @@ using namespace std;
 int agent_type;                                         // 智能体类型
 int agent_num;                                          // 智能体数量
 float agent_height;                                     // 智能体高度
-bool demo_start_flag = false;                           // 是否接收到开始命令
 std_msgs::String text_info;                             // 打印消息
 string node_name;                                       // 节点名称
 
@@ -44,7 +42,6 @@ enum FORMATION_STATE
 FORMATION_STATE formation_state;        // 当前队形状态
 
 ros::Publisher orca_cmd_pub;                        // 发布ORCA指令
-ros::Subscriber demo_start_flag_sub;                // 订阅开始命令
 ros::Subscriber orca_state_sub[MAX_AGENT_NUM];      // 订阅ORCA状态
 ros::Publisher orca_goal_pub[MAX_AGENT_NUM];        // 发布ORCA目标点
 ros::Publisher text_info_pub;                       // 发布文字提示消息
@@ -61,22 +58,6 @@ void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg, int i)
     orca_state[i] = *msg;
 }
 
-void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
-{
-    demo_start_flag = msg->data;    
-
-    if(demo_start_flag)
-    {
-        text_info.data = node_name + "Get demo start cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }else
-    {
-        text_info.data = node_name + "Get demo stop cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }
-}
 void setup_formation();
 
 // 主函数
@@ -115,8 +96,6 @@ int main(int argc, char **argv)
         cout << GREEN << "agent_type    : ugv" << TAIL << endl;
     }
 
-    //【订阅】触发指令 外部 -> 本节点 
-    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/swarm_formation", 1, demo_start_flag_cb);
     //【发布】ORCA算法指令 本节点 -> ORCA算法节点
     orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm/" + agent_prefix + "/orca_cmd", 1);
     //【发布】文字提示消息  本节点 -> 地面站
@@ -161,16 +140,6 @@ int main(int argc, char **argv)
     // 主循环
     while (ros::ok())
     {
-        // 等待demo启动
-        if(!demo_start_flag)
-        {
-            // 处理一次回调函数
-            ros::spinOnce();
-            // sleep
-            rate.sleep();
-            continue;
-        }
-   
         switch(formation_state)
         {
             case FORMATION_STATE::INIT:

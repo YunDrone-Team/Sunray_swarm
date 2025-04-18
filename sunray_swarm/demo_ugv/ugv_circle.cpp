@@ -5,7 +5,6 @@
  *     1、从参数列表里面获取圆形轨迹参数
  *     2、等待demo启动指令
  *     3、启动后根据时间计算圆形轨迹位置并发送到控制节点执行（POS_CONTROL模式）
- *     4、可通过demo_start_flag暂停或恢复圆形轨迹
  ***********************************************************************************/
 
 #include <ros/ros.h>
@@ -19,37 +18,18 @@ float circle_radius;                   // 圆参数：圆周轨迹的半径
 float linear_vel;                      // 圆参数：线速度
 float omega;                           // 圆参数：角速度
 float time_trajectory = 0.0;           // 圆参数：轨迹时间计数器
-bool demo_start_flag = false;          // 是否接收到开始命令
 sunray_msgs::agent_cmd agent_cmd;      // 智能体控制指令
 float desired_yaw;                     // 期望的偏航角
 std_msgs::String text_info;            // 打印消息
 string node_name;                      // 节点名称
 
 ros::Publisher agent_cmd_pub;          // 发布控制命令
-ros::Subscriber demo_start_flag_sub;   // 订阅开始命令
 ros::Publisher text_info_pub;          // 发布信息到地面站
 
 void mySigintHandler(int sig)
 {
     ROS_INFO("[ugv_circle] exit...");
     ros::shutdown();
-}
-
-void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
-{
-    demo_start_flag = msg->data;  
-
-    if(demo_start_flag)
-    {
-        text_info.data = node_name + "Get demo start cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }else
-    {
-        text_info.data = node_name + "Get demo stop cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }
 }
 
 // 主函数
@@ -77,8 +57,6 @@ int main(int argc, char **argv)
     cout << GREEN << "desired_yaw   : " << desired_yaw << TAIL << endl;
 
     string agent_name = "/ugv_" + std::to_string(agent_id);
-    // 【订阅】触发指令 外部 -> 本节点 
-    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/ugv_circle", 1, demo_start_flag_cb);
     // 【发布】控制指令 本节点 -> 无人车控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
@@ -96,18 +74,9 @@ int main(int argc, char **argv)
     // 主循环
     while (ros::ok())
     {   
-        // 等待demo启动
-        if(!demo_start_flag)
-        {
-            // 处理一次回调函数
-            ros::spinOnce();
-            // sleep
-            rate.sleep();
-            continue;
-        }
 
-        // 执行圆周运动，当demo_start_flag为false时退出
-        while(ros::ok() && demo_start_flag)
+        // 执行圆周运动
+        while(ros::ok())
         {
             // 根据设定的圆参数计算每一时刻的期望位置
             omega = linear_vel / circle_radius;

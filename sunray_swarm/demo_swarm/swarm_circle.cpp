@@ -6,8 +6,7 @@
  *     2、如果是无人机，请使用地面站一键起飞所有无人机（无人车集群忽略这一步）
  *     3、等待demo启动指令
  *     4、启动后根据时间计算圆形轨迹位置并发送到控制节点执行（POS_CONTROL模式）
- *     5、可通过demo_start_flag暂停或恢复圆形轨迹
- *     6、本程序没有设置自动降落，可以停止圆形轨迹移动后，通过地面站降落
+ *     5、本程序没有设置自动降落，可以停止圆形轨迹移动后，通过地面站降落
  ***********************************************************************************/
 
 #include <ros/ros.h>
@@ -21,7 +20,6 @@ using namespace std;
 int agent_type;                        // 智能体类型
 int agent_num;                         // 智能体数量
 int agent_height;                      // 智能体固定的高度
-bool demo_start_flag = false;          // 是否接收到开始命令
 
 Eigen::Vector3f circle_center;         // 圆参数：圆心坐标
 float circle_radius;                   // 圆参数：圆周轨迹的半径
@@ -36,7 +34,6 @@ std_msgs::String text_info;            // 打印消息
 sunray_msgs::orca_state orca_state[MAX_AGENT_NUM];      // ORCA状态
 string node_name;                      // 节点名称
 
-ros::Subscriber demo_start_flag_sub;             // 订阅开始命令
 ros::Subscriber orca_state_sub[MAX_AGENT_NUM];   // ORCA算法状态订阅
 ros::Publisher orca_cmd_pub;                     // 发布ORCA指令
 ros::Publisher orca_goal_pub[MAX_AGENT_NUM];     // ORCA算法目标点发布
@@ -55,22 +52,6 @@ void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg, int i)
     orca_state[i] = *msg;
 }
 
-void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
-{
-    demo_start_flag = msg->data;    
-
-    if(demo_start_flag)
-    {
-        text_info.data = node_name + "Get demo start cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }else
-    {
-        text_info.data = node_name + "Get demo stop cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }
-}
 
 // 主函数
 int main(int argc, char **argv) 
@@ -132,8 +113,6 @@ int main(int argc, char **argv)
     cout << GREEN << "direction     : " << direction << "" << TAIL << endl;
     cout << GREEN << "omega         : " << omega << "" << TAIL << endl;
 
-    //【订阅】触发指令 外部 -> 本节点 
-    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/swarm_circle", 1, demo_start_flag_cb);
     //【发布】ORCA算法指令 本节点 -> ORCA算法节点
     orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm/" + agent_prefix + "/orca_cmd", 1);
     //【发布】文字提示消息  本节点 -> 地面站
@@ -178,23 +157,33 @@ int main(int argc, char **argv)
         goal_point.z = desired_yaw;
         orca_goal_pub[i].publish(goal_point);
     }
-    sleep(10.0);
+ 
+    text_info.data = node_name + "Wait to the initial point...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
+    orca_state[0].arrived_all_goal = false;
+    int flag_a = 0;
+    while (!(orca_state[0].arrived_all_goal)) 
+    {
+        flag_a++;
+        sleep(1);
+        ros::spinOnce();
+        rate.sleep();
+        if(flag_a>25)
+        {
+         break;   
+        }
+    }
+    text_info.data = node_name + "Demo start...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
 
     time_trajectory = 0.0;
     while (ros::ok()) 
     {
-        // 等待demo启动
-        if(!demo_start_flag)
-        {
-            // 处理一次回调函数
-            ros::spinOnce();
-            // sleep
-            rate.sleep();
-            continue;
-        }
 
-        // 执行圆周运动，当demo_start_flag为false时退出
-        while(ros::ok() && demo_start_flag)
+        // 执行圆周运动
+        while(ros::ok())
         {
             for (int i = 0; i < agent_num; i++) 
             {

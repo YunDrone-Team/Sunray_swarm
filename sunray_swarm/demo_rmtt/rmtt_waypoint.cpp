@@ -3,8 +3,7 @@
  *  作者: Yun Drone                                                                 
  *  描述: 无人机demo：路径点移动
  *     1、从参数列表里面获取目标点数目及目标点位置
- *     2、等待demo启动指令
- *     3、起飞
+ *     2、起飞
  *     3、启动后逐个发送目标点至智能体控制节点执行（POS_CONTROL模式）
  *     4、执行完后，降落
  ***********************************************************************************/
@@ -18,27 +17,12 @@ using namespace std;
 int agent_id;                            // 智能体ID
 int waypoint_count;                      // 目标点数量
 vector<geometry_msgs::Point> waypoints;  // 目标点列表
-bool demo_start_flag = false;            // 标记是否接收到开始命令
 sunray_msgs::agent_cmd agent_cmd;        // 智能体控制指令
 std_msgs::String text_info;              // 打印消息
 string node_name;                        // 节点名称
 
 ros::Publisher agent_cmd_pub;            // 发布控制命令
 ros::Publisher text_info_pub;            // 发布文字提示消息
-ros::Subscriber demo_start_flag_sub;     // demo启动订阅
-
-// 触发信号的回调函数，处理接收到的位置
-void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg) 
-{
-    demo_start_flag = msg->data; 
-
-    if(demo_start_flag)
-    {
-        text_info.data = node_name + "Get demo start cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }
-}
 
 // 主函数
 int main(int argc, char **argv)
@@ -67,8 +51,6 @@ int main(int argc, char **argv)
 
     string agent_name = "/rmtt_" + to_string(agent_id);
 
-    // 【订阅】触发指令 外部 -> 本节点 
-    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/rmtt_waypoint", 1, demo_start_flag_cb);
     // 【发布】控制指令 本节点 -> rmtt控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
@@ -84,14 +66,6 @@ int main(int argc, char **argv)
     // 主循环
     while (ros::ok()) 
     {
-        if(!demo_start_flag)
-        {
-            // 处理一次回调函数
-            ros::spinOnce();
-            // sleep
-            rate.sleep();
-            continue;
-        }
 
         // 发送起飞指令
         agent_cmd.header.stamp = ros::Time::now();
@@ -142,8 +116,6 @@ int main(int argc, char **argv)
 
         sleep(1.0);
 
-        // 执行完所有的目标点后，重置状态位
-        demo_start_flag = false; 
         text_info.data = node_name + "Demo finished...";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);

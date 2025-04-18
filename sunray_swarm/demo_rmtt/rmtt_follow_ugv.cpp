@@ -4,8 +4,7 @@
  *  描述: 无人机demo：无人机跟随地面小车
  *     1、起飞，等待demo启动指令
  *     2、启动后根据动捕中无人车的位置进行追随控制（POS_CONTROL模式）
- *     3、可通过demo_start_flag暂停或恢复跟随
- *     4、本程序没有设置自动降落，可以停止跟随后，通过地面站降落
+ *     3、本程序没有设置自动降落，可以停止跟随后，通过地面站降落
  ***********************************************************************************/
 
 #include <ros/ros.h>
@@ -16,7 +15,6 @@
 using namespace std;
 
 int agent_id;                          // 智能体编号
-bool demo_start_flag = false;          // 接收到开始命令
 std_msgs::String text_info;            // 打印消息
 string target_name;                    // 目标名称
 sunray_msgs::agent_cmd agent_cmd;      // 控制命令消息
@@ -26,25 +24,7 @@ string node_name;                      // 节点名称
 
 ros::Subscriber target_pos_sub;        // 订阅目标位置
 ros::Publisher agent_cmd_pub;          // 发布控制命令
-ros::Subscriber demo_start_flag_sub;   // 订阅开始命令
 ros::Publisher text_info_pub;          // 发布信息到地面站
-
-void demo_start_flag_cb(const std_msgs::Bool::ConstPtr &msg)
-{
-    demo_start_flag = msg->data;    
-
-    if(demo_start_flag)
-    {
-        text_info.data = node_name + "Get demo start cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }else
-    {
-        text_info.data = node_name + "Get demo stop cmd";
-        cout << GREEN << text_info.data << TAIL << endl;
-        text_info_pub.publish(text_info);
-    }
-}
 
 // 目标位置回调函数
 void mocap_pos_cb(const geometry_msgs::PoseStamped::ConstPtr &msg)
@@ -78,8 +58,7 @@ int main(int argc, char **argv)
     string agent_name = "/rmtt_" + std::to_string(agent_id);
     // 【订阅】无人车位置 VRPN（动捕） -> 本节点目标位置
     target_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ target_name + "/pose", 1, mocap_pos_cb);
-    // 【订阅】触发指令 外部 -> 本节点 
-    demo_start_flag_sub = nh.subscribe<std_msgs::Bool>("/sunray_swarm/demo/rmtt_follow_ugv", 1, demo_start_flag_cb);
+   
     // 【发布】控制指令 本节点 -> 无人机控制节点
     agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
@@ -110,16 +89,6 @@ int main(int argc, char **argv)
     // 主循环
     while (ros::ok())
     {
-        // 等待demo启动
-        if(!demo_start_flag)
-        {
-            // 处理一次回调函数
-            ros::spinOnce();
-            // sleep
-            rate.sleep();
-            continue;
-        }
-
         agent_cmd.header.stamp = ros::Time::now();
         agent_cmd.header.frame_id = "world";
         agent_cmd.agent_id = agent_id;
