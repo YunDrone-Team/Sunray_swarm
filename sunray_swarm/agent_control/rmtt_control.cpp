@@ -296,6 +296,11 @@ void RMTT_CONTROL::handle_cmd(const sunray_msgs::agent_cmd msg)
         case sunray_msgs::agent_cmd::TAKEOFF:
             text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: TAKEOFF!";
             cout << BLUE << text_info.data << TAIL << endl;
+            // home point
+            home_position.x = agent_state.pos[0];
+            home_position.y = agent_state.pos[1];
+            home_position.z = 0.0;
+            home_yaw = agent_state.att[2];
             // 起飞
             takeoff_pub.publish(takeoff); 
             agent_state.control_state = sunray_msgs::agent_cmd::TAKEOFF;

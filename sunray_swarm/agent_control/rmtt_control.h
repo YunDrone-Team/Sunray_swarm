@@ -97,6 +97,10 @@ class RMTT_CONTROL
         std_msgs::Empty takeoff;
         std_msgs::Empty land;
         std_msgs::String text_info;
+
+        // 智能体当前期望位置+偏航角（来自外部控制指令赋值）    
+        geometry_msgs::Point home_position;
+        double home_yaw{0.0};
         // 轨迹容器,用于rviz显示
         vector<geometry_msgs::PoseStamped> pos_vector;    
         

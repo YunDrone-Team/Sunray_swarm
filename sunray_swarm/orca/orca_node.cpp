@@ -35,11 +35,11 @@ int main(int argc, char **argv)
     {
         // 回调函数
         ros::spinOnce();
+        orca.pub_orca_state();
+
         orca.text_info.data = "[" + ros::this_node::getName() + "] ---> Wait for ORCA start cmd!";
         orca.text_info_pub.publish(orca.text_info);
         cout << YELLOW << orca.text_info.data << TAIL << endl;
-
-        // seep
         sleep(5.0);
     }
 
