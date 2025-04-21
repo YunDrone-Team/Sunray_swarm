@@ -21,6 +21,7 @@ uint8 ORCA_SCENARIO_2 = 12    ##ORCA程序预设目标点场景2
 uint8 ORCA_SCENARIO_3 = 13    ##ORCA程序预设目标点场景3
 uint8 ORCA_SCENARIO_4 = 14    ##ORCA程序预设目标点场景4
 uint8 ORCA_SCENARIO_5 = 15    ##ORCA程序预设目标点场景5
+uint8 INIT = 99               ##INIT
 
 ## 障碍物顶点，4个点围成一个凸体,针对SETUP_OBS模式
 geometry_msgs/Point[] obs_point    ## [m]

@@ -50,6 +50,7 @@ int main(int argc, char **argv)
         ros::spinOnce();
         // 主循环函数
         arrived_all_goals = orca.orca_run();
+        orca.pub_orca_state();
         // sleep
         rate.sleep();
     }

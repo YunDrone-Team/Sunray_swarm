@@ -23,6 +23,7 @@ class ORCA
         void init(ros::NodeHandle& nh);
         // 主循环函数
         bool orca_run();
+        void pub_orca_state();
         // 算法是否启动
         bool start_flag{false};
         // 以下为辅助变量

@@ -78,6 +78,24 @@ void ORCA::init(ros::NodeHandle& nh)
     // 打印本节点参数，用于检查
     printf_param();
 
+    // 循环遍历每个智能体，init
+    for(int i = 0; i < agent_num; i++) 
+    {
+        agent_orca_state[i].orca_cmd = sunray_msgs::orca_cmd::INIT;
+        agent_orca_state[i].agent_num = agent_num;
+        agent_orca_state[i].agent_id = i+1;
+        agent_orca_state[i].arrived_goal = false;
+        agent_orca_state[i].arrived_all_goal = false;
+        agent_orca_state[i].goal[0] = 0.0;
+        agent_orca_state[i].goal[1] = 0.0;
+        agent_orca_state[i].yaw = 0.0;
+        agent_orca_state[i].vel_orca[0] = 0.0;
+        agent_orca_state[i].vel_orca[1] = 0.0;
+        agent_orca_state[i].home_pos[0] = 0.0;
+        agent_orca_state[i].home_pos[1] = 0.0;
+        agent_orca_state[i].home_yaw = 0.0;
+    }
+
     // ORCA算法初始化 - 添加智能体
     setup_agents();
     // ORCA算法初始化 - 添加障碍物
@@ -85,7 +103,7 @@ void ORCA::init(ros::NodeHandle& nh)
 }
 
 bool ORCA::orca_run()
-{
+{   
     // 没有收到ORCA算法启动的指令，不执行主循环
     if(!start_flag)
     {
@@ -158,6 +176,11 @@ bool ORCA::orca_run()
         }
 	}
 
+    return arrived_all_goal;
+}
+
+void ORCA::pub_orca_state()
+{
     // 循环遍历每个智能体，更新并发布ORCA状态信息
     for(int i = 0; i < agent_num; i++) 
     {
@@ -203,8 +226,6 @@ bool ORCA::orca_run()
         goal_marker.mesh_use_embedded_materials = false;
         goal_point_pub[i].publish(goal_marker);
     }
-
-    return arrived_all_goal;
 }
 
 // ORCA算法初始化 - 设置智能体
