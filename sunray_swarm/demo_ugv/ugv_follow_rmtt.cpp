@@ -122,10 +122,10 @@
          }
          if(land_flag||target_pos.pose.position.z<0.75)
          {
-          if(target_pos.pose.position.x > 0)
-           {
+            if(target_pos.pose.position.x > 0)
+            {
              agent_cmd.desired_pos.x = target_pos.pose.position.x - 1;
-           }
+            }
           else
           {
              agent_cmd.desired_pos.x = target_pos.pose.position.x + 1;

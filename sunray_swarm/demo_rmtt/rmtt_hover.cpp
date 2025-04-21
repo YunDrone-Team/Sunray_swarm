@@ -80,7 +80,7 @@ int main(int argc, char **argv)
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
 
-    sleep(5.0);
+    sleep(10.0);
 
     // 发送悬停指令
     agent_cmd.header.stamp = ros::Time::now();
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
 
-    sleep(10.0);
+    sleep(5.0);
 
     // 发送降落指令
     agent_cmd.header.stamp = ros::Time::now();

@@ -179,33 +179,31 @@ int main(int argc, char **argv)
     text_info_pub.publish(text_info);
 
     time_trajectory = 0.0;
-    while (ros::ok()) 
+
+    // 执行圆周运动
+    while(ros::ok())
     {
-
-        // 执行圆周运动
-        while(ros::ok())
+        for (int i = 0; i < agent_num; i++) 
         {
-            for (int i = 0; i < agent_num; i++) 
-            {
-                float angle = omega * time_trajectory + i * 2 * M_PI / agent_num;
-                geometry_msgs::Point goal_point;
-                goal_point.x = circle_center[0] + circle_radius * cos(angle);
-                goal_point.y = circle_center[1] + circle_radius * sin(angle);
+            float angle = omega * time_trajectory + i * 2 * M_PI / agent_num;
+            geometry_msgs::Point goal_point;
+            goal_point.x = circle_center[0] + circle_radius * cos(angle);
+            goal_point.y = circle_center[1] + circle_radius * sin(angle);
 
-                // 偏航角跟随圆形轨迹计算
-                double vx,vy;
-                vx = -omega * circle_radius * sin(angle);
-                vy = omega * circle_radius * cos(angle);
-                goal_point.z = atan2(vy, vx);
-                // goal_point.z = desired_yaw;
-                orca_goal_pub[i].publish(goal_point);
-            }
-            // 更新时间计数器，由于循环频率为10Hz，因此设置为0.1秒
-            time_trajectory += 0.1;
-            ros::spinOnce();
-            rate.sleep();
+            // 偏航角跟随圆形轨迹计算
+            double vx,vy;
+            vx = -omega * circle_radius * sin(angle);
+            vy = omega * circle_radius * cos(angle);
+            goal_point.z = atan2(vy, vx);
+            // goal_point.z = desired_yaw;
+            orca_goal_pub[i].publish(goal_point);
         }
+        // 更新时间计数器，由于循环频率为10Hz，因此设置为0.1秒
+        time_trajectory += 0.1;
+        ros::spinOnce();
+        rate.sleep();
     }
+
     text_info.data = node_name + "Demo finished...";
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);

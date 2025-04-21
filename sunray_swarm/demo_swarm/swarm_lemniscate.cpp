@@ -168,7 +168,7 @@ int main(int argc, char **argv)
         sleep(1);
         ros::spinOnce();
         rate.sleep();
-        if(flag_a>25)
+        if(flag_a>50)
         {
          break;   
         }
@@ -177,37 +177,35 @@ int main(int argc, char **argv)
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
 
-    while (ros::ok()) 
+
+    // 8字轨迹生成
+    while(ros::ok())
     {
-
-        // 8字轨迹生成
-        while(ros::ok())
+        for (int i = 0; i < agent_num; i++) 
         {
-            for (int i = 0; i < agent_num; i++) 
-            {
-                // 修改相位计算公式：添加动态时间偏移
-                float base_phase = i * M_PI / agent_num; // 基础相位差
-                float dynamic_phase = omega * time_trajectory;
-                float theta = dynamic_phase + base_phase;
-                
-                geometry_msgs::Point goal_point;
-                goal_point.x = circle_center[0] + circle_radius * sin(theta);
-                goal_point.y = circle_center[1] + circle_radius * sin(2*theta) * 0.5;
-                // 偏航角跟随圆形轨迹计算
-                double vx,vy;
-                vx = omega * circle_radius * cos(theta);
-                vy = omega * circle_radius * cos(2*theta);
-                goal_point.z = atan2(vy, vx);  
-                orca_goal_pub[i].publish(goal_point);
-            }
-
-
-            // 更新时间计数器，由于循环频率为10Hz，因此设置为0.1秒
-            time_trajectory += 0.1; // 保持10Hz更新率
-            ros::spinOnce();
-            rate.sleep();
+            // 修改相位计算公式：添加动态时间偏移
+            float base_phase = i * M_PI / agent_num; // 基础相位差
+            float dynamic_phase = omega * time_trajectory;
+            float theta = dynamic_phase + base_phase;
+            
+            geometry_msgs::Point goal_point;
+            goal_point.x = circle_center[0] + circle_radius * sin(theta);
+            goal_point.y = circle_center[1] + circle_radius * sin(2*theta) * 0.5;
+            // 偏航角跟随圆形轨迹计算
+            double vx,vy;
+            vx = omega * circle_radius * cos(theta);
+            vy = omega * circle_radius * cos(2*theta);
+            goal_point.z = atan2(vy, vx);  
+            orca_goal_pub[i].publish(goal_point);
         }
+
+
+        // 更新时间计数器，由于循环频率为10Hz，因此设置为0.1秒
+        time_trajectory += 0.1; // 保持10Hz更新率
+        ros::spinOnce();
+        rate.sleep();
     }
+
     text_info.data = node_name + "Demo finished...";
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);

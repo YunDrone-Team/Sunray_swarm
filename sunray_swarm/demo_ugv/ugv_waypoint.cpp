@@ -64,35 +64,30 @@ int main(int argc, char **argv)
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
 
-    // 主循环
-    while (ros::ok()) 
+    // 逐个发送目标点，发送后睡眠等待，然后发送下一个，直到遍历完所有目标点
+    for (auto &waypoint : waypoints) 
     {
+        agent_cmd.header.stamp = ros::Time::now();
+        agent_cmd.header.frame_id = "world";
+        agent_cmd.agent_id = agent_id;
+        agent_cmd.cmd_source = "ugv_waypoint";
+        agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+        agent_cmd.desired_pos = waypoint;
+        agent_cmd.desired_yaw = 0.0;    
+        agent_cmd_pub.publish(agent_cmd); 
 
-        // 逐个发送目标点，发送后睡眠等待，然后发送下一个，直到遍历完所有目标点
-        for (auto &waypoint : waypoints) 
-        {
-            agent_cmd.header.stamp = ros::Time::now();
-            agent_cmd.header.frame_id = "world";
-            agent_cmd.agent_id = agent_id;
-            agent_cmd.cmd_source = "ugv_waypoint";
-            agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
-            agent_cmd.desired_pos = waypoint;
-            agent_cmd.desired_yaw = 0.0;    
-            agent_cmd_pub.publish(agent_cmd); 
-
-            // 发送提示消息
-            text_info.data = "Moving to waypoints: [" + to_string(waypoint.x) + ", " + to_string(waypoint.y) + ", " + to_string(waypoint.z)+"]...";
-            cout << GREEN << text_info.data << TAIL << endl;
-            text_info_pub.publish(text_info);
-
-            // 等待智能体移动（注：可以改为判断来确定是否发送下一个目标点）
-            ros::Duration(6.0).sleep();
-        }
-
-        text_info.data = node_name + "Demo finished...";
+        // 发送提示消息
+        text_info.data = "Moving to waypoints: [" + to_string(waypoint.x) + ", " + to_string(waypoint.y) + ", " + to_string(waypoint.z)+"]...";
         cout << GREEN << text_info.data << TAIL << endl;
         text_info_pub.publish(text_info);
+
+        // 等待智能体移动（注：可以改为判断来确定是否发送下一个目标点）
+        ros::Duration(6.0).sleep();
     }
+
+    text_info.data = node_name + "Demo finished...";
+    cout << GREEN << text_info.data << TAIL << endl;
+    text_info_pub.publish(text_info);
 
     return 0;
 }

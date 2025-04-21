@@ -6,7 +6,7 @@
 		<param name="agent_num" value="$(arg agent_num)" />
 		<param name="circle_center_x" value="0.0" />
 		<param name="circle_center_y" value="0.0" />
-		<param name="circle_radius" value="1.5" />
+		<param name="circle_radius" value="2.5" />
 		<param name="linear_vel" value="0.1" />
 		<param name="direction" value="1.0" />
 		<param name="desired_yaw" value="0.0" />

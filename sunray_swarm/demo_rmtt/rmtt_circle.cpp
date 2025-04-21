@@ -87,14 +87,13 @@ int main(int argc, char **argv)
     cout << GREEN << text_info.data << TAIL << endl;
     text_info_pub.publish(text_info);
     
-    sleep(8.0);
+    sleep(10.0);
 
     // 重置时间计数器，准备执行圆周运动
     time_trajectory = 0.0;  
     // 主循环
     while (ros::ok())
     {   
-
         // 执行圆周运动
         while(ros::ok())
         {
