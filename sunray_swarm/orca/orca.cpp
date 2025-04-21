@@ -78,9 +78,20 @@ void ORCA::init(ros::NodeHandle& nh)
     // 打印本节点参数，用于检查
     printf_param();
 
+    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::INIT;
+
     // 循环遍历每个智能体，init
     for(int i = 0; i < agent_num; i++) 
     {
+        arrived_goal[i] = false;
+        arrived_all_goal = false;
+        agent_cmd[i].desired_vel.linear.x = 0.0;
+        agent_cmd[i].desired_vel.linear.y = 0.0;
+        home_pose[i].x = 0.0;
+        home_pose[i].y = 0.0;
+        home_pose[i].yaw = 0.0;
+        goal_pose[i].yaw = 0.0;
+
         agent_orca_state[i].orca_cmd = sunray_msgs::orca_cmd::INIT;
         agent_orca_state[i].agent_num = agent_num;
         agent_orca_state[i].agent_id = i+1;
@@ -184,6 +195,8 @@ void ORCA::pub_orca_state()
     // 循环遍历每个智能体，更新并发布ORCA状态信息
     for(int i = 0; i < agent_num; i++) 
     {
+        agent_orca_state[i].header.frame_id = "world";
+        agent_orca_state[i].header.stamp = ros::Time::now();
         agent_orca_state[i].orca_cmd = orca_cmd.orca_cmd;
         agent_orca_state[i].agent_num = agent_num;
         agent_orca_state[i].agent_id = i+1;
