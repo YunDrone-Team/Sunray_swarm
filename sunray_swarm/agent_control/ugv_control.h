@@ -13,6 +13,8 @@ using namespace std;
 
 #define TRA_WINDOW 50        
 #define ODOM_TIMEOUT 0.35                 
+#define DIS_TOLERANCE 0.1
+#define ZERO_THRESHOLD 0.01
 
 class UGV_CONTROL
 {
@@ -41,6 +43,8 @@ class UGV_CONTROL
         int pose_source;
         // 是否打印 - 通过参数配置
         bool flag_printf;
+        // 
+        int ugv_type;
         // 悬停控制参数 - 通过参数配置
         struct control_param
         {
@@ -118,8 +122,10 @@ class UGV_CONTROL
         void printf_param();
         void set_desired_position();
         bool check_geo_fence();
-        geometry_msgs::Twist enu_to_body(geometry_msgs::Twist enu_cmd);
-        void pos_control(geometry_msgs::Point pos_ref, double yaw_ref);
+        geometry_msgs::Twist enu_to_body_mac(geometry_msgs::Twist enu_cmd);
+        geometry_msgs::Twist enu_to_body_diff(geometry_msgs::Twist enu_cmd);
+        void pos_control_mac(geometry_msgs::Point pos_ref, double yaw_ref);
+        void pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref);
         float constrain_function(float data, float Max, float Min);
         Eigen::Vector3d quaternion_to_euler(const Eigen::Quaterniond &q);
         double get_yaw_error(double yaw_ref, double yaw_now);

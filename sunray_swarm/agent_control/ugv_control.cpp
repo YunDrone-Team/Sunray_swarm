@@ -14,6 +14,8 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     nh.param<int>("pose_source", pose_source, 1);
     // 【参数】是否打印
     nh.param<bool>("flag_printf", flag_printf, false);
+    // 【参数】0 for mai,1 for diff
+    nh.param<int>("ugv_type", ugv_type, 0);
     // 【参数】设置获取数据源
     nh.param<int>("pose_source", pose_source, 1);
     // 【参数】悬停控制参数 - xy
@@ -161,8 +163,14 @@ void UGV_CONTROL::mainloop()
         
         // POS_CONTROL：位置控制模式，无人车移动到期望的位置+偏航（期望位置由外部指令赋值）
         case sunray_msgs::agent_cmd::POS_CONTROL:
-            // 位置控制算法
-            pos_control(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
+            if(ugv_type == 0)
+            {
+                pos_control_mac(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
+            }else if(ugv_type == 1)
+            {
+                pos_control_diff(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
+            }
+
             break;
 
         // VEL_CONTROL_BODY：车体系速度控制，无人车按照期望的速度在车体系移动（期望速度由外部指令赋值）
@@ -177,7 +185,13 @@ void UGV_CONTROL::mainloop()
         // VEL_CONTROL_ENU：惯性系速度控制，无人车按照期望的速度在惯性系移动（期望速度由外部指令赋值）
         case sunray_msgs::agent_cmd::VEL_CONTROL_ENU:
             // 由于UGV底层控制指令为车体系，所以需要将收到的惯性系速度转换为车体系速度
-            desired_vel = enu_to_body(current_agent_cmd.desired_vel);
+            if(ugv_type == 0)
+            {
+                desired_vel = enu_to_body_mac(current_agent_cmd.desired_vel);
+            }else if(ugv_type == 1)
+            {
+                desired_vel = enu_to_body_diff(current_agent_cmd.desired_vel);
+            }           
             agent_cmd_vel_pub.publish(desired_vel);
             break;  
 
@@ -259,8 +273,45 @@ double UGV_CONTROL::get_yaw_error(double yaw_ref, double yaw_now)
     return error;
 }
 
+void UGV_CONTROL::pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref)
+{
+    // 计算目标点与当前点的差值
+    double dx = pos_ref.x - agent_state.pos[0];
+    double dy = pos_ref.y - agent_state.pos[1];
+    double distance = sqrt(dx * dx + dy * dy);
+    double yaw_error;
+    if(distance < DIS_TOLERANCE)
+    {
+        desired_vel.linear.x = 0.0;
+        // YAW误差计算
+        yaw_error = get_yaw_error(yaw_ref, agent_state.att[2]);
+        // 控制指令计算：使用简易P控制 - YAW
+        desired_vel.angular.z = yaw_error * ugv_control_param.Kp_yaw;
+        agent_cmd_vel_pub.publish(desired_vel);
+        return;
+    }
+
+    // 计算目标点与当前点的角度,target_yaw for control
+    double target_yaw = atan2(dy, dx);
+    // 控制指令计算：使用简易P控制 - 差速控制只有X方向和角速率上的控制
+    // desired_vel.linear.x = ugv_control_param.Kp_xy * distance;
+    desired_vel.linear.x = ugv_control_param.Kp_xy * distance * cos(yaw_error);
+    desired_vel.linear.y = 0.0;
+    desired_vel.linear.z = 0.0;
+    // YAW误差计算
+    yaw_error = get_yaw_error(target_yaw, agent_state.att[2]);
+    // 控制指令计算：使用简易P控制 - YAW
+    desired_vel.angular.z = yaw_error * ugv_control_param.Kp_yaw;
+
+    // 控制指令限幅
+    desired_vel.linear.x = constrain_function(desired_vel.linear.x, ugv_control_param.max_vel_xy, 0.0);
+    desired_vel.angular.z = constrain_function(desired_vel.angular.z, ugv_control_param.max_vel_yaw, 0.01);
+    // 发布控制指令
+    agent_cmd_vel_pub.publish(desired_vel); 
+}
+
 // 位置控制算法
-void UGV_CONTROL::pos_control(geometry_msgs::Point pos_ref, double yaw_ref)
+void UGV_CONTROL::pos_control_mac(geometry_msgs::Point pos_ref, double yaw_ref)
 {
     float cmd_body[2];
     float cmd_enu[2];
@@ -295,7 +346,38 @@ void UGV_CONTROL::rotation_yaw(double yaw_angle, float body_frame[2], float enu_
 }
 
 // 惯性系->机体系
-geometry_msgs::Twist UGV_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
+geometry_msgs::Twist UGV_CONTROL::enu_to_body_diff(geometry_msgs::Twist enu_cmd)
+{
+    geometry_msgs::Twist body_cmd;
+    body_cmd.linear.x = 0.0;
+    body_cmd.angular.z = 0.0;
+
+    double speed_xy = sqrt(enu_cmd.linear.x*enu_cmd.linear.x + enu_cmd.linear.y*enu_cmd.linear.y);
+
+    if(speed_xy < ZERO_THRESHOLD)
+    {
+        return body_cmd;
+    }
+
+    // 计算target_yaw for control
+    double target_yaw = atan2(enu_cmd.linear.y, enu_cmd.linear.x);
+    // YAW误差计算
+    double yaw_error = get_yaw_error(target_yaw, agent_state.att[2]);
+    // 控制指令计算：使用简易P控制 - YAW
+    body_cmd.angular.z = yaw_error * ugv_control_param.Kp_yaw;
+
+    //
+    body_cmd.linear.x = speed_xy*cos(yaw_error);
+
+    // 控制指令限幅
+    body_cmd.linear.x = constrain_function(body_cmd.linear.x, ugv_control_param.max_vel_xy, 0.0);
+    body_cmd.angular.z = constrain_function(body_cmd.angular.z, ugv_control_param.max_vel_yaw, ugv_control_param.deadzone_vel_yaw);
+
+    return body_cmd;
+}
+
+// 惯性系->机体系
+geometry_msgs::Twist UGV_CONTROL::enu_to_body_mac(geometry_msgs::Twist enu_cmd)
 {
     geometry_msgs::Twist body_cmd;
     // 惯性系 -> body frame 
