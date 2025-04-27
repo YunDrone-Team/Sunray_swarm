@@ -21,7 +21,10 @@ float32 battery                ## [0-1]
 
 ## 智能体当前执行的控制状态
 uint8 control_state
-                          
+
+## 
+geometry_msgs/Twist cmd_vel
+
 ## agent_type枚举
 uint8 RMTT = 0
 uint8 UGV = 1

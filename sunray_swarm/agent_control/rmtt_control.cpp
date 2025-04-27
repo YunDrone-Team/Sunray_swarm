@@ -529,6 +529,7 @@ void RMTT_CONTROL::timercb_state(const ros::TimerEvent &e)
     }
 
     agent_state.control_state = current_agent_cmd.control_state;
+    agent_state.cmd_vel = desired_vel;
     agent_state_pub.publish(agent_state);
 }
 

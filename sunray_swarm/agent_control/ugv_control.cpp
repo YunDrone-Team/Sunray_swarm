@@ -14,10 +14,8 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     nh.param<int>("pose_source", pose_source, 1);
     // 【参数】是否打印
     nh.param<bool>("flag_printf", flag_printf, false);
-    // 【参数】0 for mai,1 for diff
+    // 【参数】0 for mac,1 for diff
     nh.param<int>("ugv_type", ugv_type, 0);
-    // 【参数】设置获取数据源
-    nh.param<int>("pose_source", pose_source, 1);
     // 【参数】悬停控制参数 - xy
     nh.param<float>("ugv_control_param/Kp_xy", ugv_control_param.Kp_xy, 1.4);
     // 【参数】悬停控制参数 - yaw
@@ -47,9 +45,9 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     }
     else if (pose_source == 2)
     {
-        // 【订阅】订阅VIOBOT Odom数据
-        viobot_odom_sub = nh.subscribe("/sunray/robobaton_mini/odom", 1, &UGV_CONTROL::odom_cb,this);
-        cout << GREEN << "Pose source: VIOBOT" << TAIL << endl;
+        // 【订阅】订阅Odom数据
+        odom_sub = nh.subscribe("/car_odom", 1, &UGV_CONTROL::odom_cb,this);
+        cout << GREEN << "Pose source: ODOM" << TAIL << endl;
     }
     else
     {
@@ -279,6 +277,8 @@ void UGV_CONTROL::pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref)
     double dx = pos_ref.x - agent_state.pos[0];
     double dy = pos_ref.y - agent_state.pos[1];
     double distance = sqrt(dx * dx + dy * dy);
+
+    // cout << YELLOW << "distance: " << distance << " " << TAIL << endl;
     double yaw_error;
     if(distance < DIS_TOLERANCE)
     {
@@ -293,15 +293,15 @@ void UGV_CONTROL::pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref)
 
     // 计算目标点与当前点的角度,target_yaw for control
     double target_yaw = atan2(dy, dx);
-    // 控制指令计算：使用简易P控制 - 差速控制只有X方向和角速率上的控制
-    // desired_vel.linear.x = ugv_control_param.Kp_xy * distance;
-    desired_vel.linear.x = ugv_control_param.Kp_xy * distance * cos(yaw_error);
-    desired_vel.linear.y = 0.0;
-    desired_vel.linear.z = 0.0;
     // YAW误差计算
     yaw_error = get_yaw_error(target_yaw, agent_state.att[2]);
     // 控制指令计算：使用简易P控制 - YAW
     desired_vel.angular.z = yaw_error * ugv_control_param.Kp_yaw;
+
+    // 控制指令计算：使用简易P控制 - 差速控制只有X方向和角速率上的控制
+    desired_vel.linear.x = ugv_control_param.Kp_xy * distance * cos(yaw_error);
+    desired_vel.linear.y = 0.0;
+    desired_vel.linear.z = 0.0;
 
     // 控制指令限幅
     desired_vel.linear.x = constrain_function(desired_vel.linear.x, ugv_control_param.max_vel_xy, 0.0);
@@ -500,6 +500,7 @@ void UGV_CONTROL::timercb_state(const ros::TimerEvent &e)
     }
 
     agent_state.control_state = current_agent_cmd.control_state;
+    agent_state.cmd_vel = desired_vel;
     agent_state_pub.publish(agent_state);
 }
 
@@ -751,6 +752,8 @@ void UGV_CONTROL::printf_param()
     cout << GREEN << "agent_ip : " << agent_ip << "" << TAIL << endl;
     cout << GREEN << "flag_printf : " << flag_printf << "" << TAIL << endl;
     cout << GREEN << "agent_height : " << agent_height << TAIL << endl;
+    cout << GREEN << "pose_source : " << pose_source << TAIL << endl;
+    cout << GREEN << "ugv_type : " << ugv_type << TAIL << endl;
 
     // 悬停控制参数
     cout << GREEN << "Kp_xy : " << ugv_control_param.Kp_xy << TAIL << endl;

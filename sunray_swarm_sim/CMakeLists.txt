@@ -56,8 +56,8 @@ include_directories(
 
 ## 仿真
 add_executable(agent_sim_node
-  sim/agent_sim.cpp	
-  sim/agent_sim_node.cpp
+  rviz_sim/agent_sim.cpp	
+  rviz_sim/agent_sim_node.cpp
 )
 target_link_libraries(agent_sim_node ${catkin_LIBRARIES})
 

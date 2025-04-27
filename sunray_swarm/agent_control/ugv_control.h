@@ -13,7 +13,7 @@ using namespace std;
 
 #define TRA_WINDOW 50        
 #define ODOM_TIMEOUT 0.35                 
-#define DIS_TOLERANCE 0.1
+#define DIS_TOLERANCE 0.25
 #define ZERO_THRESHOLD 0.01
 
 class UGV_CONTROL
@@ -91,7 +91,7 @@ class UGV_CONTROL
         // 订阅话题
         ros::Subscriber mocap_pos_sub;
         ros::Subscriber mocap_vel_sub;
-        ros::Subscriber viobot_odom_sub;
+        ros::Subscriber odom_sub;
         ros::Subscriber ugv_cmd_sub;
         ros::Subscriber battery_sub;
 
