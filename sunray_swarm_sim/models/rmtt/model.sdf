@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="rmtt">
+
+    <link name="base_link">
+      <pose>0 0 1.0 0 0 0</pose>
+      <gravity>0</gravity>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.028819942</ixx>
+          <iyy>0.047333716</iyy>
+          <izz>0.054201740</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.05 0.05</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <pose>0.0 0 0.0 0.0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.025 0.025 0.025</scale>
+            <uri>model://rmtt/meshes/tello.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+  <plugin name="base_controller" filename="libgazebo_ros_planar_move.so">
+    <commandTopic>/sunray_swarm/rmtt_1/cmd_vel</commandTopic>
+    <cmdTimeout>0.01</cmdTimeout>
+    <odometryTopic>/rmtt_odom</odometryTopic>
+    <odometryFrame>world</odometryFrame>
+    <odometryRate>100.0</odometryRate>
+    <robotBaseFrame>base_link</robotBaseFrame>
+    <broadcastTF>true</broadcastTF>
+  </plugin>
+
+  </model>
+</sdf>

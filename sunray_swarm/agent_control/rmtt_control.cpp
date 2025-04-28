@@ -57,6 +57,12 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
         timer_get_map_pose = nh.createTimer(ros::Duration(0.05), &RMTT_CONTROL::timercb_get_map_pose, this);
         cout << BLUE << "Pose source: Map" << TAIL << endl;
     }
+    else if (pose_source == 3)
+    {
+        // 【订阅】订阅Odom数据
+        odom_sub = nh.subscribe("/rmtt_odom", 1, &RMTT_CONTROL::odom_cb,this);
+        cout << GREEN << "Pose source: ODOM" << TAIL << endl;
+    }
     else
     {
         cout << RED << "Pose source: Unknown" << TAIL << endl;
@@ -558,6 +564,28 @@ void RMTT_CONTROL::mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg)
 	agent_state.vel[0] = msg->twist.linear.x;
     agent_state.vel[1] = msg->twist.linear.y;
 	agent_state.vel[2] = msg->twist.linear.z;
+}
+
+// 回调函数：VIOBOT ODOM
+void RMTT_CONTROL::odom_cb(const nav_msgs::OdometryConstPtr& msg)
+{
+    get_odom_time = ros::Time::now(); // 记录时间戳，防止超时
+	agent_state.pos[0] = msg->pose.pose.position.x;
+    agent_state.pos[1] = msg->pose.pose.position.y;
+	agent_state.pos[2] = agent_height;
+	agent_state.vel[0] = msg->twist.twist.linear.x;
+    agent_state.vel[1] = msg->twist.twist.linear.y;
+	agent_state.vel[2] = msg->twist.twist.linear.z;
+    agent_state.attitude_q = msg->pose.pose.orientation;
+
+    Eigen::Quaterniond q_mocap = Eigen::Quaterniond(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z);
+    Eigen::Vector3d agent_att = quaternion_to_euler(q_mocap);
+
+	agent_state.att[0] = agent_att.x();
+    agent_state.att[1] = agent_att.y();
+	agent_state.att[2] = agent_att.z();
+
+    agent_state.odom_valid = true;
 }
 
 void RMTT_CONTROL::timercb_get_map_pose(const ros::TimerEvent &e)

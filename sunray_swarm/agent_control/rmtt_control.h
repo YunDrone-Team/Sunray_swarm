@@ -107,6 +107,7 @@ class RMTT_CONTROL
         // 订阅话题
         ros::Subscriber mocap_pos_sub;
         ros::Subscriber mocap_vel_sub;
+        ros::Subscriber odom_sub;
         ros::Subscriber agent_cmd_sub;
         ros::Subscriber agent_gs_cmd_sub;
         ros::Subscriber battery_sub;
@@ -136,6 +137,7 @@ class RMTT_CONTROL
         // 内部函数
         void mocap_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg);
         void mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg);
+        void odom_cb(const nav_msgs::OdometryConstPtr& msg);
         void agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg);
         void agent_gs_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg);
         void battery_cb(const std_msgs::Float32ConstPtr& msg);

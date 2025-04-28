@@ -25,7 +25,7 @@
 
 
     <!-- 第四个节点：启动终端控制地面站节点，如果使用地面站软件，这个可以不启动 -->
-    <arg name="terminal_enable" default="true"/>
+    <arg name="terminal_enable" default="false"/>
 	  <group if="$(arg terminal_enable)">
         <node pkg="sunray_swarm" name="agent_terminal_station" type="agent_terminal_station" output="screen" launch-prefix="gnome-terminal --tab --title='terminal cmd station' --command">
 		    <param name="agent_type" type="int" value="1" />
