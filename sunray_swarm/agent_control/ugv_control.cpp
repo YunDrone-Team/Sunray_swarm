@@ -287,6 +287,9 @@ void UGV_CONTROL::pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref)
         yaw_error = get_yaw_error(yaw_ref, agent_state.att[2]);
         // 控制指令计算：使用简易P控制 - YAW
         desired_vel.angular.z = yaw_error * ugv_control_param.Kp_yaw;
+        // 控制指令限幅
+        desired_vel.angular.z = constrain_function(desired_vel.angular.z, ugv_control_param.max_vel_yaw, 0.01);
+
         agent_cmd_vel_pub.publish(desired_vel);
         return;
     }

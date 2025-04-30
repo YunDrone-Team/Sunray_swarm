@@ -8,7 +8,7 @@
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_$(arg ugv_id)" output="screen">
         <param name="agent_id" value="$(arg ugv_id)" />
         <param name="ugv_type" value="$(arg ugv_type)" />
-        <rosparam command="load" file="$(find sunray_swarm)/launch_ugv/ugv_params.yaml" />
+        <rosparam command="load" file="$(find sunray_swarm)/launch_ugv/ugv_params_diff.yaml" />
     </node>
 </launch>
 

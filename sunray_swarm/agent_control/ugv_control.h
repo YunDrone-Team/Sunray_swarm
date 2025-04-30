@@ -13,7 +13,7 @@ using namespace std;
 
 #define TRA_WINDOW 50        
 #define ODOM_TIMEOUT 0.35                 
-#define DIS_TOLERANCE 0.25
+#define DIS_TOLERANCE 0.05
 #define ZERO_THRESHOLD 0.01
 
 class UGV_CONTROL
