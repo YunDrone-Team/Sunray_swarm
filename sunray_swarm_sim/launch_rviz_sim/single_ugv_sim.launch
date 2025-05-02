@@ -1,0 +1,34 @@
+<launch>
+    <!-- 本文件为单个无人车的仿真启动脚本 -->
+
+    <!-- 第一个节点：启动1号无人车控制节点 - ugv_control_node -->
+    <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_1" output="screen" launch-prefix="gnome-terminal --tab --title='ugv_control_node_1' --command">
+        <param name="agent_id" type="int" value="1" />
+    </node>
+
+    <!-- 第二个节点：启动1号无人车仿真节点 - ugv_sim_node -->
+    <!-- 注意配置初始位置 -->
+    <node pkg="sunray_swarm_sim" type="agent_sim_node" name="agent_sim_node_1" output="screen">
+        <param name="agent_type" type="int" value="1" />
+        <param name="agent_id" type="int" value="1" />
+        <param name="init_pos_x" type="double" value="2.0" />
+        <param name="init_pos_y" type="double" value="2.0" />
+        <param name="init_yaw" type="double" value="0.0" />
+    </node>
+
+    <!-- 第三个节点：启动RVIZ，对应的配置文件为single_agent.rviz -->
+    <arg name="rviz_enable" default="true"/>
+    <arg name="rivz_config" default="$(find sunray_swarm_sim)/config/single_agent.rviz"/>
+		<group if="$(arg rviz_enable)">
+			<node type="rviz" name="rviz" pkg="rviz" args="-d $(arg rivz_config)"/>
+    </group>
+
+
+    <!-- 第四个节点：启动终端控制地面站节点，如果使用地面站软件，这个可以不启动 -->
+    <arg name="terminal_enable" default="false"/>
+	  <group if="$(arg terminal_enable)">
+        <node pkg="sunray_swarm" name="agent_terminal_station" type="agent_terminal_station" output="screen" launch-prefix="gnome-terminal --tab --title='terminal cmd station' --command">
+		    <param name="agent_type" type="int" value="1" />
+        </node>
+    </group>
+</launch>

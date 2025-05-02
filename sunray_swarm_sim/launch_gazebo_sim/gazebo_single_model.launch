@@ -1,0 +1,48 @@
+<launch>
+    <!-- 智能体初始位置 -->
+    <arg name="init_1_x"   default="0.0"/>
+    <arg name="init_1_y"   default="0.0"/>
+    <arg name="init_1_z"   default="0.0"/>
+    <arg name="init_1_yaw" default="0.0"/>
+    <arg name="init_2_x"   default="0.0"/>
+    <arg name="init_2_y"   default="0.0"/>
+    <arg name="init_2_z"   default="0.0"/>
+    <arg name="init_2_yaw" default="0.0"/>
+
+    <!-- 无人车（默认为麦轮） -->
+    <group ns="/sunray_swarm/ugv_1">
+        <include file="$(find sunray_swarm_sim)/launch_gazebo_sim/spawn_agent_model.launch">
+            <arg name="agent_id" value="1" />
+            <arg name="model_name" value="ugv_mac" />
+            <arg name="init_x" value="$(arg init_1_x)"/>
+            <arg name="init_y" value="$(arg init_1_y)"/>
+            <arg name="init_z" value="$(arg init_1_z)"/>
+            <arg name="init_yaw" value="$(arg init_1_yaw)"/>
+        </include>
+    </group>
+    <!-- 0 for 麦克纳姆轮，1 for 差速轮 -->
+    <arg name="ugv_type" default="0"/>
+    <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_1" output="screen">
+        <param name="agent_id" value="1" />
+        <param name="ugv_type" value="$(arg ugv_type)" />
+        <param name="pose_source" value="2" />
+    </node>
+
+    <!-- 无人机 -->
+    <group ns="/sunray_swarm/rmtt_1">
+        <include file="$(find sunray_swarm_sim)/launch_gazebo_sim/spawn_agent_model.launch">
+            <arg name="agent_id" value="1" />
+            <arg name="model_name" value="rmtt" />
+            <arg name="init_x" value="$(arg init_2_x)"/>
+            <arg name="init_y" value="$(arg init_2_y)"/>
+            <arg name="init_z" value="$(arg init_2_z)"/>
+            <arg name="init_yaw" value="$(arg init_2_yaw)"/>
+        </include>
+    </group>
+
+    <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_1" output="screen" >
+        <param name="agent_id" type="int" value="1" />
+        <param name="pose_source" value="3" />
+    </node>
+</launch>
+

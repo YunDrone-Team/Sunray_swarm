@@ -7,7 +7,8 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     // 【参数】智能体编号
     nh.param<int>("agent_id", agent_id, 1);
     // 【参数】智能体IP
-    nh.param<std::string>("agent_ip", agent_ip, "192.168.1.1");
+    agent_ip = get_ugv_ip();
+    // nh.param<std::string>("agent_ip", agent_ip, "192.168.1.1");
     // 【参数】智能体的固定高度
     nh.param<float>("agent_height", agent_height, 0.1);
     // 【参数】智能体位置来源（1：代表动捕、2代表SLAM数据）
@@ -21,13 +22,13 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     // 【参数】悬停控制参数 - yaw
     nh.param<float>("ugv_control_param/Kp_yaw", ugv_control_param.Kp_yaw, 0.9);
     // 【参数】悬停控制参数 - max_vel_xy
-    nh.param<float>("ugv_control_param/max_vel_xy", ugv_control_param.max_vel_xy, 0.5);
+    nh.param<float>("ugv_control_param/max_vel_xy", ugv_control_param.max_vel_xy, 0.8);
     // 【参数】悬停控制参数 - max_vel_yaw
-    nh.param<float>("ugv_control_param/max_vel_yaw", ugv_control_param.max_vel_yaw, 50.0/180.0*M_PI);
+    nh.param<float>("ugv_control_param/max_vel_yaw", ugv_control_param.max_vel_yaw, 180.0/180.0*M_PI);
     // 【参数】位置环控制参数 - deadzone_vel_xy
     nh.param<float>("ugv_control_param/deadzone_vel_xy", ugv_control_param.deadzone_vel_xy, 0.0);
     // 【参数】位置环控制参数 - deadzone_vel_yaw
-    nh.param<float>("ugv_control_param/deadzone_vel_yaw", ugv_control_param.deadzone_vel_yaw, 1.0/180.0*M_PI);
+    nh.param<float>("ugv_control_param/deadzone_vel_yaw", ugv_control_param.deadzone_vel_yaw, 0.0/180.0*M_PI);
     // 【参数】地理围栏参数（超出围栏自动停止）
     nh.param<float>("ugv_geo_fence/max_x", ugv_geo_fence.max_x, 100.0);
     nh.param<float>("ugv_geo_fence/min_x", ugv_geo_fence.min_x, -100.0);
@@ -41,19 +42,13 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
         // 【订阅】订阅动捕的数据(位置+速度) vrpn -> 本节点
         mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ agent_name + "/pose", 1, &UGV_CONTROL::mocap_pos_cb, this);
         mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &UGV_CONTROL::mocap_vel_cb, this);
-        cout << GREEN << "Pose source: Mocap" << TAIL << endl;
     }
     else if (pose_source == 2)
     {
         // 【订阅】订阅Odom数据
-        odom_sub = nh.subscribe("/car_odom", 1, &UGV_CONTROL::odom_cb,this);
-        cout << GREEN << "Pose source: ODOM" << TAIL << endl;
+        odom_sub = nh.subscribe("/sunray_swarm/" + agent_name + "/odom", 1, &UGV_CONTROL::odom_cb,this);
     }
-    else
-    {
-        cout << RED << "Pose source: Unknown" << TAIL << endl;
-    }   
-
+ 
     // 【订阅】智能体控制指令 ORCA算法 -> 本节点
     ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &UGV_CONTROL::agnet_cmd_cb, this);
     // 【订阅】ugv电池的数据 ugv_driver -> 本节点
@@ -163,20 +158,20 @@ void UGV_CONTROL::mainloop()
         case sunray_msgs::agent_cmd::POS_CONTROL:
             if(ugv_type == 0)
             {
-                pos_control_mac(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
+                desired_vel = pos_control_mac(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
             }else if(ugv_type == 1)
             {
-                pos_control_diff(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
+                desired_vel = pos_control_diff(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
             }
-
+            agent_cmd_vel_pub.publish(desired_vel);
             break;
 
         // VEL_CONTROL_BODY：车体系速度控制，无人车按照期望的速度在车体系移动（期望速度由外部指令赋值）
         case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:
             // 控制指令限幅（防止外部指令给了一个很大的数）
-            desired_vel.linear.x = constrain_function(current_agent_cmd.desired_vel.linear.x, ugv_control_param.max_vel_xy, 0.0);
-            desired_vel.linear.y = constrain_function(current_agent_cmd.desired_vel.linear.y, ugv_control_param.max_vel_xy, 0.0);
-            desired_vel.angular.z = constrain_function(current_agent_cmd.desired_vel.angular.z, ugv_control_param.max_vel_yaw, 0.01);
+            desired_vel.linear.x = constrain_function(current_agent_cmd.desired_vel.linear.x, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
+            desired_vel.linear.y = constrain_function(current_agent_cmd.desired_vel.linear.y, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
+            desired_vel.angular.z = constrain_function(current_agent_cmd.desired_vel.angular.z, ugv_control_param.max_vel_yaw, ugv_control_param.deadzone_vel_yaw);
             agent_cmd_vel_pub.publish(desired_vel);        
             break;
 
@@ -271,15 +266,22 @@ double UGV_CONTROL::get_yaw_error(double yaw_ref, double yaw_now)
     return error;
 }
 
-void UGV_CONTROL::pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref)
+double UGV_CONTROL::normalizeAngle(double angle) 
+{
+    if (angle > M_PI) angle -= 2.0 * M_PI;
+    if (angle < -M_PI) angle += 2.0 * M_PI;
+    return angle;
+}
+
+geometry_msgs::Twist UGV_CONTROL::pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref)
 {
     // 计算目标点与当前点的差值
     double dx = pos_ref.x - agent_state.pos[0];
     double dy = pos_ref.y - agent_state.pos[1];
     double distance = sqrt(dx * dx + dy * dy);
-
-    // cout << YELLOW << "distance: " << distance << " " << TAIL << endl;
     double yaw_error;
+
+    // 调整到达终点的yaw角度
     if(distance < DIS_TOLERANCE)
     {
         desired_vel.linear.x = 0.0;
@@ -288,33 +290,61 @@ void UGV_CONTROL::pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref)
         // 控制指令计算：使用简易P控制 - YAW
         desired_vel.angular.z = yaw_error * ugv_control_param.Kp_yaw;
         // 控制指令限幅
-        desired_vel.angular.z = constrain_function(desired_vel.angular.z, ugv_control_param.max_vel_yaw, 0.01);
-
-        agent_cmd_vel_pub.publish(desired_vel);
-        return;
+        desired_vel.angular.z = constrain_function(desired_vel.angular.z, ugv_control_param.max_vel_yaw, ugv_control_param.deadzone_vel_yaw);
+        return desired_vel;
     }
 
     // 计算目标点与当前点的角度,target_yaw for control
     double target_yaw = atan2(dy, dx);
-    // YAW误差计算
-    yaw_error = get_yaw_error(target_yaw, agent_state.att[2]);
+    // 计算两种转向误差
+    double error_forward = normalizeAngle(target_yaw - agent_state.att[2]);
+    double error_backward = normalizeAngle(target_yaw + M_PI - agent_state.att[2]);
+
+    if(fabs(error_forward) <= fabs(error_backward)) 
+    {
+        // 前进模式
+        yaw_error = error_forward;
+
+    }else 
+    {
+        // 后退模式
+        yaw_error = error_backward;
+    }
+
     // 控制指令计算：使用简易P控制 - YAW
     desired_vel.angular.z = yaw_error * ugv_control_param.Kp_yaw;
+    desired_vel.angular.z = constrain_function(desired_vel.angular.z, ugv_control_param.max_vel_yaw, ugv_control_param.deadzone_vel_yaw);
 
+    if(fabs(error_forward) <= fabs(error_backward)) 
+    {
+        // 前进模式
     // 控制指令计算：使用简易P控制 - 差速控制只有X方向和角速率上的控制
     desired_vel.linear.x = ugv_control_param.Kp_xy * distance * cos(yaw_error);
+
+    }else 
+    {
+        // 后退模式
+    // 控制指令计算：使用简易P控制 - 差速控制只有X方向和角速率上的控制
+    desired_vel.linear.x = -ugv_control_param.Kp_xy * distance * cos(yaw_error);
+    }
+
+
     desired_vel.linear.y = 0.0;
     desired_vel.linear.z = 0.0;
-
     // 控制指令限幅
-    desired_vel.linear.x = constrain_function(desired_vel.linear.x, ugv_control_param.max_vel_xy, 0.0);
-    desired_vel.angular.z = constrain_function(desired_vel.angular.z, ugv_control_param.max_vel_yaw, 0.01);
-    // 发布控制指令
-    agent_cmd_vel_pub.publish(desired_vel); 
+    desired_vel.linear.x = constrain_function(desired_vel.linear.x, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
+
+    // 先调整朝向，再调整位置
+    if(yaw_error > 3.0/180.0*M_PI)
+    {
+        desired_vel.linear.x = constrain_function(desired_vel.linear.x, 0.05, ugv_control_param.deadzone_vel_xy);
+    }
+
+    return desired_vel;
 }
 
 // 位置控制算法
-void UGV_CONTROL::pos_control_mac(geometry_msgs::Point pos_ref, double yaw_ref)
+geometry_msgs::Twist UGV_CONTROL::pos_control_mac(geometry_msgs::Point pos_ref, double yaw_ref)
 {
     float cmd_body[2];
     float cmd_enu[2];
@@ -337,8 +367,7 @@ void UGV_CONTROL::pos_control_mac(geometry_msgs::Point pos_ref, double yaw_ref)
     desired_vel.linear.y = constrain_function(desired_vel.linear.y, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
     desired_vel.angular.z = constrain_function(desired_vel.angular.z, ugv_control_param.max_vel_yaw, ugv_control_param.deadzone_vel_yaw);
 
-    // 发布控制指令
-    agent_cmd_vel_pub.publish(desired_vel);
+    return desired_vel;
 }
 
 // 【坐标系旋转函数】- enu系到body系
@@ -373,7 +402,7 @@ geometry_msgs::Twist UGV_CONTROL::enu_to_body_diff(geometry_msgs::Twist enu_cmd)
     body_cmd.linear.x = speed_xy*cos(yaw_error);
 
     // 控制指令限幅
-    body_cmd.linear.x = constrain_function(body_cmd.linear.x, ugv_control_param.max_vel_xy, 0.0);
+    body_cmd.linear.x = constrain_function(body_cmd.linear.x, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
     body_cmd.angular.z = constrain_function(body_cmd.angular.z, ugv_control_param.max_vel_yaw, ugv_control_param.deadzone_vel_yaw);
 
     return body_cmd;
@@ -399,8 +428,8 @@ geometry_msgs::Twist UGV_CONTROL::enu_to_body_mac(geometry_msgs::Twist enu_cmd)
     body_cmd.angular.z = yaw_error * ugv_control_param.Kp_yaw;
 
     // 控制指令限幅
-    body_cmd.linear.x = constrain_function(body_cmd.linear.x, ugv_control_param.max_vel_xy, 0.0);
-    body_cmd.linear.y = constrain_function(body_cmd.linear.y, ugv_control_param.max_vel_xy, 0.0);
+    body_cmd.linear.x = constrain_function(body_cmd.linear.x, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
+    body_cmd.linear.y = constrain_function(body_cmd.linear.y, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
     body_cmd.angular.z = constrain_function(body_cmd.angular.z, ugv_control_param.max_vel_yaw, ugv_control_param.deadzone_vel_yaw);
 
     return body_cmd;
@@ -710,11 +739,7 @@ bool UGV_CONTROL::check_geo_fence()
     if (agent_state.pos[0] > ugv_geo_fence.max_x || agent_state.pos[0] < ugv_geo_fence.min_x || 
         agent_state.pos[1] > ugv_geo_fence.max_y || agent_state.pos[1] < ugv_geo_fence.min_y)
     {
-        ROS_WARN_STREAM("ugv [" << agent_id << "] out of geofence land! Position: [" 
-                        << agent_state.pos[0] << ", " << agent_state.pos[1] << ", " 
-                        << agent_state.pos[2] << "], Geofence: ["
-                        << ugv_geo_fence.min_x << ", " << ugv_geo_fence.max_x << ", "
-                        << ugv_geo_fence.min_y << ", " << ugv_geo_fence.max_y << "]");
+        cout << GREEN << "ugv [" << agent_id << "] out of geofence!" << TAIL << endl;
         return 1;
     }
     return 0;
@@ -753,18 +778,37 @@ void UGV_CONTROL::printf_param()
     }    
     cout << GREEN << "agent_id : " << agent_id << "" << TAIL << endl;
     cout << GREEN << "agent_ip : " << agent_ip << "" << TAIL << endl;
-    cout << GREEN << "flag_printf : " << flag_printf << "" << TAIL << endl;
     cout << GREEN << "agent_height : " << agent_height << TAIL << endl;
     cout << GREEN << "pose_source : " << pose_source << TAIL << endl;
+    if(pose_source == 1)
+    {
+        cout << GREEN << "Pose source: Mocap" << TAIL << endl;
+    }else if(pose_source == 2)
+    {
+        cout << GREEN << "Pose source: ODOM" << TAIL << endl;
+    }else
+    {
+        cout << RED << "Pose source: Unknown" << TAIL << endl;
+    }   
+    cout << GREEN << "flag_printf : " << flag_printf << "" << TAIL << endl;
     cout << GREEN << "ugv_type : " << ugv_type << TAIL << endl;
-
+    if(ugv_type == 0)
+    {
+        cout << GREEN << "ugv_type: mac" << TAIL << endl;
+    }else if(ugv_type == 1)
+    {
+        cout << GREEN << "ugv_type: diff" << TAIL << endl;
+    }else
+    {
+        cout << RED << "ugv_type: Unknown" << TAIL << endl;
+    }   
     // 悬停控制参数
     cout << GREEN << "Kp_xy : " << ugv_control_param.Kp_xy << TAIL << endl;
     cout << GREEN << "Kp_yaw : " << ugv_control_param.Kp_yaw << TAIL << endl;
     cout << GREEN << "max_vel_xy : " << ugv_control_param.max_vel_xy << " [m/s]" << TAIL << endl;
-    cout << GREEN << "max_vel_yaw : " << ugv_control_param.max_vel_yaw << " [rad/s]" << TAIL << endl;
+    cout << GREEN << "max_vel_yaw : " << ugv_control_param.max_vel_yaw/M_PI*180 << " [deg/s]" << TAIL << endl;
     cout << GREEN << "deadzone_vel_xy : " << ugv_control_param.deadzone_vel_xy << " [m/s]" << TAIL << endl;
-    cout << GREEN << "deadzone_vel_yaw : " << ugv_control_param.deadzone_vel_yaw << " [rad/s]" << TAIL << endl;
+    cout << GREEN << "deadzone_vel_yaw : " << ugv_control_param.deadzone_vel_yaw/M_PI*180 << " [deg/s]" << TAIL << endl;
 
     // 地理围栏参数
     cout << GREEN << "geo_fence max_x : " << ugv_geo_fence.max_x << " [m]" << TAIL << endl;
@@ -773,4 +817,38 @@ void UGV_CONTROL::printf_param()
     cout << GREEN << "geo_fence min_y : " << ugv_geo_fence.min_y << " [m]" << TAIL << endl;
 }
 
+
+string UGV_CONTROL::get_ugv_ip() 
+{
+    struct ifaddrs *ifaddr, *ifa;
+    char ip[INET6_ADDRSTRLEN];
+
+    if (getifaddrs(&ifaddr) == -1) 
+    {
+        return "192.168.1.1";
+    }
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
+    {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        int family = ifa->ifa_addr->sa_family;
+        
+        // 仅处理IPv4地址
+        if (family == AF_INET) 
+        {
+            // 跳过回环接口（127.0.0.1）
+            if (strcmp(ifa->ifa_name, "lo") == 0)
+                continue;
+
+            struct sockaddr_in *addr = (struct sockaddr_in *)ifa->ifa_addr;
+            inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip));
+            // printf("Interface: %s\tIP: %s\n", ifa->ifa_name, ip);
+        }
+    }
+
+    // freeifaddrs(ifaddr);
+    return ip;
+}
 

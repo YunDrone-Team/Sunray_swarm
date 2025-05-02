@@ -151,7 +151,7 @@ class RMTT_CONTROL
         void set_desired_position();
         bool check_geo_fence();
         void orca_control();
-        void pos_control(geometry_msgs::Point pos_ref, double yaw_ref);
+        geometry_msgs::Twist pos_control(geometry_msgs::Point pos_ref, double yaw_ref);
         float constrain_function(float data, float Max, float Min);
         Eigen::Vector3d quaternion_to_euler(const Eigen::Quaterniond &q);
         double get_yaw_error(double desired_yaw, double yaw_now);

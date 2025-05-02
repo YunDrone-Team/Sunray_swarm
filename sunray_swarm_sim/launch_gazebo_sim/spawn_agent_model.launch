@@ -1,0 +1,17 @@
+<launch>
+    <!-- 定义智能体ID，默认为1 -->
+    <arg name="agent_id" default="1"/>
+    <!-- 定义智能体模型名称，默认为麦轮 -->
+    <arg name="model_name" default="ugv_mac"/>
+    <!-- 用于指定智能体初始位置x坐标，默认为0 -->
+    <arg name="init_x" default="0"/>
+    <!-- 用于指定智能体初始位置y坐标，默认为0 -->
+    <arg name="init_y" default="0"/>
+    <!-- 用于指定智能体初始位置z坐标，默认为0 -->
+    <arg name="init_z" default="0"/>
+    <!-- 定义智能体初始朝向，默认为0 -->
+    <arg name="init_yaw" default="0"/>
+    <!-- 在Gazebo中生成智能体模型 -->
+    <node name="spawn_sdf_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find sunray_swarm_sim)/models/$(arg model_name)/model.sdf -sdf -model $(arg model_name)$(arg agent_id) -x $(arg init_x) -y $(arg init_y) -z $(arg init_z) -Y $(arg init_yaw)" output="screen"/>
+</launch>
+

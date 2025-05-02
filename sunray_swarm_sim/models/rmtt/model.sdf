@@ -28,7 +28,7 @@
         <pose>0.0 0 0.0 0.0 0 0</pose>
         <geometry>
           <mesh>
-            <scale>0.025 0.025 0.025</scale>
+            <scale>0.015 0.015 0.015</scale>
             <uri>model://rmtt/meshes/tello.dae</uri>
           </mesh>
         </geometry>
@@ -36,11 +36,11 @@
     </link>
 
   <plugin name="base_controller" filename="libgazebo_ros_planar_move.so">
-    <commandTopic>/sunray_swarm/rmtt_1/cmd_vel</commandTopic>
-    <cmdTimeout>0.01</cmdTimeout>
-    <odometryTopic>/rmtt_odom</odometryTopic>
+    <commandTopic>cmd_vel</commandTopic>
+    <cmdTimeout>0.2</cmdTimeout>
+    <odometryTopic>odom</odometryTopic>
     <odometryFrame>world</odometryFrame>
-    <odometryRate>100.0</odometryRate>
+    <odometryRate>50.0</odometryRate>
     <robotBaseFrame>base_link</robotBaseFrame>
     <broadcastTF>true</broadcastTF>
   </plugin>

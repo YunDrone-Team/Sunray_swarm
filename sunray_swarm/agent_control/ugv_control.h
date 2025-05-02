@@ -5,6 +5,8 @@
 #include <iostream>
 #include <Eigen/Eigen>
 #include <vector>
+#include <ifaddrs.h>
+#include <arpa/inet.h>
 
 #include "printf_utils.h"
 #include "ros_msg_utils.h"
@@ -12,8 +14,8 @@
 using namespace std;
 
 #define TRA_WINDOW 50        
-#define ODOM_TIMEOUT 0.35                 
-#define DIS_TOLERANCE 0.05
+#define ODOM_TIMEOUT 0.5                 
+#define DIS_TOLERANCE 0.1
 #define ZERO_THRESHOLD 0.01
 
 class UGV_CONTROL
@@ -29,7 +31,7 @@ class UGV_CONTROL
     private:
         // 节点名称
         string node_name;     
-        // 智能体类型 - RMTT
+        // 智能体类型
         int agent_type;
         // 智能体编号 - 通过参数配置
         int agent_id;                     
@@ -109,7 +111,6 @@ class UGV_CONTROL
         ros::Timer timer_state_pub;
         ros::Timer timer_rivz;
         ros::Timer timer_debug;
-        ros::Timer timer_rivz2;
 
         void mocap_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg);
         void mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg);
@@ -120,12 +121,13 @@ class UGV_CONTROL
         void timercb_rviz(const ros::TimerEvent &e);
         void timercb_debug(const ros::TimerEvent &e);
         void printf_param();
+        double normalizeAngle(double angle);
         void set_desired_position();
         bool check_geo_fence();
         geometry_msgs::Twist enu_to_body_mac(geometry_msgs::Twist enu_cmd);
         geometry_msgs::Twist enu_to_body_diff(geometry_msgs::Twist enu_cmd);
-        void pos_control_mac(geometry_msgs::Point pos_ref, double yaw_ref);
-        void pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref);
+        geometry_msgs::Twist pos_control_mac(geometry_msgs::Point pos_ref, double yaw_ref);
+        geometry_msgs::Twist pos_control_diff(geometry_msgs::Point pos_ref, double yaw_ref);
         float constrain_function(float data, float Max, float Min);
         Eigen::Vector3d quaternion_to_euler(const Eigen::Quaterniond &q);
         double get_yaw_error(double yaw_ref, double yaw_now);
@@ -133,5 +135,6 @@ class UGV_CONTROL
         void rotation_yaw(double yaw_angle, float body_frame[2], float enu_frame[2]);
         void setup_led();
         void setup_rviz_color();
+        string get_ugv_ip();
 };
 #endif

@@ -271,14 +271,15 @@
     </joint>
 
     <plugin name="mecanum_controller" filename="libgazebo_ros_planar_move.so">
-      <commandTopic>/sunray_swarm/ugv_1/cmd_vel</commandTopic>
-      <odometryTopic>/car_odom</odometryTopic>
+      <commandTopic>cmd_vel</commandTopic>
+      <cmdTimeout>0.2</cmdTimeout>
+      <odometryTopic>odom</odometryTopic>
       <odometryFrame>world</odometryFrame>
       <leftFrontJoint>left_front_wheel_joint</leftFrontJoint>
       <rightFrontJoint>right_front_wheel_joint</rightFrontJoint>
       <leftRearJoint>right_after_wheel_joint</leftRearJoint>
       <rightRearJoint>left_after_wheel_joint</rightRearJoint>
-      <odometryRate>20.0</odometryRate>
+      <odometryRate>50.0</odometryRate>
       <robotBaseFrame>/base_link</robotBaseFrame>
     </plugin>
 

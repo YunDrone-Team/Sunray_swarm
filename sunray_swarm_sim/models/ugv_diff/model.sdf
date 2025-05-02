@@ -1,9 +1,10 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
-  <model name="ugv_mac">
+  <model name="ugv_diff">
 
     <link name="base_link">
       <pose>0 0 0.16 0 0 0</pose>
+      <gravity>1</gravity>
       <inertial>
         <mass>2</mass>
         <inertia>
@@ -35,6 +36,7 @@
 
     <link name="right_front_wheel">
       <pose>0.08 -0.1 0.12 1.57 0 0</pose>
+      <gravity>1</gravity>
       <inertial>
         <mass>0.3844</mass>
         <inertia>
@@ -57,10 +59,10 @@
         <surface>
           <friction>
             <ode>
-              <mu>0.8</mu>
-              <mu2>0.6</mu2>
-              <slip1>0.5</slip1>
-              <slip2>0.5</slip2>
+              <mu>0.05</mu>
+              <mu2>0.05</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
             </ode>
           </friction>
         </surface>
@@ -77,6 +79,7 @@
 
     <link name="right_after_wheel">
       <pose>-0.08 -0.1 0.12 1.57 0 0</pose>
+      <gravity>1</gravity>
       <inertial>
         <mass>0.3844</mass>
         <inertia>
@@ -99,10 +102,10 @@
         <surface>
           <friction>
             <ode>
-              <mu>0.8</mu>
-              <mu2>0.6</mu2>
-              <slip1>0.5</slip1>
-              <slip2>0.5</slip2>
+              <mu>0.05</mu>
+              <mu2>0.05</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
             </ode>
           </friction>
         </surface>
@@ -120,6 +123,7 @@
 
     <link name="left_front_wheel">
       <pose>0.08 0.1 0.12 1.57 0 0</pose>
+      <gravity>1</gravity>
       <inertial>
         <mass>0.3844</mass>
         <inertia>
@@ -142,10 +146,10 @@
         <surface>
           <friction>
             <ode>
-              <mu>0.8</mu>
-              <mu2>0.6</mu2>
-              <slip1>0.5</slip1>
-              <slip2>0.5</slip2>
+              <mu>0.05</mu>
+              <mu2>0.05</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
             </ode>
           </friction>
         </surface>
@@ -162,6 +166,7 @@
 
     <link name="left_after_wheel">
       <pose>-0.08 0.1 0.12 1.57 0 0</pose>
+      <gravity>1</gravity>
       <inertial>
         <mass>0.3844</mass>
         <inertia>
@@ -184,10 +189,10 @@
         <surface>
           <friction>
             <ode>
-              <mu>0.8</mu>
-              <mu2>0.6</mu2>
-              <slip1>0.5</slip1>
-              <slip2>0.5</slip2>
+              <mu>0.05</mu>
+              <mu2>0.05</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
             </ode>
           </friction>
         </surface>
@@ -273,19 +278,28 @@
 
   <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>20.0</updateRate>
+      <updateRate>100.0</updateRate>
       <leftFrontJoint>left_front_wheel_joint</leftFrontJoint>
       <rightFrontJoint>right_front_wheel_joint</rightFrontJoint>
       <leftRearJoint>left_after_wheel_joint</leftRearJoint>
       <rightRearJoint>right_after_wheel_joint</rightRearJoint> 
-      <wheelSeparation>0.1966</wheelSeparation> 
+      <wheelSeparation>0.2</wheelSeparation> 
       <wheelDiameter>0.07</wheelDiameter>
-      <torque>3</torque>
-      <commandTopic>/sunray_swarm/ugv_1/cmd_vel</commandTopic>
-      <odometryTopic>/car_odom</odometryTopic>
-      <odometryFrame>odom</odometryFrame>
+      <torque>50</torque>
+      <commandTopic>cmd_vel</commandTopic>
+      <!-- 当机器人未收到新的速度指令（如cmd_vel话题消息）的时间超过cmdTimeout设定的阈值时，插件会自动将机器人的线速度和角速度置零，使其停止运动 -->
+      <cmdTimeout>0.2</cmdTimeout>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>world</odometryFrame>
       <robotBaseFrame>base_link</robotBaseFrame>
-      <broadcastTF>1</broadcastTF>
+      <broadcastTF>0</broadcastTF>
+      <covariance_x>0.0000</covariance_x>
+      <covariance_y>0.000</covariance_y>
+      <covariance_yaw>0.000</covariance_yaw>   
+      <wheelSlip>
+        <slip1>0.001</slip1>  <!-- 纵向滑移 -->
+        <slip2>0.001</slip2>  <!-- 横向滑移 -->
+      </wheelSlip>
     </plugin>
 
   </model>

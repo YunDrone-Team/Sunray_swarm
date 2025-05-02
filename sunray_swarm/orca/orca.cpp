@@ -21,7 +21,7 @@ void ORCA::init(ros::NodeHandle& nh)
     // 【参数】智能体体积半径
     nh.param<float>("orca_params/radius", orca_params.radius, 0.35);
     // 【参数】智能体最大移动速度
-    nh.param<float>("orca_params/maxSpeed", orca_params.maxSpeed, 0.3);
+    nh.param<float>("orca_params/maxSpeed", orca_params.maxSpeed, 0.8);
     // 【参数】时间步长
     nh.param<float>("orca_params/time_step", orca_params.time_step, 0.1);
 
@@ -206,8 +206,9 @@ void ORCA::pub_orca_state()
         agent_orca_state[i].goal[0] = rvo_goal.x();
         agent_orca_state[i].goal[1] = rvo_goal.y();
         agent_orca_state[i].yaw = goal_pose[i].yaw;
-        agent_orca_state[i].vel_orca[0] = agent_cmd[i].desired_vel.linear.x;
-        agent_orca_state[i].vel_orca[1] = agent_cmd[i].desired_vel.linear.y;
+        RVO::Vector2 vel = sim->getAgentVelCMD(i); 
+        agent_orca_state[i].vel_orca[0] = vel.x();
+        agent_orca_state[i].vel_orca[1] = vel.y();
         agent_orca_state[i].home_pos[0] = home_pose[i].x;
         agent_orca_state[i].home_pos[1] = home_pose[i].y;
         agent_orca_state[i].home_yaw = home_pose[i].yaw;
@@ -579,32 +580,6 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
     text_info_pub.publish(text_info); 
 }
 
-void ORCA::printf_param()
-{
-    cout << GREEN << ">>>>>>>>>>>>>>>>>>> ORCA Parameters <<<<<<<<<<<<<<<<" << TAIL << endl;
-    cout << GREEN << "agent_num    : " << agent_num << TAIL << endl;
-    cout << GREEN << "agent_height : " << agent_height << TAIL << endl;
-    if(agent_type == sunray_msgs::agent_state::RMTT)
-    {
-        cout << GREEN << "agent_type : RMTT" << TAIL << endl;
-    }else if(agent_type == sunray_msgs::agent_state::UGV)
-    {
-        cout << GREEN << "agent_type : UGV" << TAIL << endl;
-    }else
-    {
-        cout << GREEN << "agent_type : UNKONWN" << TAIL << endl;
-    }
-
-    // ORCA算法参数
-    cout << GREEN << "neighborDist : " << orca_params.neighborDist << " [m]" << TAIL << endl;
-    cout << GREEN << "maxNeighbors : " << orca_params.maxNeighbors << TAIL << endl;
-    cout << GREEN << "timeHorizon : " << orca_params.timeHorizon << " [s]" << TAIL << endl;
-    cout << GREEN << "timeHorizonObst : " << orca_params.timeHorizonObst << " [s]" << TAIL << endl;
-    cout << GREEN << "radius : " << orca_params.radius << " [m]" << TAIL << endl;
-    cout << GREEN << "maxSpeed : " << orca_params.maxSpeed << " [m/s]" << TAIL << endl;
-    cout << GREEN << "time_step : " << orca_params.time_step << " [s]" << TAIL << endl;
-}
-
 void ORCA::setup_init_goals()
 {
     // 容器清零
@@ -634,59 +609,73 @@ void ORCA::setup_init_goals()
     cout << BLUE << text_info.data << TAIL << endl;
 }
 
+void ORCA::printf_param()
+{
+    cout << GREEN << ">>>>>>>>>>>>>>>>>>> ORCA Parameters <<<<<<<<<<<<<<<<" << TAIL << endl;
+    cout << GREEN << "agent_num    : " << agent_num << TAIL << endl;
+    cout << GREEN << "agent_height : " << agent_height << TAIL << endl;
+    if(agent_type == sunray_msgs::agent_state::RMTT)
+    {
+        cout << GREEN << "agent_type : RMTT" << TAIL << endl;
+    }else if(agent_type == sunray_msgs::agent_state::UGV)
+    {
+        cout << GREEN << "agent_type : UGV" << TAIL << endl;
+    }else
+    {
+        cout << GREEN << "agent_type : UNKONWN" << TAIL << endl;
+    }
+
+    // ORCA算法参数
+    cout << GREEN << "neighborDist : " << orca_params.neighborDist << " [m]" << TAIL << endl;
+    cout << GREEN << "maxNeighbors : " << orca_params.maxNeighbors << TAIL << endl;
+    cout << GREEN << "timeHorizon : " << orca_params.timeHorizon << " [s]" << TAIL << endl;
+    cout << GREEN << "timeHorizonObst : " << orca_params.timeHorizonObst << " [s]" << TAIL << endl;
+    cout << GREEN << "radius : " << orca_params.radius << " [m]" << TAIL << endl;
+    cout << GREEN << "maxSpeed : " << orca_params.maxSpeed << " [m/s]" << TAIL << endl;
+    cout << GREEN << "time_step : " << orca_params.time_step << " [s]" << TAIL << endl;
+}
+
 void ORCA::setup_scenario_1()
 {
     // 容器清零
     goals.clear();
     RVO::Vector2 agent_set_goal;
 
-    // 设置预设目标点 agent_1 -> agent_2
-    goal_pose[0].x = -0.85;
-    goal_pose[0].y = 1.35;
+    // 设置预设目标点
+    goal_pose[0].x = 1.0;
+    goal_pose[0].y = 1.0;
     goal_pose[0].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[0].x, goal_pose[0].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[1].x = 1.05;
-    goal_pose[1].y = 1.35;
+    goal_pose[1].x = 1.0;
+    goal_pose[1].y = -1.0;
     goal_pose[1].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[1].x, goal_pose[1].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[2].x = 0.1;
-    goal_pose[2].y = -0.15;
+    goal_pose[2].x = 0.0;
+    goal_pose[2].y = 1.0;
     goal_pose[2].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[2].x, goal_pose[2].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[3].x = 1.05;
-    goal_pose[3].y = -1.25;
+    goal_pose[3].x = 0.0;
+    goal_pose[3].y = -1.0;
     goal_pose[3].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[3].x, goal_pose[3].y);
     goals.push_back(agent_set_goal);
 
     goal_pose[4].x = -1.0;
-    goal_pose[4].y = -1.3;
+    goal_pose[4].y = 1.0;
     goal_pose[4].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[4].x, goal_pose[4].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[5].x = -1.5;
-    goal_pose[5].y = 0.75;
+    goal_pose[5].x = -1.0;
+    goal_pose[5].y = -1.0;
     goal_pose[5].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[5].x, goal_pose[5].y);
-    goals.push_back(agent_set_goal);
-
-    goal_pose[6].x = -1.5;
-    goal_pose[6].y = -0.75;
-    goal_pose[6].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[6].x, goal_pose[6].y);
-    goals.push_back(agent_set_goal);
-
-    goal_pose[7].x = -1.5;
-    goal_pose[7].y = -1.5;
-    goal_pose[7].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[7].x, goal_pose[7].y);
     goals.push_back(agent_set_goal);
 
     for (int i = 0; i < agent_num; i++)  
@@ -709,55 +698,42 @@ void ORCA::setup_scenario_2()
     goals.clear();
     RVO::Vector2 agent_set_goal;
 
-    // 设置预设目标点 agent_1 -> agent_2
-    goal_pose[0].x = 0.1;
-    goal_pose[0].y = 1.35;
+    // 设置预设目标点
+    goal_pose[0].x = 1.0;
+    goal_pose[0].y = -1.0;
     goal_pose[0].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[0].x, goal_pose[0].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[1].x = 1.4;
-    goal_pose[1].y = 0.5;
+    goal_pose[1].x = 1.0;
+    goal_pose[1].y = 1.0;
     goal_pose[1].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[1].x, goal_pose[1].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[2].x = -0.8;
-    goal_pose[2].y = -0.0;
+    goal_pose[2].x = 0.0;
+    goal_pose[2].y = -1.0;
     goal_pose[2].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[2].x, goal_pose[2].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[3].x = 1.4;
-    goal_pose[3].y = -0.5;
+    goal_pose[3].x = 0.0;
+    goal_pose[3].y = 1.0;
     goal_pose[3].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[3].x, goal_pose[3].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[4].x = 0.1;
-    goal_pose[4].y = -1.35;
+    goal_pose[4].x = -1.0;
+    goal_pose[4].y = -1.0;
     goal_pose[4].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[4].x, goal_pose[4].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[5].x = -1.5;
-    goal_pose[5].y = 0.75;
+    goal_pose[5].x = -1.0;
+    goal_pose[5].y = 1.0;
     goal_pose[5].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[5].x, goal_pose[5].y);
     goals.push_back(agent_set_goal);
-
-    goal_pose[6].x = -1.5;
-    goal_pose[6].y = -0.75;
-    goal_pose[6].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[6].x, goal_pose[6].y);
-    goals.push_back(agent_set_goal);
-
-    goal_pose[7].x = -1.5;
-    goal_pose[7].y = 1.5;
-    goal_pose[7].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[7].x, goal_pose[7].y);
-    goals.push_back(agent_set_goal);
-
 
     for (int i = 0; i < agent_num; i++)  
     {   
@@ -768,7 +744,7 @@ void ORCA::setup_scenario_2()
         goal_reached_printed[i] = false;
     }
 
-   text_info.data = node_name + "ORCA set setup_scenario_2 goals success!";
+    text_info.data = node_name + "ORCA set setup_scenario_2 goals success!";
     text_info_pub.publish(text_info);
     cout << BLUE << text_info.data << TAIL << endl;
 }
@@ -779,53 +755,41 @@ void ORCA::setup_scenario_3()
     goals.clear();
     RVO::Vector2 agent_set_goal;
 
-    // 设置预设目标点 agent_1 -> agent_8
-    goal_pose[0].x = 0.1;
-    goal_pose[0].y = 0.9;
+    // 设置预设目标点
+    goal_pose[0].x = -1.0;
+    goal_pose[0].y = -1.0;
     goal_pose[0].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[0].x, goal_pose[0].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[1].x = 1.2;
-    goal_pose[1].y = 0.9;
+    goal_pose[1].x = -1.0;
+    goal_pose[1].y = 1.0;
     goal_pose[1].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[1].x, goal_pose[1].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[2].x = -0.8;
-    goal_pose[2].y = 0.9;
+    goal_pose[2].x = 0.0;
+    goal_pose[2].y = -1.0;
     goal_pose[2].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[2].x, goal_pose[2].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[3].x = 1.2;
-    goal_pose[3].y = -0.75;
+    goal_pose[3].x = 0.0;
+    goal_pose[3].y = 1.0;
     goal_pose[3].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[3].x, goal_pose[3].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[4].x = -0.8;
-    goal_pose[4].y = -0.75;
+    goal_pose[4].x = 1.0;
+    goal_pose[4].y = -1.0;
     goal_pose[4].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[4].x, goal_pose[4].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[5].x = 0.0;
-    goal_pose[5].y = 1.5;
+    goal_pose[5].x = 1.0;
+    goal_pose[5].y = 1.0;
     goal_pose[5].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[5].x, goal_pose[5].y);
-    goals.push_back(agent_set_goal);
-
-    goal_pose[6].x = 1.5;
-    goal_pose[6].y = 0.0;
-    goal_pose[6].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[6].x, goal_pose[6].y);
-    goals.push_back(agent_set_goal);
-
-    goal_pose[7].x = 0.0;
-    goal_pose[7].y = -1.5;
-    goal_pose[7].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[7].x, goal_pose[7].y);
     goals.push_back(agent_set_goal);
 
     for (int i = 0; i < agent_num; i++)  
@@ -837,7 +801,7 @@ void ORCA::setup_scenario_3()
         goal_reached_printed[i] = false;
     }
 
-   text_info.data = node_name + "ORCA set setup_scenario_3 goals success!";
+    text_info.data = node_name + "ORCA set setup_scenario_3 goals success!";
     text_info_pub.publish(text_info);
     cout << BLUE << text_info.data << TAIL << endl;
 }
@@ -848,53 +812,41 @@ void ORCA::setup_scenario_4()
     goals.clear();
     RVO::Vector2 agent_set_goal;
 
-    // 设置预设目标点 agent_1 -> agent_2
-    goal_pose[0].x = 0.1;
-    goal_pose[0].y = 1.35;
+    // 设置预设目标点
+    goal_pose[0].x = 1.0;
+    goal_pose[0].y = 0.0;
     goal_pose[0].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[0].x, goal_pose[0].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[1].x = 1.4;
-    goal_pose[1].y = 0.5;
+    goal_pose[1].x = 0.0;
+    goal_pose[1].y = 1.0;
     goal_pose[1].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[1].x, goal_pose[1].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[2].x = -0.8;
-    goal_pose[2].y = 0.0;
+    goal_pose[2].x = 0.0;
+    goal_pose[2].y = -1.0;
     goal_pose[2].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[2].x, goal_pose[2].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[3].x = 1.4;
-    goal_pose[3].y = -0.5;
+    goal_pose[3].x = -1.0;
+    goal_pose[3].y = 2.0;
     goal_pose[3].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[3].x, goal_pose[3].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[4].x = 0.1;
-    goal_pose[4].y = -1.35;
+    goal_pose[4].x = -1.0;
+    goal_pose[4].y = 0.0;
     goal_pose[4].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[4].x, goal_pose[4].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[5].x = -1.5;
-    goal_pose[5].y = -0.75;
+    goal_pose[5].x = -1.0;
+    goal_pose[5].y = -2.0;
     goal_pose[5].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[5].x, goal_pose[5].y);
-    goals.push_back(agent_set_goal);
-
-    goal_pose[6].x = -1.5;
-    goal_pose[6].y = -1.5;
-    goal_pose[6].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[6].x, goal_pose[6].y);
-    goals.push_back(agent_set_goal);
-
-    goal_pose[7].x = -1.5;
-    goal_pose[7].y = 1.5;
-    goal_pose[7].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[7].x, goal_pose[7].y);
     goals.push_back(agent_set_goal);
 
     for (int i = 0; i < agent_num; i++)  
@@ -905,7 +857,7 @@ void ORCA::setup_scenario_4()
         }
         goal_reached_printed[i] = false;
     }
-   text_info.data = node_name + "ORCA set setup_scenario_4 goals success!";
+    text_info.data = node_name + "ORCA set setup_scenario_4 goals success!";
     text_info_pub.publish(text_info);
     cout << BLUE << text_info.data << TAIL << endl;
 }
@@ -916,56 +868,43 @@ void ORCA::setup_scenario_5()
     goals.clear();
     RVO::Vector2 agent_set_goal;
 
-// O——1
-    // 设置预设目标点 agent_1 -> agent_2
-    goal_pose[0].x = 0.1;
-    goal_pose[0].y = 0.6;
+    // 设置预设目标点
+    goal_pose[0].x = -1.0;
+    goal_pose[0].y = -0.5;
     goal_pose[0].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[0].x, goal_pose[0].y);
     goals.push_back(agent_set_goal);
 
-// N——2
-    goal_pose[1].x = 1.1;
-    goal_pose[1].y = 1.1;
+    goal_pose[1].x = -1.0;
+    goal_pose[1].y = 0.5;
     goal_pose[1].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[1].x, goal_pose[1].y);
     goals.push_back(agent_set_goal);
-// K——3
-    goal_pose[2].x = -0.7;
-    goal_pose[2].y = 0.0;
+
+    goal_pose[2].x = 0.0;
+    goal_pose[2].y = -1.0;
     goal_pose[2].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[2].x, goal_pose[2].y);
     goals.push_back(agent_set_goal);
-// V——4
-    goal_pose[3].x = 1.1;
-    goal_pose[3].y = -1.1;
+
+    goal_pose[3].x = 0.0;
+    goal_pose[3].y = 1.0;
     goal_pose[3].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[3].x, goal_pose[3].y);
     goals.push_back(agent_set_goal);
-// O——5
-    goal_pose[4].x = 0.1;
-    goal_pose[4].y = -0.6;
+
+    goal_pose[4].x = 1.0;
+    goal_pose[4].y = 0.0;
     goal_pose[4].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[4].x, goal_pose[4].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[5].x = -1.5;
-    goal_pose[5].y = -0.75;
+    goal_pose[5].x = 0.0;
+    goal_pose[5].y = 0.0;
     goal_pose[5].yaw = 0.0;
     agent_set_goal = RVO::Vector2(goal_pose[5].x, goal_pose[5].y);
     goals.push_back(agent_set_goal);
 
-    goal_pose[6].x = -1.5;
-    goal_pose[6].y = 0.75;
-    goal_pose[6].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[6].x, goal_pose[6].y);
-    goals.push_back(agent_set_goal);
-
-    goal_pose[7].x = -1.5;
-    goal_pose[7].y = 1.5;
-    goal_pose[7].yaw = 0.0;
-    agent_set_goal = RVO::Vector2(goal_pose[7].x, goal_pose[7].y);
-    goals.push_back(agent_set_goal);
     for (int i = 0; i < agent_num; i++)  
     {   
         if (i < goals.size()) {
@@ -975,6 +914,7 @@ void ORCA::setup_scenario_5()
         goal_reached_printed[i] = false;
     }
 
-   text_info.data = node_name + "ORCA set setup_scenario_5 goals success!";
+    text_info.data = node_name + "ORCA set setup_scenario_5 goals success!";
     text_info_pub.publish(text_info);
-    cout << BLUE << text_info.data << TAIL << endl;}
+    cout << BLUE << text_info.data << TAIL << endl;
+}

@@ -27,13 +27,13 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     // 【参数】位置环控制参数 - max_vel_z
     nh.param<float>("rmtt_control_param/max_vel_z", rmtt_control_param.max_vel_z, 0.3);
     // 【参数】位置环控制参数 - max_vel_yaw
-    nh.param<float>("rmtt_control_param/max_vel_yaw", rmtt_control_param.max_vel_yaw, 40.0/180.0*M_PI);
+    nh.param<float>("rmtt_control_param/max_vel_yaw", rmtt_control_param.max_vel_yaw, 180.0/180.0*M_PI);
     // 【参数】位置环控制参数 - deadzone_vel_xy
     nh.param<float>("rmtt_control_param/deadzone_vel_xy", rmtt_control_param.deadzone_vel_xy, 0.0);
     // 【参数】位置环控制参数 - deadzone_vel_z
     nh.param<float>("rmtt_control_param/deadzone_vel_z", rmtt_control_param.deadzone_vel_z, 0.0);
     // 【参数】位置环控制参数 - deadzone_vel_yaw
-    nh.param<float>("rmtt_control_param/deadzone_vel_yaw", rmtt_control_param.deadzone_vel_yaw, 1.0/180.0*M_PI);
+    nh.param<float>("rmtt_control_param/deadzone_vel_yaw", rmtt_control_param.deadzone_vel_yaw, 0.0/180.0*M_PI);
     // 【参数】地理围栏参数（超出围栏自动降落）
     nh.param<float>("rmtt_geo_fence/max_x", rmtt_geo_fence.max_x, 100.0);
     nh.param<float>("rmtt_geo_fence/min_x", rmtt_geo_fence.min_x, -100.0);
@@ -47,26 +47,19 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     if (pose_source == 1)
     {
         // 【订阅】订阅动捕的定位数据(位置+速度) vrpn -> 本节点
-        mocap_pos_sub = nh.subscribe("/vrpn_client_node/" + agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
+        mocap_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/" + agent_name + "/pose", 1, &RMTT_CONTROL::mocap_pos_cb, this);
         mocap_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/vrpn_client_node/"+ agent_name + "/twist", 1, &RMTT_CONTROL::mocap_vel_cb, this);
-        cout << BLUE << "Pose source: Mocap" << TAIL << endl;
     }
     else if (pose_source == 2)
     {       
         // 【定时器】 通过TF获取定位地图的地位信息
         timer_get_map_pose = nh.createTimer(ros::Duration(0.05), &RMTT_CONTROL::timercb_get_map_pose, this);
-        cout << BLUE << "Pose source: Map" << TAIL << endl;
     }
     else if (pose_source == 3)
     {
         // 【订阅】订阅Odom数据
-        odom_sub = nh.subscribe("/rmtt_odom", 1, &RMTT_CONTROL::odom_cb,this);
-        cout << GREEN << "Pose source: ODOM" << TAIL << endl;
+        odom_sub = nh.subscribe("/sunray_swarm/" + agent_name + "/odom", 1, &RMTT_CONTROL::odom_cb,this);
     }
-    else
-    {
-        cout << RED << "Pose source: Unknown" << TAIL << endl;
-    }  
 
     // 【订阅】智能体控制指令 ORCA等上层算法 -> 本节点
     agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &RMTT_CONTROL::agent_cmd_cb, this);
@@ -191,7 +184,8 @@ void RMTT_CONTROL::mainloop()
         // POS_CONTROL：位置控制模式，无人机移动到期望的位置+偏航（期望位置由外部指令赋值）
         case sunray_msgs::agent_cmd::POS_CONTROL:
             // 位置控制算法
-            pos_control(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
+            desired_vel = pos_control(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
+            agent_cmd_vel_pub.publish(desired_vel);
             break;
 
         // VEL_CONTROL_BODY：机体系速度控制，无人机按照期望的速度在机体系飞行（期望速度由外部指令赋值）
@@ -361,7 +355,7 @@ double RMTT_CONTROL::get_yaw_error(double desired_yaw, double yaw_now)
 }
 
 // 位置控制算法
-void RMTT_CONTROL::pos_control(geometry_msgs::Point pos_ref, double yaw_ref)
+geometry_msgs::Twist RMTT_CONTROL::pos_control(geometry_msgs::Point pos_ref, double yaw_ref)
 {
     float cmd_body[2];
     float cmd_enu[2];
@@ -386,7 +380,7 @@ void RMTT_CONTROL::pos_control(geometry_msgs::Point pos_ref, double yaw_ref)
     desired_vel.angular.z = constrain_function(desired_vel.angular.z, rmtt_control_param.max_vel_yaw, rmtt_control_param.deadzone_vel_yaw);
 
     // 发布控制指令
-    agent_cmd_vel_pub.publish(desired_vel);
+    return desired_vel;
 }
 
 // 【坐标系旋转函数】- enu系到body系
@@ -782,12 +776,7 @@ bool RMTT_CONTROL::check_geo_fence()
         agent_state.pos[1] > rmtt_geo_fence.max_y || agent_state.pos[1] < rmtt_geo_fence.min_y || 
         agent_state.pos[2] > rmtt_geo_fence.max_z || agent_state.pos[2] < rmtt_geo_fence.min_z)
     {
-        ROS_WARN_STREAM("RMTT [" << agent_id << "] out of geofence land! Position: [" 
-                        << agent_state.pos[0] << ", " << agent_state.pos[1] << ", " 
-                        << agent_state.pos[2] << "], Geofence: ["
-                        << rmtt_geo_fence.min_x << ", " << rmtt_geo_fence.max_x << ", "
-                        << rmtt_geo_fence.min_y << ", " << rmtt_geo_fence.max_y << ", "
-                        << rmtt_geo_fence.min_z << ", " << rmtt_geo_fence.max_z << "]");
+        cout << GREEN << "RMTT [" << agent_id << "] out of geofence! Land now" << TAIL << endl;
         return 1;
     }
     return 0;
@@ -828,17 +817,29 @@ void RMTT_CONTROL::printf_param()
     cout << GREEN << "agent_ip : " << agent_ip << "" << TAIL << endl;
     cout << GREEN << "flag_printf : " << flag_printf << "" << TAIL << endl;
     cout << GREEN << "agent_height : " << agent_height << " [m]" << TAIL << endl;
-
+    if(pose_source == 1)
+    {
+        cout << GREEN << "Pose source: Mocap" << TAIL << endl;
+    }else if(pose_source == 2)
+    {
+        cout << GREEN << "Pose source: MAP" << TAIL << endl;
+    }else if(pose_source == 3)
+    {
+        cout << GREEN << "Pose source: ODOM" << TAIL << endl;
+    }else
+    {
+        cout << RED << "Pose source: Unknown" << TAIL << endl;
+    }  
     // 悬停控制参数
     cout << GREEN << "Kp_xy : " << rmtt_control_param.Kp_xy << TAIL << endl;
     cout << GREEN << "Kp_z : " << rmtt_control_param.Kp_z << TAIL << endl;
     cout << GREEN << "Kp_yaw : " << rmtt_control_param.Kp_yaw << TAIL << endl;
     cout << GREEN << "max_vel_xy : " << rmtt_control_param.max_vel_xy << " [m/s]" << TAIL << endl;
     cout << GREEN << "max_vel_z : " << rmtt_control_param.max_vel_z << " [m/s]" << TAIL << endl;
-    cout << GREEN << "max_vel_yaw : " << rmtt_control_param.max_vel_yaw << " [rad/s]" << TAIL << endl;
+    cout << GREEN << "max_vel_yaw : " << rmtt_control_param.max_vel_yaw/M_PI*180 << " [deg/s]" << TAIL << endl;
     cout << GREEN << "deadzone_vel_xy : " << rmtt_control_param.deadzone_vel_xy << " [m/s]" << TAIL << endl;
     cout << GREEN << "deadzone_vel_z : " << rmtt_control_param.deadzone_vel_z << " [m/s]" << TAIL << endl;
-    cout << GREEN << "deadzone_vel_yaw : " << rmtt_control_param.deadzone_vel_yaw << " [rad/s]" << TAIL << endl;
+    cout << GREEN << "deadzone_vel_yaw : " << rmtt_control_param.deadzone_vel_yaw/M_PI*180 << " [deg/s]" << TAIL << endl;
 
     // 地理围栏参数
     cout << GREEN << "geo_fence max_x : " << rmtt_geo_fence.max_x << " [m]" << TAIL << endl;
