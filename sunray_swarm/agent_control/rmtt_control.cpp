@@ -3,7 +3,7 @@
 void RMTT_CONTROL::init(ros::NodeHandle& nh)
 {
     // 智能体类型
-    agent_type = sunray_msgs::agent_state::RMTT;
+    agent_type = sunray_swarm_msgs::agent_state::RMTT;
     // 【参数】智能体编号
     nh.param<int>("agent_id", agent_id, 1);
     // 【参数】智能体IP
@@ -62,14 +62,14 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     }
 
     // 【订阅】智能体控制指令 ORCA等上层算法 -> 本节点
-    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &RMTT_CONTROL::agent_cmd_cb, this);
+    agent_cmd_sub = nh.subscribe<sunray_swarm_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &RMTT_CONTROL::agent_cmd_cb, this);
     // 【订阅】智能体控制指令 地面站 -> 本节点
-    agent_gs_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt_gs/agent_cmd", 10, &RMTT_CONTROL::agent_gs_cmd_cb, this);   
+    agent_gs_cmd_sub = nh.subscribe<sunray_swarm_msgs::agent_cmd>("/sunray_swarm/rmtt_gs/agent_cmd", 10, &RMTT_CONTROL::agent_gs_cmd_cb, this);   
     // 【订阅】rmtt电池的数据 rmtt_driver -> 本节点
     battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm/" + agent_name + "/battery", 1, &RMTT_CONTROL::battery_cb, this);  
     
     // 【发布】智能体状态 本节点 -> 地面站/其他节点
-    agent_state_pub = nh.advertise<sunray_msgs::agent_state>("/sunray_swarm/" + agent_name + "/agent_state", 10);
+    agent_state_pub = nh.advertise<sunray_swarm_msgs::agent_state>("/sunray_swarm/" + agent_name + "/agent_state", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 【发布】智能体控制指令（机体系，单位：米/秒，Rad/秒）本节点 -> rmtt_driver
@@ -121,8 +121,8 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     agent_state.attitude_q.z = 0.0;
     agent_state.attitude_q.w = 1.0;
     agent_state.battery = -1.0;
-    agent_state.control_state = sunray_msgs::agent_cmd::INIT;
-    current_agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
+    agent_state.control_state = sunray_swarm_msgs::agent_cmd::INIT;
+    current_agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::INIT;
 
     // 根据智能体ID来设置仿真时RVIZ中智能体的颜色，与真机无关
     setup_rviz_color();
@@ -166,7 +166,7 @@ void RMTT_CONTROL::mainloop()
     switch (current_agent_cmd.control_state)
     {
         // INIT：不执行任何指令
-        case sunray_msgs::agent_cmd::INIT:
+        case sunray_swarm_msgs::agent_cmd::INIT:
             // 第一次初始化进入的时候，配置RMTT的LED颜色及MLED屏幕字符
             if(agent_state_last.connected==false && agent_state.connected==true)
             {
@@ -176,20 +176,20 @@ void RMTT_CONTROL::mainloop()
             break;
 
         // HOLD：悬停模式，切入该模式的瞬间，无人机在当前位置悬停，并锁定该位置
-        case sunray_msgs::agent_cmd::HOLD:
+        case sunray_swarm_msgs::agent_cmd::HOLD:
             // 悬停需要借助位置控制算法进行闭环控制
             pos_control(desired_position, desired_yaw);
             break;
 
         // POS_CONTROL：位置控制模式，无人机移动到期望的位置+偏航（期望位置由外部指令赋值）
-        case sunray_msgs::agent_cmd::POS_CONTROL:
+        case sunray_swarm_msgs::agent_cmd::POS_CONTROL:
             // 位置控制算法
             desired_vel = pos_control(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
             agent_cmd_vel_pub.publish(desired_vel);
             break;
 
         // VEL_CONTROL_BODY：机体系速度控制，无人机按照期望的速度在机体系飞行（期望速度由外部指令赋值）
-        case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_BODY:
             // 控制指令限幅（防止外部指令给了一个很大的数）
             desired_vel.linear.x = constrain_function(current_agent_cmd.desired_vel.linear.x, rmtt_control_param.max_vel_xy, 0.0);
             desired_vel.linear.y = constrain_function(current_agent_cmd.desired_vel.linear.y, rmtt_control_param.max_vel_xy, 0.0);
@@ -199,18 +199,18 @@ void RMTT_CONTROL::mainloop()
             break;
 
         // VEL_CONTROL_ENU：惯性系速度控制，无人机按照期望的速度在惯性系飞行（期望速度由外部指令赋值）
-        case sunray_msgs::agent_cmd::VEL_CONTROL_ENU:
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_ENU:
             // 由于RMTT底层控制指令为机体系，所以需要将收到的惯性系速度转换为机体系速度
             desired_vel = enu_to_body(current_agent_cmd.desired_vel);
             agent_cmd_vel_pub.publish(desired_vel);
             break;  
 
         // TAKEOFF：起飞 - 起飞逻辑在回调函数中处理，此处不做任何处理
-        case sunray_msgs::agent_cmd::TAKEOFF:
+        case sunray_swarm_msgs::agent_cmd::TAKEOFF:
             break;
 
         // LAND：降落 - 降落逻辑在回调函数中处理，此处不做任何处理
-        case sunray_msgs::agent_cmd::LAND:
+        case sunray_swarm_msgs::agent_cmd::LAND:
             break;
 
         default:
@@ -223,7 +223,7 @@ void RMTT_CONTROL::mainloop()
 
 
 // 控制指令回调函数 - 来自其他节点
-void RMTT_CONTROL::agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
+void RMTT_CONTROL::agent_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
 {
     // 判断指令ID是否正确，否则不接收该指令
     if(msg->agent_id != agent_id && msg->agent_id != 99)
@@ -241,7 +241,7 @@ void RMTT_CONTROL::agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
 // 为什么RMTT要单独写一个地面站指令处理的回调？因为启动了ORCA算法后，ORCA算法会一直抢占agent_cmd_cb()这个函数（ORCA算法发布的频率很高）
 // 如果在运行ORCA算法的同时，想通过地面站来降落无人机的话，起飞降落的指令会被淹没，因此要单独处理地面站的指令消息
 // 但是就算是这样，地面站发送除了起飞降落之外指令，还是会被ORCA算法占用，因此正常一般是要先暂停ORCA算法
-void RMTT_CONTROL::agent_gs_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
+void RMTT_CONTROL::agent_gs_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
 {
     if(msg->agent_id != agent_id && msg->agent_id != 99)
     {
@@ -254,25 +254,25 @@ void RMTT_CONTROL::agent_gs_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
     handle_cmd(current_agent_cmd);
 }
 
-void RMTT_CONTROL::handle_cmd(const sunray_msgs::agent_cmd msg)
+void RMTT_CONTROL::handle_cmd(const sunray_swarm_msgs::agent_cmd msg)
 {
     // 根据收到控制指令进行相关处理
     switch(msg.control_state) 
     {
         // 收到INIT指令
-        case sunray_msgs::agent_cmd::INIT:
+        case sunray_swarm_msgs::agent_cmd::INIT:
             text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: INIT!";
             cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到HOLD指令
-        case sunray_msgs::agent_cmd::HOLD:
+        case sunray_swarm_msgs::agent_cmd::HOLD:
             // 将智能体当前的点设置为期望点
             set_desired_position();
             text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: HOLD!";
             cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到POS_CONTROL指令
-        case sunray_msgs::agent_cmd::POS_CONTROL:
+        case sunray_swarm_msgs::agent_cmd::POS_CONTROL:
             // 将命令中的位置赋值到内部变量desired_position和desired_yaw
             desired_position.x = msg.desired_pos.x;
             desired_position.y = msg.desired_pos.y;
@@ -283,17 +283,17 @@ void RMTT_CONTROL::handle_cmd(const sunray_msgs::agent_cmd msg)
             // cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到VEL_CONTROL_BODY指令：此处不做任何处理，在主循环中处理
-        case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_BODY:
             // text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_BODY!";
             // cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到VEL_CONTROL_ENU指令：此处不做任何处理，在主循环中处理
-        case sunray_msgs::agent_cmd::VEL_CONTROL_ENU:
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_ENU:
             // text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_ENU!";
             // cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到TAKEOFF指令，直接执行（在此处中断处理的原因是防止其他节点发送其他指令打断该指令）
-        case sunray_msgs::agent_cmd::TAKEOFF:
+        case sunray_swarm_msgs::agent_cmd::TAKEOFF:
             text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: TAKEOFF!";
             cout << BLUE << text_info.data << TAIL << endl;
             // home point
@@ -303,26 +303,26 @@ void RMTT_CONTROL::handle_cmd(const sunray_msgs::agent_cmd msg)
             home_yaw = agent_state.att[2];
             // 起飞
             takeoff_pub.publish(takeoff); 
-            agent_state.control_state = sunray_msgs::agent_cmd::TAKEOFF;
+            agent_state.control_state = sunray_swarm_msgs::agent_cmd::TAKEOFF;
             agent_state_pub.publish(agent_state);
             // 等待飞机起飞，此时不能发送其他指令
             sleep(5.0);
             // 起飞后进入悬停状态，并设定起飞点上方为悬停点
             set_desired_position();
-            current_agent_cmd.control_state = sunray_msgs::agent_cmd::HOLD;
+            current_agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::HOLD;
             break;
         // 收到LAND指令，直接执行（在此处中断处理的原因是防止其他节点发送其他指令打断该指令）
-        case sunray_msgs::agent_cmd::LAND:
+        case sunray_swarm_msgs::agent_cmd::LAND:
             text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: LAND!";
             cout << BLUE << text_info.data << TAIL << endl;
             // 降落
             land_pub.publish(land);
-            agent_state.control_state = sunray_msgs::agent_cmd::LAND;
+            agent_state.control_state = sunray_swarm_msgs::agent_cmd::LAND;
             agent_state_pub.publish(agent_state);
             // 等待飞机降落，此时不能发送其他指令
             sleep(5.0); 
             // 降落后进入INIT
-            current_agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
+            current_agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::INIT;
             break;
         default:
             text_info.data = node_name + ": rmtt_" + to_string(agent_id) + " Get agent_cmd: Wrong!";
@@ -463,19 +463,19 @@ void RMTT_CONTROL::timercb_debug(const ros::TimerEvent &e)
     //集群控制命令状态打印
     cout << GREEN << "CMD_SOURCE : [ " << current_agent_cmd.cmd_source   << " ] " << TAIL << endl;
 
-    if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::INIT)
+    if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::INIT)
     {
         cout << GREEN << "CONTROL_STATE : [ Ready ]" << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::TAKEOFF)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::TAKEOFF)
     {
         cout << GREEN << "CONTROL_STATE : [ TAKEOFF ]" << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::LAND)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::LAND)
     {
         cout << GREEN << "CONTROL_STATE : [ LAND ]" << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::HOLD)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::HOLD)
     {
         cout << GREEN << "CONTROL_STATE : [ HOLD ]" << TAIL << endl;
         cout << GREEN << "POS_REF [X Y Z] : " << desired_position.x   << " [ m ] " << desired_position.y   << " [ m ] " << desired_position.z   << " [ m ] " << TAIL << endl;
@@ -483,7 +483,7 @@ void RMTT_CONTROL::timercb_debug(const ros::TimerEvent &e)
         cout << GREEN << "CMD_PUB [X Y Z] : " << desired_vel.linear.x << " [m/s] " << desired_vel.linear.y << " [m/s] " << desired_vel.linear.z << " [m/s] " << TAIL << endl;
         cout << GREEN << "CMD_PUB [ Yaw ] : " << desired_vel.angular.z * 180 / M_PI<< " [deg/s] " << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::POS_CONTROL)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::POS_CONTROL)
     {
         cout << GREEN << "CONTROL_STATE : [ POS_CONTROL ]" << TAIL << endl;
         cout << GREEN << "POS_REF [X Y Z] : " << desired_position.x   << " [ m ] " << desired_position.y   << " [ m ] " << desired_position.z   << " [ m ] " << TAIL << endl;
@@ -491,13 +491,13 @@ void RMTT_CONTROL::timercb_debug(const ros::TimerEvent &e)
         cout << GREEN << "CMD_PUB [X Y Z] : " << desired_vel.linear.x << " [m/s] " << desired_vel.linear.y << " [m/s] " << desired_vel.linear.z << " [m/s] " << TAIL << endl;
         cout << GREEN << "CMD_PUB [ Yaw ] : " << desired_vel.angular.z * 180 / M_PI<< " [deg/s] " << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::VEL_CONTROL_BODY)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::VEL_CONTROL_BODY)
     {
         cout << GREEN << "CONTROL_STATE : [ VEL_CONTROL_BODY ]" << TAIL << endl;
         cout << GREEN << "CMD_PUB [X Y Z] : " << desired_vel.linear.x << " [m/s] " << desired_vel.linear.y << " [m/s] " << desired_vel.linear.z << " [m/s] " << TAIL << endl;
         cout << GREEN << "CMD_PUB [ Yaw ] : " << desired_vel.angular.z * 180 / M_PI<< " [deg/s] " << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::VEL_CONTROL_ENU)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::VEL_CONTROL_ENU)
     {
         cout << GREEN << "CONTROL_STATE : [ VEL_CONTROL_ENU ]" << TAIL << endl;
         cout << GREEN << "CMD_ENU [X Y] : " << current_agent_cmd.desired_vel.linear.x   << " [m/s] " << current_agent_cmd.desired_vel.linear.y  << " [m/s] " << TAIL << endl;
@@ -709,7 +709,7 @@ void RMTT_CONTROL::timercb_rviz(const ros::TimerEvent &e)
     vel_rviz_pub.publish(vel_rviz);
 
     // 发布当前目标点marker，仅针对位置控制模式
-    if(current_agent_cmd.control_state == sunray_msgs::agent_cmd::POS_CONTROL)
+    if(current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::POS_CONTROL)
     {
         // 发布目标点mesh
         visualization_msgs::Marker goal_marker;
@@ -803,10 +803,10 @@ void RMTT_CONTROL::printf_param()
 {
     cout << GREEN << ">>>>>>>>>>>>>>>>>>> RMTT_CONTROL Parameters <<<<<<<<<<<<<<<<" << TAIL << endl;
 
-    if(agent_type == sunray_msgs::agent_state::RMTT)
+    if(agent_type == sunray_swarm_msgs::agent_state::RMTT)
     {
         cout << GREEN << "agent_type : RMTT" << TAIL << endl;
-    }else if(agent_type == sunray_msgs::agent_state::UGV)
+    }else if(agent_type == sunray_swarm_msgs::agent_state::UGV)
     {
         cout << GREEN << "agent_type : UGV" << TAIL << endl;
     }else

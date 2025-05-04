@@ -15,7 +15,7 @@ using namespace std;
 
 int agent_type;                           // 智能体编号
 
-sunray_msgs::orca_cmd agent_orca_cmd;   //ORCA算法指令
+sunray_swarm_msgs::orca_cmd agent_orca_cmd;   //ORCA算法指令
 
 ros::Publisher orca_cmd_pub;           // ORCA算法指令
 ros::Publisher agent_goal_pub;         // ORCA算法目标点
@@ -37,19 +37,19 @@ int main(int argc, char **argv)
     nh.param<int>("agent_type", agent_type, 1);
     cout << GREEN << ros::this_node::getName() << " start." << TAIL << endl;
     string agent_prefix;
-    if(agent_type == sunray_msgs::agent_state::RMTT)
+    if(agent_type == sunray_swarm_msgs::agent_state::RMTT)
     {
         agent_prefix = "rmtt";
         cout << GREEN << " agent_type: rmtt" << TAIL << endl;
     }
-    else if(agent_type == sunray_msgs::agent_state::UGV)
+    else if(agent_type == sunray_swarm_msgs::agent_state::UGV)
     {
         agent_prefix = "ugv";
         cout << GREEN << " agent_type: ugv" << TAIL << endl;
     }
 
     // 【发布】ORCA算法指令 本节点 -> ORCA算法节点
-    orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm/"+agent_prefix+"/orca_cmd", 10);
+    orca_cmd_pub = nh.advertise<sunray_swarm_msgs::orca_cmd>("/sunray_swarm/"+agent_prefix+"/orca_cmd", 10);
     // 【发布】ORCA算法目标点 本节点 -> ORCA算法节点
     agent_goal_pub = nh.advertise<geometry_msgs::Point>("/sunray_swarm/" + agent_prefix + "_1/goal_point", 10);
     // 【发布】 初始化marker_pub发布者，发布RVIZ标记
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     agent_orca_cmd.header.stamp = ros::Time::now();
     agent_orca_cmd.header.frame_id = "world";
     agent_orca_cmd.cmd_source = ros::this_node::getName();
-    agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
+    agent_orca_cmd.orca_cmd = sunray_swarm_msgs::orca_cmd::SET_HOME;
     orca_cmd_pub.publish(agent_orca_cmd);
     cout << GREEN << "start orca..." << TAIL << endl;
 
@@ -118,7 +118,7 @@ void setupObstacles(geometry_msgs::Point obs_center, int marker_id)
     agent_orca_cmd.header.stamp = ros::Time::now();
     agent_orca_cmd.header.frame_id = "world";
     agent_orca_cmd.cmd_source = ros::this_node::getName();
-    agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SETUP_OBS;
+    agent_orca_cmd.orca_cmd = sunray_swarm_msgs::orca_cmd::SETUP_OBS;
     agent_orca_cmd.obs_point.push_back(Point1);
     agent_orca_cmd.obs_point.push_back(Point2);
     agent_orca_cmd.obs_point.push_back(Point3);

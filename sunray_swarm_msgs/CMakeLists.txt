@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(sunray_msgs)
+project(sunray_swarm_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
   message_generation  

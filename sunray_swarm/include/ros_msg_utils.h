@@ -1,10 +1,10 @@
 // ROS话题消息头文件
 
-// sunray_msgs
-#include <sunray_msgs/agent_state.h>
-#include <sunray_msgs/agent_cmd.h>
-#include <sunray_msgs/orca_state.h>
-#include <sunray_msgs/orca_cmd.h>
+// sunray_swarm_msgs
+#include <sunray_swarm_msgs/agent_state.h>
+#include <sunray_swarm_msgs/agent_cmd.h>
+#include <sunray_swarm_msgs/orca_state.h>
+#include <sunray_swarm_msgs/orca_cmd.h>
 
 // std_msgs
 #include <std_msgs/Float32.h>

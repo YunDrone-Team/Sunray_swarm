@@ -26,30 +26,30 @@ void ORCA::init(ros::NodeHandle& nh)
     nh.param<float>("orca_params/time_step", orca_params.time_step, 0.1);
 
     string agent_prefix;
-    if(agent_type == sunray_msgs::agent_state::RMTT)
+    if(agent_type == sunray_swarm_msgs::agent_state::RMTT)
     {
         agent_prefix = "/rmtt";
     }
-    else if(agent_type == sunray_msgs::agent_state::UGV)
+    else if(agent_type == sunray_swarm_msgs::agent_state::UGV)
     {
         agent_prefix = "/ugv";
     }
 
     // 【订阅】ORCA算法指令 地面站/其他节点 -> 本节点
-    orca_cmd_sub = nh.subscribe<sunray_msgs::orca_cmd>("/sunray_swarm" + agent_prefix + "/orca_cmd", 10, &ORCA::orca_cmd_cb, this);
+    orca_cmd_sub = nh.subscribe<sunray_swarm_msgs::orca_cmd>("/sunray_swarm" + agent_prefix + "/orca_cmd", 10, &ORCA::orca_cmd_cb, this);
 
     string agent_name;
     for(int i = 0; i < agent_num; i++) 
     {
         agent_name = agent_prefix + "_" + std::to_string(i+1);
         // 【订阅】智能体状态数据 智能体控制节点 -> 本节点
-        agent_state_sub[i] = nh.subscribe<sunray_msgs::agent_state>("/sunray_swarm" + agent_name + "/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
+        agent_state_sub[i] = nh.subscribe<sunray_swarm_msgs::agent_state>("/sunray_swarm" + agent_name + "/agent_state", 20, boost::bind(&ORCA::agent_state_cb,this ,_1,i));
         // 【订阅】智能体目标点（xy+yaw） 地面站/其他节点 -> 本节点
         agent_goal_sub[i] = nh.subscribe<geometry_msgs::Point>("/sunray_swarm" + agent_name + "/goal_point", 10, boost::bind(&ORCA::agent_goal_cb,this ,_1,i));
         // 【发布】智能体控制指令 本节点 -> 智能体控制节点
-        agent_cmd_pub[i] = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10); 
+        agent_cmd_pub[i] = nh.advertise<sunray_swarm_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10); 
         // 【发布】无人机orca状态 本节点 -> 地面站/其他节点
-		agent_orca_state_pub[i] = nh.advertise<sunray_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1);
+		agent_orca_state_pub[i] = nh.advertise<sunray_swarm_msgs::orca_state>("/sunray_swarm" + agent_name + "/agent_orca_state", 1);
         // 【发布】目标点marker 本节点 -> RVIZ （仿真）
         goal_point_pub[i] = nh.advertise<visualization_msgs::Marker>("/sunray_swarm" + agent_name + "/goal_point_rviz", 1);   
     }
@@ -78,7 +78,7 @@ void ORCA::init(ros::NodeHandle& nh)
     // 打印本节点参数，用于检查
     printf_param();
 
-    orca_cmd.orca_cmd = sunray_msgs::orca_cmd::INIT;
+    orca_cmd.orca_cmd = sunray_swarm_msgs::orca_cmd::INIT;
 
     // 循环遍历每个智能体，init
     for(int i = 0; i < agent_num; i++) 
@@ -92,7 +92,7 @@ void ORCA::init(ros::NodeHandle& nh)
         home_pose[i].yaw = 0.0;
         goal_pose[i].yaw = 0.0;
 
-        agent_orca_state[i].orca_cmd = sunray_msgs::orca_cmd::INIT;
+        agent_orca_state[i].orca_cmd = sunray_swarm_msgs::orca_cmd::INIT;
         agent_orca_state[i].agent_num = agent_num;
         agent_orca_state[i].agent_id = i+1;
         agent_orca_state[i].arrived_goal = false;
@@ -151,7 +151,7 @@ bool ORCA::orca_run()
 		if(arrived_goal[i])
 		{
             agent_cmd[i].agent_id = i+1;
-            agent_cmd[i].control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agent_cmd[i].control_state = sunray_swarm_msgs::agent_cmd::POS_CONTROL;
             agent_cmd[i].cmd_source = "ORCA";
             agent_cmd[i].desired_pos.x = sim->getAgentGoal(i).x();
             agent_cmd[i].desired_pos.y = sim->getAgentGoal(i).y();
@@ -174,7 +174,7 @@ bool ORCA::orca_run()
             // 从ORCA算法中读取期望速度 注：这个速度是ENU坐标系的
             RVO::Vector2 vel = sim->getAgentVelCMD(i);   
             agent_cmd[i].agent_id = i+1;
-            agent_cmd[i].control_state = sunray_msgs::agent_cmd::VEL_CONTROL_ENU;
+            agent_cmd[i].control_state = sunray_swarm_msgs::agent_cmd::VEL_CONTROL_ENU;
             agent_cmd[i].cmd_source = "ORCA";
             agent_cmd[i].desired_vel.linear.x = vel.x();
             agent_cmd[i].desired_vel.linear.y = vel.y();
@@ -378,7 +378,7 @@ bool ORCA::reachedGoal(int i)
 }
 
 // 回调函数：智能体状态回调函数，根据ID存放到agent_state数组里
-void ORCA::agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg, int i)
+void ORCA::agent_state_cb(const sunray_swarm_msgs::agent_state::ConstPtr& msg, int i)
 {
     agent_state[i] = *msg;
 }
@@ -401,11 +401,11 @@ void ORCA::agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i)
 }
 
 // 回调函数：ORCA算法指令回调函数，根据msg->orca_cmd的值来判断处理
-void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
+void ORCA::orca_cmd_cb(const sunray_swarm_msgs::orca_cmd::ConstPtr& msg)
 {
     orca_cmd = *msg;
     // 当orca_cmd为SET_HOME时，将每个智能体的当前所在点设置为home点，并同时启动ORCA算法
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::SET_HOME)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::SET_HOME)
     {
         start_flag = true;
         // 记录home点
@@ -424,7 +424,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
     }
 
     // 当orca_cmd为RETURN_HOME时，将每个智能体的home点设置为目标点，智能体会直接返回初始位置
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::RETURN_HOME)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::RETURN_HOME)
     {
         // 相当于收到了新的目标点，将状态位都设置为false
         for(int i = 0; i < agent_num; i++) 
@@ -460,7 +460,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
     }
 
     // 当orca_cmd为SETUP_OBS时，在ORCA算法中设置障碍物
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::SETUP_OBS)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::SETUP_OBS)
     {
 	    std::vector<RVO::Vector2> obstacle;
 
@@ -482,14 +482,14 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
     }
 
     // 当orca_cmd为ORCA_STOP时，不更改目标点，但是停止ORCA算法运行
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_STOP)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::ORCA_STOP)
     {
         start_flag = false;
         // 发送HOLD指令
         for(int i = 0; i < agent_num; ++i) 
         {	
             agent_cmd[i].agent_id = i+1;
-            agent_cmd[i].control_state = sunray_msgs::agent_cmd::HOLD;
+            agent_cmd[i].control_state = sunray_swarm_msgs::agent_cmd::HOLD;
             agent_cmd[i].cmd_source = "ORCA";
             agent_cmd_pub[i].publish(agent_cmd[i]);
         }
@@ -501,7 +501,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
     }
 
     // 当orca_cmd为ORCA_RESTART时，不更改此前目标点，继续运行ORCA算法
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_RESTART)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::ORCA_RESTART)
     {
         start_flag = true;
         text_info.data = node_name + "Get orca_cmd: ORCA_RESTART!";
@@ -511,7 +511,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
     }
 
     // ORCA_SCENARIO_1 - ORCA_SCENARIO_5 : 直接使用预设好的5组目标点
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_1)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::ORCA_SCENARIO_1)
     {
         for(int i = 0; i < agent_num; i++) 
         {
@@ -525,7 +525,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         text_info_pub.publish(text_info);
     }
 
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_2)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::ORCA_SCENARIO_2)
     {
         for(int i = 0; i < agent_num; i++) 
         {
@@ -538,7 +538,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         text_info_pub.publish(text_info);
     }
 
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_3)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::ORCA_SCENARIO_3)
     {
         for(int i = 0; i < agent_num; i++) 
         {
@@ -551,7 +551,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         text_info_pub.publish(text_info);
     }
 
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_4)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::ORCA_SCENARIO_4)
     {
         for(int i = 0; i < agent_num; i++) 
         {
@@ -564,7 +564,7 @@ void ORCA::orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg)
         text_info_pub.publish(text_info);
     }
 
-    if(msg->orca_cmd == sunray_msgs::orca_cmd::ORCA_SCENARIO_5)
+    if(msg->orca_cmd == sunray_swarm_msgs::orca_cmd::ORCA_SCENARIO_5)
     {
         for(int i = 0; i < agent_num; i++) 
         {
@@ -614,10 +614,10 @@ void ORCA::printf_param()
     cout << GREEN << ">>>>>>>>>>>>>>>>>>> ORCA Parameters <<<<<<<<<<<<<<<<" << TAIL << endl;
     cout << GREEN << "agent_num    : " << agent_num << TAIL << endl;
     cout << GREEN << "agent_height : " << agent_height << TAIL << endl;
-    if(agent_type == sunray_msgs::agent_state::RMTT)
+    if(agent_type == sunray_swarm_msgs::agent_state::RMTT)
     {
         cout << GREEN << "agent_type : RMTT" << TAIL << endl;
-    }else if(agent_type == sunray_msgs::agent_state::UGV)
+    }else if(agent_type == sunray_swarm_msgs::agent_state::UGV)
     {
         cout << GREEN << "agent_type : UGV" << TAIL << endl;
     }else

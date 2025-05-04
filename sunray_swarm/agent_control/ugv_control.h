@@ -69,15 +69,15 @@ class UGV_CONTROL
         geo_fence ugv_geo_fence;
 
         // 智能体当前状态
-        sunray_msgs::agent_state agent_state;   
+        sunray_swarm_msgs::agent_state agent_state;   
         // 智能体上一时刻状态        
-        sunray_msgs::agent_state agent_state_last; 
+        sunray_swarm_msgs::agent_state agent_state_last; 
         // 智能体获得上一帧定位数据的时间（用于检查定位数据获取是否超时）
         ros::Time get_odom_time{0};
         // 智能体获得上一帧电量数据的时间（用于检查driver数据获取是否超时）
         ros::Time get_battery_time{0};
         // 智能体当前控制指令
-        sunray_msgs::agent_cmd current_agent_cmd;
+        sunray_swarm_msgs::agent_cmd current_agent_cmd;
         // 智能体当前期望位置+偏航角（来自外部控制指令赋值）    
         geometry_msgs::Point desired_position;
         double desired_yaw{0.0};
@@ -115,7 +115,7 @@ class UGV_CONTROL
         void mocap_pos_cb(const geometry_msgs::PoseStampedConstPtr& msg);
         void mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg);
         void odom_cb(const nav_msgs::OdometryConstPtr& msg);
-        void agnet_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg);
+        void agnet_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg);
         void battery_cb(const std_msgs::Float32ConstPtr& msg);
         void timercb_state(const ros::TimerEvent &e);
         void timercb_rviz(const ros::TimerEvent &e);

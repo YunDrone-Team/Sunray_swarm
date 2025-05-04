@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 编译rmtt_msgs模块
-catkin_make --source sunray_msgs --build build/sunray_msgs
+catkin_make --source sunray_swarm_msgs --build build/sunray_swarm_msgs
 # 编译oradar_ros模块
 catkin_make --source sunray_drivers/oradar_ros --build build/oradar_ros
 # 编译rmtt_driver模块

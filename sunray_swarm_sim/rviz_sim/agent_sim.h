@@ -36,7 +36,7 @@ class AGENT_SIM
         std_msgs::Float32 battery;
 
         // 智能体当前控制指令
-        sunray_msgs::agent_cmd current_agent_cmd;
+        sunray_swarm_msgs::agent_cmd current_agent_cmd;
 
         // 智能体当前底层控制指令
         geometry_msgs::Twist cmd_vel;
@@ -54,7 +54,7 @@ class AGENT_SIM
         ros::Publisher battery_pub;
 
         ros::Timer debug_timer;
-        void agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg);
+        void agent_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg);
         void agent_cmd_vel_cb(const geometry_msgs::Twist::ConstPtr& msg);
         geometry_msgs::Quaternion ros_quaternion_from_rpy(double roll, double pitch, double yaw);
 };

@@ -20,16 +20,16 @@ void AGENT_SIM::init(ros::NodeHandle& nh)
     nh.param<float>("agent_height", agent_height, 0.1);
 
     string agent_name;
-    if(agent_type == sunray_msgs::agent_state::RMTT)
+    if(agent_type == sunray_swarm_msgs::agent_state::RMTT)
     {
         agent_name = "/rmtt_" + std::to_string(agent_id);
-    }else if(agent_type == sunray_msgs::agent_state::UGV)
+    }else if(agent_type == sunray_swarm_msgs::agent_state::UGV)
     {
         agent_name = "/ugv_" + std::to_string(agent_id);
     }
 
     // 【订阅】智能体控制指令 地面站/ORCA等上层算法 -> 本节点 
-    agent_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1, &AGENT_SIM::agent_cmd_cb, this); 
+    agent_cmd_sub = nh.subscribe<sunray_swarm_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1, &AGENT_SIM::agent_cmd_cb, this); 
     // 【订阅】智能体底层控制指令 智能体控制节点(rmtt_control/ugv_control) -> 本节点
     agent_cmd_vel_sub = nh.subscribe<geometry_msgs::Twist>("/sunray_swarm" + agent_name + "/cmd_vel", 1, &AGENT_SIM::agent_cmd_vel_cb, this);
     // 【发布】伪装成动捕的位置数据发布 本节点 -> 智能体控制节点(rmtt_control/ugv_control)
@@ -46,10 +46,10 @@ void AGENT_SIM::init(ros::NodeHandle& nh)
     mocap_pos_pub.publish(agent_pos);
 
     cout << GREEN << node_name << " ---------------> init! " << TAIL << endl;
-    if(agent_type == sunray_msgs::agent_state::RMTT)
+    if(agent_type == sunray_swarm_msgs::agent_state::RMTT)
     {
         cout << GREEN << "agent_type : RMTT" << TAIL << endl;
-    }else if(agent_type == sunray_msgs::agent_state::UGV)
+    }else if(agent_type == sunray_swarm_msgs::agent_state::UGV)
     {
         cout << GREEN << "agent_type : UGV" << TAIL << endl;
     }else
@@ -62,7 +62,7 @@ void AGENT_SIM::init(ros::NodeHandle& nh)
     cout << GREEN << "init_pos_z: " << agent_pos.pose.position.z << TAIL << endl;
     cout << GREEN << "init_yaw: " << agent_yaw << TAIL << endl;
     cout << GREEN << "agent_height: " << agent_height << TAIL << endl;
-    current_agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
+    current_agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::INIT;
 }
 
 bool AGENT_SIM::mainloop()
@@ -72,7 +72,7 @@ bool AGENT_SIM::mainloop()
     switch (current_agent_cmd.control_state)
     {
         // 当控制指令为INIT时，无人机/车位置维持不动，不更新
-        case sunray_msgs::agent_cmd::INIT:
+        case sunray_swarm_msgs::agent_cmd::INIT:
             agent_pos.header.stamp = ros::Time::now();
             agent_pos.header.frame_id = "world";
             agent_pos.pose.position.x = agent_pos.pose.position.x;
@@ -83,7 +83,7 @@ bool AGENT_SIM::mainloop()
             break;
 
         // 当控制指令为HOLD时，无人机/车位置维持不动，不更新
-        case sunray_msgs::agent_cmd::HOLD:
+        case sunray_swarm_msgs::agent_cmd::HOLD:
             agent_pos.header.stamp = ros::Time::now();
             agent_pos.header.frame_id = "world";
             agent_pos.pose.position.x = agent_pos.pose.position.x;
@@ -95,7 +95,7 @@ bool AGENT_SIM::mainloop()
 
         // 当控制指令为POS_CONTROL时，无人机/车位置依据底层控制指令的速度进行更新（一阶积分器模型）
         // 注意：此处底层控制指令是由控制节点中的位置控制算法产生的
-        case sunray_msgs::agent_cmd::POS_CONTROL:
+        case sunray_swarm_msgs::agent_cmd::POS_CONTROL:
             agent_pos.header.stamp = ros::Time::now();
             agent_pos.header.frame_id = "world";
             agent_pos.pose.position.x = agent_pos.pose.position.x + cmd_vel.linear.x * dt;
@@ -107,7 +107,7 @@ bool AGENT_SIM::mainloop()
             break;
 
         // 当控制指令为VEL_CONTROL_BODY时，无人机/车位置依据底层控制指令的速度进行更新（一阶积分器模型）
-        case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_BODY:
             agent_pos.header.stamp = ros::Time::now();
             agent_pos.header.frame_id = "world";
             agent_pos.pose.position.x = agent_pos.pose.position.x + cmd_vel.linear.x * dt;
@@ -119,7 +119,7 @@ bool AGENT_SIM::mainloop()
             break;
 
         // 当控制指令为VEL_CONTROL_ENU时，无人机/车位置依据底层控制指令的速度进行更新（一阶积分器模型）
-        case sunray_msgs::agent_cmd::VEL_CONTROL_ENU:
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_ENU:
             agent_pos.header.stamp = ros::Time::now();
             agent_pos.header.frame_id = "world";
             agent_pos.pose.position.x = agent_pos.pose.position.x + cmd_vel.linear.x * dt;
@@ -131,7 +131,7 @@ bool AGENT_SIM::mainloop()
             break;
 
         // 当控制指令为TAKEOFF时，无人机直接高度更新到起飞高度
-        case sunray_msgs::agent_cmd::TAKEOFF:
+        case sunray_swarm_msgs::agent_cmd::TAKEOFF:
             agent_pos.header.stamp = ros::Time::now();
             agent_pos.header.frame_id = "world";
             agent_pos.pose.position.x = agent_pos.pose.position.x;
@@ -142,7 +142,7 @@ bool AGENT_SIM::mainloop()
             break;
 
         // 当控制指令为LAND时，无人机直接高度更新到地面高度
-        case sunray_msgs::agent_cmd::LAND:
+        case sunray_swarm_msgs::agent_cmd::LAND:
             agent_pos.header.stamp = ros::Time::now();
             agent_pos.header.frame_id = "world";
             agent_pos.pose.position.x = agent_pos.pose.position.x;
@@ -161,7 +161,7 @@ bool AGENT_SIM::mainloop()
     return true;
 }
 
-void AGENT_SIM::agent_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
+void AGENT_SIM::agent_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
 {
     if(msg->agent_id != agent_id && msg->agent_id != 99)
     {

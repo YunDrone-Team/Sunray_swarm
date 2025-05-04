@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf2_ros
   tf2_eigen
-  sunray_msgs
+  sunray_swarm_msgs
   cv_bridge
   image_transport
 )

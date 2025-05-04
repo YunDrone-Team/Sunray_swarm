@@ -23,8 +23,8 @@ float agent_height;                                     // 智能体高度
 std_msgs::String text_info;                             // 打印消息
 string node_name;                                       // 节点名称
 
-sunray_msgs::orca_cmd agent_orca_cmd;                   // ORCA指令
-sunray_msgs::orca_state orca_state[MAX_AGENT_NUM];      // ORCA状态
+sunray_swarm_msgs::orca_cmd agent_orca_cmd;                   // ORCA指令
+sunray_swarm_msgs::orca_state orca_state[MAX_AGENT_NUM];      // ORCA状态
 
 geometry_msgs::Point fomation_line[MAX_AGENT_NUM];            
 geometry_msgs::Point fomation_triangle[MAX_AGENT_NUM];           
@@ -52,7 +52,7 @@ void mySigintHandler(int sig)
     ros::shutdown();                                // 关闭ROS
 }
 // 处理ORCA状态回调
-void rmtt_orca_state_cb(const sunray_msgs::orca_stateConstPtr& msg, int i)
+void rmtt_orca_state_cb(const sunray_swarm_msgs::orca_stateConstPtr& msg, int i)
 {
     // 更新指定智能体的ORCA状态
     orca_state[i] = *msg;
@@ -83,13 +83,13 @@ int main(int argc, char **argv)
 
     // 根据智能体类型设置名称前缀
     string agent_prefix;
-    if (agent_type == sunray_msgs::agent_state::RMTT)
+    if (agent_type == sunray_swarm_msgs::agent_state::RMTT)
     {
         agent_prefix = "rmtt";
         agent_height = 1.0;
         cout << GREEN << "agent_type    : rmtt" << TAIL << endl;
     }
-    else if (agent_type == sunray_msgs::agent_state::UGV)
+    else if (agent_type == sunray_swarm_msgs::agent_state::UGV)
     {
         agent_prefix = "ugv";
         agent_height = 0.1;
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
     }
 
     //【发布】ORCA算法指令 本节点 -> ORCA算法节点
-    orca_cmd_pub = nh.advertise<sunray_msgs::orca_cmd>("/sunray_swarm/" + agent_prefix + "/orca_cmd", 1);
+    orca_cmd_pub = nh.advertise<sunray_swarm_msgs::orca_cmd>("/sunray_swarm/" + agent_prefix + "/orca_cmd", 1);
     //【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
         //【发布】每个智能体的ORCA算法目标点 本节点 -> ORCA算法节点
         orca_goal_pub[i] = nh.advertise<geometry_msgs::Point>("/sunray_swarm/" + agent_name + "/goal_point", 1);
         //【订阅】每个智能体的ORCA算法状态 本节点 -> ORCA算法节点
-        orca_state_sub[i] = nh.subscribe<sunray_msgs::orca_state>("/sunray_swarm/" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb, _1, i));
+        orca_state_sub[i] = nh.subscribe<sunray_swarm_msgs::orca_state>("/sunray_swarm/" + agent_name + "/agent_orca_state", 1, boost::bind(&rmtt_orca_state_cb, _1, i));
     }
 
     sleep(1.0);
@@ -129,7 +129,7 @@ int main(int argc, char **argv)
     agent_orca_cmd.header.stamp = ros::Time::now();
     agent_orca_cmd.header.frame_id = "world";
     agent_orca_cmd.cmd_source = ros::this_node::getName();
-    agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::SET_HOME;
+    agent_orca_cmd.orca_cmd = sunray_swarm_msgs::orca_cmd::SET_HOME;
     orca_cmd_pub.publish(agent_orca_cmd);
 
     text_info.data = node_name + "Start orca...";
@@ -246,7 +246,7 @@ int main(int argc, char **argv)
                     text_info.data = node_name + "ORCA: RETURN_HOME...";
                     cout << GREEN << text_info.data << TAIL << endl;
                     text_info_pub.publish(text_info); 
-                    agent_orca_cmd.orca_cmd = sunray_msgs::orca_cmd::RETURN_HOME; // 设置ORCA命令为返回起点
+                    agent_orca_cmd.orca_cmd = sunray_swarm_msgs::orca_cmd::RETURN_HOME; // 设置ORCA命令为返回起点
                     orca_cmd_pub.publish(agent_orca_cmd);                         // 发布命令
                     pub_formation = true;                                   // 标志设置为已发布
                     orca_state[0].arrived_all_goal = false;                 // 重置到达目标状态

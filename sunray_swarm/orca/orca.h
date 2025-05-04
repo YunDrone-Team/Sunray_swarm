@@ -62,9 +62,9 @@ class ORCA
         };
 
         // 智能体当前状态
-        sunray_msgs::agent_state agent_state[MAX_NUM];
+        sunray_swarm_msgs::agent_state agent_state[MAX_NUM];
         // 智能体控制指令 - 待发布
-        sunray_msgs::agent_cmd agent_cmd[MAX_NUM];
+        sunray_swarm_msgs::agent_cmd agent_cmd[MAX_NUM];
         // 智能体的home点
         agent_pose home_pose[MAX_NUM];
         // 智能体的目标点
@@ -73,9 +73,9 @@ class ORCA
         // ORCA算法类
         RVO::RVOSimulator *sim = new RVO::RVOSimulator();
         // ORCA算法指令
-        sunray_msgs::orca_cmd orca_cmd;
+        sunray_swarm_msgs::orca_cmd orca_cmd;
         // 智能体ORCA算法状态
-        sunray_msgs::orca_state agent_orca_state[MAX_NUM];
+        sunray_swarm_msgs::orca_state agent_orca_state[MAX_NUM];
         // ORCA目标点        
         std::vector<RVO::Vector2> goals;  
 
@@ -97,9 +97,9 @@ class ORCA
         // 定时器
         ros::Timer timer_debug;
 
-        void orca_cmd_cb(const sunray_msgs::orca_cmd::ConstPtr& msg);
+        void orca_cmd_cb(const sunray_swarm_msgs::orca_cmd::ConstPtr& msg);
         void timercb_debug(const ros::TimerEvent &e);
-        void agent_state_cb(const sunray_msgs::agent_state::ConstPtr& msg, int i);
+        void agent_state_cb(const sunray_swarm_msgs::agent_state::ConstPtr& msg, int i);
         void agent_goal_cb(const geometry_msgs::Point::ConstPtr& msg, int i);
         void setup_obstacles();
         void setup_agents();

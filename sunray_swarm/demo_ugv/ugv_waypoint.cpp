@@ -17,7 +17,7 @@ using namespace std;
 int agent_id;                            // 智能体ID
 int waypoint_count;                      // 目标点数量
 vector<geometry_msgs::Point> waypoints;  // 目标点列表
-sunray_msgs::agent_cmd agent_cmd;        // 智能体控制指令
+sunray_swarm_msgs::agent_cmd agent_cmd;        // 智能体控制指令
 std_msgs::String text_info;              // 打印消息
 string node_name;                        // 节点名称
 
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 
     string agent_name = "/ugv_" + std::to_string(agent_id); 
     // 【发布】控制指令 本节点 -> 无人车控制节点
-    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
+    agent_cmd_pub = nh.advertise<sunray_swarm_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
         agent_cmd.header.frame_id = "world";
         agent_cmd.agent_id = agent_id;
         agent_cmd.cmd_source = "ugv_waypoint";
-        agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+        agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::POS_CONTROL;
         agent_cmd.desired_pos = waypoint;
         agent_cmd.desired_yaw = 0.0;    
         agent_cmd_pub.publish(agent_cmd); 

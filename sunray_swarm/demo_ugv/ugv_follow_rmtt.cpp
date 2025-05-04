@@ -18,11 +18,11 @@
  bool land_flag = false;   
  std_msgs::String text_info;            // 打印消息
  string target_name;                    // 目标名称
- sunray_msgs::agent_cmd agent_cmd;      // 控制命令消息
+ sunray_swarm_msgs::agent_cmd agent_cmd;      // 控制命令消息
  geometry_msgs::PoseStamped target_pos; // 位置
  double target_yaw{0.0};                // 无人机yaw
  string node_name;                      // 节点名称
- sunray_msgs::agent_cmd current_agent_cmd;
+ sunray_swarm_msgs::agent_cmd current_agent_cmd;
  ros::Subscriber target_pos_sub;        // 订阅目标位置
  ros::Subscriber agent_gs_cmd_sub;      // 订阅智能体控制指令 
  ros::Publisher agent_cmd_pub_ugv;          // 发布ugv控制命令
@@ -41,14 +41,14 @@
     target_yaw = target_att.z();
  }
  
- void agent_gs_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
+ void agent_gs_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
  {
     if(msg->agent_id != agent_id && msg->agent_id != 99)
       {
          return;
       } 
       current_agent_cmd = *msg;
-    if(current_agent_cmd.control_state == sunray_msgs::agent_cmd::LAND)
+    if(current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::LAND)
       {
          land_flag = true;
       }
@@ -76,11 +76,11 @@
     // 【订阅】无人机位置 VRPN（动捕） -> 本节点目标位置
     target_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ target_name + "/pose", 1, mocap_pos_cb);
     // 【订阅】智能体控制指令 地面站 -> 本节点
-    agent_gs_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/rmtt_gs/agent_cmd", 10, agent_gs_cmd_cb);  
+    agent_gs_cmd_sub = nh.subscribe<sunray_swarm_msgs::agent_cmd>("/sunray_swarm/rmtt_gs/agent_cmd", 10, agent_gs_cmd_cb);  
     // 【发布】控制指令 本节点 -> 无人车控制节点
-    agent_cmd_pub_ugv = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name_ugv + "/agent_cmd", 10);
+    agent_cmd_pub_ugv = nh.advertise<sunray_swarm_msgs::agent_cmd>("/sunray_swarm" + agent_name_ugv + "/agent_cmd", 10);
     // 【发布】控制指令 本节点 -> 无人机控制节点
-    agent_cmd_pub_rmtt = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name_rmtt + "/agent_cmd", 10);
+    agent_cmd_pub_rmtt = nh.advertise<sunray_swarm_msgs::agent_cmd>("/sunray_swarm" + agent_name_rmtt + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
@@ -92,7 +92,7 @@
     agent_cmd.header.frame_id = "world";
     agent_cmd.agent_id = agent_id;
     agent_cmd.cmd_source = ros::this_node::getName();
-    agent_cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
+    agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::TAKEOFF;
     agent_cmd_pub_rmtt.publish(agent_cmd); 
 
     text_info.data = node_name + "Takeoff...";
@@ -113,7 +113,7 @@
             agent_cmd.header.frame_id = "world";
             agent_cmd.agent_id = agent_id;
             agent_cmd.cmd_source = ros::this_node::getName();
-            agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+            agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::POS_CONTROL;
             agent_cmd.desired_pos.x = target_pos.pose.position.x;
             agent_cmd.desired_pos.y = target_pos.pose.position.y;
             agent_cmd.desired_pos.z = 0.1;

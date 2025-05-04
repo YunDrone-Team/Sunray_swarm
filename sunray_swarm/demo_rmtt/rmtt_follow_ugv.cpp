@@ -17,7 +17,7 @@ using namespace std;
 int agent_id;                          // 智能体编号
 std_msgs::String text_info;            // 打印消息
 string target_name;                    // 目标名称
-sunray_msgs::agent_cmd agent_cmd;      // 控制命令消息
+sunray_swarm_msgs::agent_cmd agent_cmd;      // 控制命令消息
 geometry_msgs::PoseStamped target_pos; // 无人车位置
 double target_yaw{0.0};                // 无人车yaw
 string node_name;                      // 节点名称
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     target_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/vrpn_client_node/"+ target_name + "/pose", 1, mocap_pos_cb);
    
     // 【发布】控制指令 本节点 -> 无人机控制节点
-    agent_cmd_pub = nh.advertise<sunray_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
+    agent_cmd_pub = nh.advertise<sunray_swarm_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 10);
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
 
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
     agent_cmd.header.frame_id = "world";
     agent_cmd.agent_id = agent_id;
     agent_cmd.cmd_source = ros::this_node::getName();
-    agent_cmd.control_state = sunray_msgs::agent_cmd::TAKEOFF;
+    agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::TAKEOFF;
     agent_cmd_pub.publish(agent_cmd); 
 
     text_info.data = node_name + "Takeoff...";
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
         agent_cmd.header.frame_id = "world";
         agent_cmd.agent_id = agent_id;
         agent_cmd.cmd_source = ros::this_node::getName();
-        agent_cmd.control_state = sunray_msgs::agent_cmd::POS_CONTROL;
+        agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::POS_CONTROL;
         agent_cmd.desired_pos.x = target_pos.pose.position.x;
         agent_cmd.desired_pos.y = target_pos.pose.position.y;
         agent_cmd.desired_pos.z = 1.0;

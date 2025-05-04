@@ -3,7 +3,7 @@
 void UGV_CONTROL::init(ros::NodeHandle& nh)
 {
     // 智能体类型
-    agent_type = sunray_msgs::agent_state::UGV;
+    agent_type = sunray_swarm_msgs::agent_state::UGV;
     // 【参数】智能体编号
     nh.param<int>("agent_id", agent_id, 1);
     // 【参数】智能体IP
@@ -50,12 +50,12 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     }
  
     // 【订阅】智能体控制指令 ORCA算法 -> 本节点
-    ugv_cmd_sub = nh.subscribe<sunray_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &UGV_CONTROL::agnet_cmd_cb, this);
+    ugv_cmd_sub = nh.subscribe<sunray_swarm_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &UGV_CONTROL::agnet_cmd_cb, this);
     // 【订阅】ugv电池的数据 ugv_driver -> 本节点
     battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm/" + agent_name + "/battery", 1, &UGV_CONTROL::battery_cb, this);  
     
     // 【发布】智能体状态 本节点 -> 地面站/其他节点
-    agent_state_pub = nh.advertise<sunray_msgs::agent_state>("/sunray_swarm/" + agent_name + "/agent_state", 1); 
+    agent_state_pub = nh.advertise<sunray_swarm_msgs::agent_state>("/sunray_swarm/" + agent_name + "/agent_state", 1); 
     // 【发布】文字提示消息  本节点 -> 地面站
     text_info_pub = nh.advertise<std_msgs::String>("/sunray_swarm/text_info", 1);
     // 【发布】控制指令（机体系，单位：米/秒，Rad/秒）本节点 -> ugv_driver
@@ -100,8 +100,8 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     agent_state.attitude_q.z = 0.0;
     agent_state.attitude_q.w = 1.0;
     agent_state.battery = -1.0;
-    agent_state.control_state = sunray_msgs::agent_cmd::INIT;
-    current_agent_cmd.control_state = sunray_msgs::agent_cmd::INIT;
+    agent_state.control_state = sunray_swarm_msgs::agent_cmd::INIT;
+    current_agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::INIT;
 
     // 根据智能体ID来设置仿真时RVIZ中智能体的颜色，与真机无关
     setup_rviz_color();
@@ -139,13 +139,13 @@ void UGV_CONTROL::mainloop()
     switch (current_agent_cmd.control_state)
     {
         // INIT：不执行任何指令
-        case sunray_msgs::agent_cmd::INIT:
+        case sunray_swarm_msgs::agent_cmd::INIT:
             // 初始模式
             // do nothing
             break;
         
         // HOLD：悬停模式，切入该模式的瞬间，无人车在当前位置停止，即发送0速度
-        case sunray_msgs::agent_cmd::HOLD:
+        case sunray_swarm_msgs::agent_cmd::HOLD:
             // 原地停止
             desired_vel.linear.x = 0.0;
             desired_vel.linear.y = 0.0;
@@ -155,7 +155,7 @@ void UGV_CONTROL::mainloop()
             break;
         
         // POS_CONTROL：位置控制模式，无人车移动到期望的位置+偏航（期望位置由外部指令赋值）
-        case sunray_msgs::agent_cmd::POS_CONTROL:
+        case sunray_swarm_msgs::agent_cmd::POS_CONTROL:
             if(ugv_type == 0)
             {
                 desired_vel = pos_control_mac(current_agent_cmd.desired_pos, current_agent_cmd.desired_yaw);
@@ -167,7 +167,7 @@ void UGV_CONTROL::mainloop()
             break;
 
         // VEL_CONTROL_BODY：车体系速度控制，无人车按照期望的速度在车体系移动（期望速度由外部指令赋值）
-        case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_BODY:
             // 控制指令限幅（防止外部指令给了一个很大的数）
             desired_vel.linear.x = constrain_function(current_agent_cmd.desired_vel.linear.x, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
             desired_vel.linear.y = constrain_function(current_agent_cmd.desired_vel.linear.y, ugv_control_param.max_vel_xy, ugv_control_param.deadzone_vel_xy);
@@ -176,7 +176,7 @@ void UGV_CONTROL::mainloop()
             break;
 
         // VEL_CONTROL_ENU：惯性系速度控制，无人车按照期望的速度在惯性系移动（期望速度由外部指令赋值）
-        case sunray_msgs::agent_cmd::VEL_CONTROL_ENU:
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_ENU:
             // 由于UGV底层控制指令为车体系，所以需要将收到的惯性系速度转换为车体系速度
             if(ugv_type == 0)
             {
@@ -195,7 +195,7 @@ void UGV_CONTROL::mainloop()
     agent_state_last = agent_state;
 }
 
-void UGV_CONTROL::agnet_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
+void UGV_CONTROL::agnet_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
 {
     // 判断指令ID是否正确，否则不接收该指令
     if(msg->agent_id != agent_id && msg->agent_id != 99)
@@ -208,17 +208,17 @@ void UGV_CONTROL::agnet_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
     switch(msg->control_state) 
     {
         // 收到INIT指令
-        case sunray_msgs::agent_cmd::INIT:
+        case sunray_swarm_msgs::agent_cmd::INIT:
             text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: INIT!";
             cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到HOLD指令
-        case sunray_msgs::agent_cmd::HOLD:
+        case sunray_swarm_msgs::agent_cmd::HOLD:
             text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: HOLD!";
             cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到POS_CONTROL指令
-        case sunray_msgs::agent_cmd::POS_CONTROL:
+        case sunray_swarm_msgs::agent_cmd::POS_CONTROL:
             desired_position.x = msg->desired_pos.x;
             desired_position.y = msg->desired_pos.y;
             desired_position.z = agent_height;
@@ -227,12 +227,12 @@ void UGV_CONTROL::agnet_cmd_cb(const sunray_msgs::agent_cmd::ConstPtr& msg)
             //  cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到VEL_CONTROL_BODY指令：此处不做任何处理，在主循环中处理
-        case sunray_msgs::agent_cmd::VEL_CONTROL_BODY:  
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_BODY:  
             //  text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_BODY!";
             //  cout << BLUE << text_info.data << TAIL << endl;
             break;
         // 收到VEL_CONTROL_ENU指令：此处不做任何处理，在主循环中处理
-        case sunray_msgs::agent_cmd::VEL_CONTROL_ENU:
+        case sunray_swarm_msgs::agent_cmd::VEL_CONTROL_ENU:
             //  text_info.data = node_name + ": ugv_" + to_string(agent_id) + " Get agent_cmd: VEL_CONTROL_ENU!";
             //  cout << BLUE << text_info.data << TAIL << endl;
             break;
@@ -478,15 +478,15 @@ void UGV_CONTROL::timercb_debug(const ros::TimerEvent &e)
 
     //集群控制命令状态打印
     cout << GREEN << "CMD_SOURCE : [ " << current_agent_cmd.cmd_source   << " ] " << TAIL << endl;
-    if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::INIT)
+    if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::INIT)
     {
         cout << GREEN << "CONTROL_STATE : [ INIT ]" << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::HOLD)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::HOLD)
     {
         cout << GREEN << "CONTROL_STATE : [ HOLD ]" << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::POS_CONTROL)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::POS_CONTROL)
     {
         cout << GREEN << "CONTROL_STATE : [ POS_CONTROL ]" << TAIL << endl;
         cout << GREEN << "POS_REF [X Y] : " << desired_position.x << " [ m ] " << desired_position.y << " [ m ] " << TAIL << endl;
@@ -494,13 +494,13 @@ void UGV_CONTROL::timercb_debug(const ros::TimerEvent &e)
         cout << GREEN << "CMD_PUB [X Y] : " << desired_vel.linear.x   << " [m/s] " << desired_vel.linear.y  << " [m/s] " << TAIL << endl;
         cout << GREEN << "CMD_PUB [Yaw] : " << desired_vel.angular.z * 180 / M_PI << " [deg/s] " << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::VEL_CONTROL_BODY)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::VEL_CONTROL_BODY)
     {
         cout << GREEN << "CONTROL_STATE : [ VEL_CONTROL_BODY ]" << TAIL << endl;
         cout << GREEN << "CMD_PUB [X Y] : " << desired_vel.linear.x   << " [m/s] " << desired_vel.linear.y  << " [m/s] " << TAIL << endl;
         cout << GREEN << "CMD_PUB [Yaw] : " << desired_vel.angular.z * 180 / M_PI << " [deg/s] " << TAIL << endl;
     }
-    else if (current_agent_cmd.control_state == sunray_msgs::agent_cmd::VEL_CONTROL_ENU)
+    else if (current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::VEL_CONTROL_ENU)
     {
         cout << GREEN << "CONTROL_STATE : [ VEL_CONTROL_ENU ]" << TAIL << endl;
         cout << GREEN << "CMD_ENU [X Y] : " << current_agent_cmd.desired_vel.linear.x   << " [m/s] " << current_agent_cmd.desired_vel.linear.y  << " [m/s] " << TAIL << endl;
@@ -672,7 +672,7 @@ void UGV_CONTROL::timercb_rviz(const ros::TimerEvent &e)
     vel_rviz_pub.publish(vel_rviz);
 
     // 发布当前目标点marker，仅针对位置控制模式
-    if(current_agent_cmd.control_state == sunray_msgs::agent_cmd::POS_CONTROL)
+    if(current_agent_cmd.control_state == sunray_swarm_msgs::agent_cmd::POS_CONTROL)
     {
         // 发布目标点mesh
         visualization_msgs::Marker goal_marker;
@@ -766,10 +766,10 @@ void UGV_CONTROL::printf_param()
 {
     cout << GREEN << ">>>>>>>>>>>>>>>>>>> UGV_CONTROL Parameters <<<<<<<<<<<<<<<<" << TAIL << endl;
 
-    if(agent_type == sunray_msgs::agent_state::RMTT)
+    if(agent_type == sunray_swarm_msgs::agent_state::RMTT)
     {
         cout << GREEN << "agent_type : RMTT" << TAIL << endl;
-    }else if(agent_type == sunray_msgs::agent_state::UGV)
+    }else if(agent_type == sunray_swarm_msgs::agent_state::UGV)
     {
         cout << GREEN << "agent_type : UGV" << TAIL << endl;
     }else
