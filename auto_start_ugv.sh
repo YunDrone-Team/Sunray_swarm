@@ -31,12 +31,13 @@ fi
 
 ## 不同的无人车注意修改下面参数中的ugv_id
 ## 启动wheeltec_driver
-#gnome-terminal --window --title="wheeltec_driver" -- bash -c "roslaunch sunray_swarm wheeltec_driver.launch ugv_id:=1; exec bash"
+gnome-terminal --window --title="wheeltec_driver" -- bash -c "roslaunch sunray_swarm wheeltec_driver.launch ugv_id:=1; exec bash"
 ## 启动tianbot_driver
-gnome-terminal --window --title="tianbot_driver" -- bash -c "roslaunch sunray_swarm tianbot_driver.launch ugv_id:=1; exec bash"
+##gnome-terminal --window --title="tianbot_driver" -- bash -c "roslaunch sunray_swarm tianbot_driver.launch ugv_id:=1; exec bash"
 sleep 1
 ## 启动ugv_control_node
-##gnome-terminal --window --title="ugv_control_node" -- bash -c "roslaunch sunray_swarm ugv_control_node.launch ugv_id:=1; exec bash"
-
+gnome-terminal --window --title="ugv_control_node" -- bash -c "roslaunch sunray_swarm ugv_control_node.launch ugv_id:=1; exec bash"
+## 启动ugv_control_node_diff
+##gnome-terminal --window --title="ugv_control_node" -- bash -c "roslaunch sunray_swarm ugv_control_node_diff.launch ugv_id:=1; exec bash"
 
 
