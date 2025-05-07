@@ -7,14 +7,14 @@ is_launch_running() {
     return $?
 }
 
-# 检查sample.launch是否正在运行
 if is_launch_running; then
-    echo "$LAUNCH_FILE 已经在运行，无需再次启动。"
+    echo "vrpn 已经在运行，无需再次启动。"
 else
-    echo "启动 $LAUNCH_FILE ..."
-
+    echo "启动 vrpn..."
     gnome-terminal --window -e 'bash -c "roslaunch vrpn_client_ros sample.launch ; exec bash"'
 fi
 
+read -p "请输入ugv的数量: " AGENT_NUM
+
 sleep 3
-gnome-terminal --window -e 'bash -c "roslaunch sunray_swarm orca_ugv.launch agent_num:=6; exec bash"' \
+gnome-terminal --window -e "bash -c \"roslaunch sunray_swarm orca_ugv.launch agent_num:=$AGENT_NUM; exec bash\""
