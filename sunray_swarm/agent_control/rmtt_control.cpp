@@ -16,12 +16,17 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     nh.param<string>("mled_text", mled_text.data, "YunDrone");
     // 【参数】终端是否打印调试信息
     nh.param<bool>("flag_printf", flag_printf, false);
-    // 【参数】位置环控制参数 - xy
-    nh.param<float>("rmtt_control_param/Kp_xy", rmtt_control_param.Kp_xy, 1.4);
+    nh.param<float>("rmtt_control_param/Kp_xy", rmtt_control_param.pid_xy.Kp, 1.5);
+    nh.param<float>("rmtt_control_param/Ki_xy", rmtt_control_param.pid_xy.Ki, 0.05);
+    nh.param<float>("rmtt_control_param/Kd_xy", rmtt_control_param.pid_xy.Kd, 0.025);
     // 【参数】位置环控制参数 - z
-    nh.param<float>("rmtt_control_param/Kp_z", rmtt_control_param.Kp_z, 1.4);
+    nh.param<float>("rmtt_control_param/Kp_z", rmtt_control_param.pid_z.Kp, 1.5);
+    nh.param<float>("rmtt_control_param/Ki_z", rmtt_control_param.pid_z.Ki, 0.05);
+    nh.param<float>("rmtt_control_param/Kd_z", rmtt_control_param.pid_z.Kd, 0.025);
     // 【参数】位置环控制参数 - yaw
-    nh.param<float>("rmtt_control_param/Kp_yaw", rmtt_control_param.Kp_yaw, 0.9);
+    nh.param<float>("rmtt_control_param/Kp_yaw", rmtt_control_param.pid_yaw.Kp, 0.9);
+    nh.param<float>("rmtt_control_param/Ki_yaw", rmtt_control_param.pid_yaw.Ki, 0.05);
+    nh.param<float>("rmtt_control_param/Kd_yaw", rmtt_control_param.pid_yaw.Kd, 0.01);
     // 【参数】位置环控制参数 - max_vel_xy
     nh.param<float>("rmtt_control_param/max_vel_xy", rmtt_control_param.max_vel_xy, 0.5);
     // 【参数】位置环控制参数 - max_vel_z
@@ -41,6 +46,13 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     nh.param<float>("rmtt_geo_fence/min_y", rmtt_geo_fence.min_y, -100.0);
     nh.param<float>("rmtt_geo_fence/max_z", rmtt_geo_fence.max_z, 2.0);
     nh.param<float>("rmtt_geo_fence/min_z", rmtt_geo_fence.min_z, -0.1);
+    //pid参数初始化
+    rmtt_control_param.pid_xy.integral = 0.0;
+    rmtt_control_param.pid_xy.prev_error = 0.0;
+    rmtt_control_param.pid_z.integral = 0.0;
+    rmtt_control_param.pid_z.prev_error = 0.0;
+    rmtt_control_param.pid_yaw.integral = 0.0;
+    rmtt_control_param.pid_yaw.prev_error = 0.0;
 
     agent_name = "rmtt_" + std::to_string(agent_id);
     // 根据 pose_source 参数选择数据源
@@ -353,24 +365,48 @@ double RMTT_CONTROL::get_yaw_error(double desired_yaw, double yaw_now)
 
     return error;
 }
+//pid控制器
+float RMTT_CONTROL::pid_control(PIDController& pid, float setpoint, float current_value, float dt)
+{
+    float error = setpoint - current_value;
+    if((error>=-0.25) && (error<=0.25))
+   {
+     if((pid.integral>=-2.5)&&(pid.integral<=2.5))
+     {
+         pid.integral += error * dt;
+     }
+   }
+   else
+   {
+     pid.integral = 0;
+   }
+    float derivative = (error - pid.prev_error) / dt;
+  if(fabs(error)<=0.1)
+  {
+     derivative = derivative*sqrtf(fabs(error));
+  }
+    pid.prev_error = error;
+    return pid.Kp * error + pid.Ki * pid.integral + pid.Kd * derivative;
+}
 
 // 位置控制算法
 geometry_msgs::Twist RMTT_CONTROL::pos_control(geometry_msgs::Point pos_ref, double yaw_ref)
 {
     float cmd_body[2];
     float cmd_enu[2];
-    // 控制指令计算：使用简易P控制 - XY
-    cmd_enu[0] = (pos_ref.x - agent_state.pos[0]) * rmtt_control_param.Kp_xy;
-    cmd_enu[1] = (pos_ref.y - agent_state.pos[1]) * rmtt_control_param.Kp_xy;
+    float dt = 0.1; 
+    // 控制指令计算：使用PID控制 - XY
+    cmd_enu[0] = pid_control(rmtt_control_param.pid_xy, pos_ref.x, agent_state.pos[0], dt);
+    cmd_enu[1] = pid_control(rmtt_control_param.pid_xy, pos_ref.y, agent_state.pos[1], dt);
     rotation_yaw(agent_state.att[2], cmd_body, cmd_enu);             
     desired_vel.linear.x = cmd_body[0];
     desired_vel.linear.y = cmd_body[1];
-    // 控制指令计算：使用简易P控制 - Z
-    desired_vel.linear.z = (agent_height - agent_state.pos[2]) * rmtt_control_param.Kp_z;
+    // 控制指令计算：使用PID控制 - Z
+    desired_vel.linear.z = pid_control(rmtt_control_param.pid_z, agent_height, agent_state.pos[2], dt);
     // YAW误差计算
     double yaw_error = get_yaw_error(yaw_ref, agent_state.att[2]);
-    // 控制指令计算：使用简易P控制 - YAW
-    desired_vel.angular.z = yaw_error * rmtt_control_param.Kp_yaw;
+    // 控制指令计算：使用PID控制 - YAW
+    desired_vel.angular.z = pid_control(rmtt_control_param.pid_yaw,  yaw_error, 0.0, dt);
 
     // 控制指令限幅，传入的参数依次是 原始数据、最大值、死区值
     // 功能：将原始数据限制在最大值之内；如果小于死区值，则直接设置为0
@@ -397,6 +433,7 @@ geometry_msgs::Twist RMTT_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
     // 惯性系 -> body frame 
     float cmd_body[2];
     float cmd_enu[2];
+    float dt = 0.1; 
     cmd_enu[0] = enu_cmd.linear.x;
     cmd_enu[1] = enu_cmd.linear.y;
     rotation_yaw(agent_state.att[2], cmd_body, cmd_enu);   
@@ -405,10 +442,10 @@ geometry_msgs::Twist RMTT_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
     body_cmd.linear.z = enu_cmd.linear.z;
     body_cmd.angular.x = 0.0;
     body_cmd.angular.y = 0.0;
-    // 控制指令计算：使用简易P控制 - YAW
+    // 控制指令计算：使用PID控制 - YAW
     double yaw_error = get_yaw_error(current_agent_cmd.desired_yaw, agent_state.att[2]);
 
-    body_cmd.angular.z = yaw_error * rmtt_control_param.Kp_yaw;
+    body_cmd.angular.z = pid_control(rmtt_control_param.pid_yaw, yaw_error, 0.0, dt);
 
     // 控制指令限幅
     body_cmd.linear.x = constrain_function(body_cmd.linear.x, rmtt_control_param.max_vel_xy, 0.0);
@@ -831,9 +868,15 @@ void RMTT_CONTROL::printf_param()
         cout << RED << "Pose source: Unknown" << TAIL << endl;
     }  
     // 悬停控制参数
-    cout << GREEN << "Kp_xy : " << rmtt_control_param.Kp_xy << TAIL << endl;
-    cout << GREEN << "Kp_z : " << rmtt_control_param.Kp_z << TAIL << endl;
-    cout << GREEN << "Kp_yaw : " << rmtt_control_param.Kp_yaw << TAIL << endl;
+    cout << GREEN << "pid_xy/Kp : " << rmtt_control_param.pid_xy.Kp << TAIL << endl;
+    cout << GREEN << "pid_xy/Ki : " << rmtt_control_param.pid_xy.Ki << TAIL << endl;
+    cout << GREEN << "pid_xy/Kd : " << rmtt_control_param.pid_xy.Kd << TAIL << endl;
+    cout << GREEN << "pid_z/Kp : " << rmtt_control_param.pid_z.Kp << TAIL << endl;
+    cout << GREEN << "pid_z/Ki : " << rmtt_control_param.pid_z.Ki << TAIL << endl;
+    cout << GREEN << "pid_z/Kd : " << rmtt_control_param.pid_z.Kd << TAIL << endl;
+    cout << GREEN << "pid_yaw/Kp : " << rmtt_control_param.pid_yaw.Kp << TAIL << endl;
+    cout << GREEN << "pid_yaw/Ki : " << rmtt_control_param.pid_yaw.Ki << TAIL << endl;
+    cout << GREEN << "pid_yaw/Kd : " << rmtt_control_param.pid_yaw.Kd << TAIL << endl;
     cout << GREEN << "max_vel_xy : " << rmtt_control_param.max_vel_xy << " [m/s]" << TAIL << endl;
     cout << GREEN << "max_vel_z : " << rmtt_control_param.max_vel_z << " [m/s]" << TAIL << endl;
     cout << GREEN << "max_vel_yaw : " << rmtt_control_param.max_vel_yaw/M_PI*180 << " [deg/s]" << TAIL << endl;

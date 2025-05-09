@@ -12,7 +12,16 @@
 using namespace std;
 
 #define TRA_WINDOW 50        
-#define ODOM_TIMEOUT 0.35                 
+#define ODOM_TIMEOUT 0.35   
+
+struct PIDController 
+{
+    float Kp;
+    float Ki;
+    float Kd;
+    float integral;
+    float prev_error;
+};
 
 class RMTT_CONTROL
 {
@@ -23,7 +32,6 @@ class RMTT_CONTROL
         void init(ros::NodeHandle& nh);
         // 主循环函数
         void mainloop();
-
     private:
         // 节点名称
         string node_name;     
@@ -52,15 +60,16 @@ class RMTT_CONTROL
         // 悬停控制参数 - 通过参数配置
         struct control_param
         {
-            float Kp_xy;
-            float Kp_z;
-            float Kp_yaw;
             float max_vel_xy;
             float max_vel_z;
             float max_vel_yaw;
             float deadzone_vel_xy;
             float deadzone_vel_z;
             float deadzone_vel_yaw;
+            PIDController pid_xy;
+            PIDController pid_z;
+            PIDController pid_yaw;
+
         };
         control_param rmtt_control_param;
 
@@ -155,6 +164,7 @@ class RMTT_CONTROL
         float constrain_function(float data, float Max, float Min);
         Eigen::Vector3d quaternion_to_euler(const Eigen::Quaterniond &q);
         double get_yaw_error(double desired_yaw, double yaw_now);
+        float pid_control(PIDController& pid, float setpoint, float current_value, float dt);
         geometry_msgs::Twist enu_to_body(geometry_msgs::Twist enu_cmd);
         void rotation_yaw(double yaw_angle, float body_frame[2], float enu_frame[2]);
         void setup_led();
