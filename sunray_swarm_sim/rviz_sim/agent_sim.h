@@ -32,8 +32,6 @@ class AGENT_SIM
         string agent_name;
         // 智能体的固定高度 - 通过参数配置
         float agent_height;
-        // 电池电量
-        std_msgs::Float32 battery;
 
         // 智能体当前控制指令
         sunray_swarm_msgs::agent_cmd current_agent_cmd;
@@ -51,7 +49,6 @@ class AGENT_SIM
 
         // 发布话题
         ros::Publisher mocap_pos_pub;
-        ros::Publisher battery_pub;
 
         ros::Timer debug_timer;
         void agent_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg);

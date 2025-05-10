@@ -13,6 +13,8 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     nh.param<float>("agent_height", agent_height, 0.1);
     // 【参数】智能体位置来源（1：代表动捕、2代表SLAM数据）
     nh.param<int>("pose_source", pose_source, 1);
+    // 【参数】是否为仿真
+    nh.param<bool>("is_simulation", is_simulation, false);
     // 【参数】是否打印
     nh.param<bool>("flag_printf", flag_printf, false);
     // 【参数】0 for mac,1 for diff
@@ -99,7 +101,13 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
     agent_state.attitude_q.y = 0.0;
     agent_state.attitude_q.z = 0.0;
     agent_state.attitude_q.w = 1.0;
-    agent_state.battery = -1.0;
+    if(is_simulation)
+    {
+        agent_state.battery = 101.0;
+    }else
+    {
+        agent_state.battery = -1.0;
+    }
     agent_state.control_state = sunray_swarm_msgs::agent_cmd::INIT;
     current_agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::INIT;
 

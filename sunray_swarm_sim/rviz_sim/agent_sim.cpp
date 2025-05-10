@@ -34,10 +34,6 @@ void AGENT_SIM::init(ros::NodeHandle& nh)
     agent_cmd_vel_sub = nh.subscribe<geometry_msgs::Twist>("/sunray_swarm" + agent_name + "/cmd_vel", 1, &AGENT_SIM::agent_cmd_vel_cb, this);
     // 【发布】伪装成动捕的位置数据发布 本节点 -> 智能体控制节点(rmtt_control/ugv_control)
     mocap_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("/vrpn_client_node"+ agent_name + "/pose", 1);
-    // 【发布】电池电量（在仿真中，电池电量设置为101，代表仿真模式）本节点 -> 智能体控制节点(rmtt_control/ugv_control)
-    battery_pub = nh.advertise<std_msgs::Float32>("/sunray_swarm" + agent_name + "/battery", 1);
-
-    battery.data = 101;
 
     // 初始化无人机初始位置
     agent_pos.header.stamp = ros::Time::now();
@@ -154,9 +150,6 @@ bool AGENT_SIM::mainloop()
         default:
             break;
     }
-
-    // 定时发布电池状态
-    battery_pub.publish(battery);
 
     return true;
 }

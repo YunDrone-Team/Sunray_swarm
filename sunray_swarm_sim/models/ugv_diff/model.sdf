@@ -302,5 +302,23 @@
       </wheelSlip>
     </plugin>
 
+    <include>
+      <uri>model://camera</uri> 
+      <pose>0.05 0 0.245 0 0 0</pose>
+    </include>
+
+    <!-- 前视相机关节 -->
+    <joint name="Monocular_front_joint" type="fixed">
+      <child>camera::Monocular_front_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
   </model>
 </sdf>

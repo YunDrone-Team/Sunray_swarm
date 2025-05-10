@@ -43,6 +43,8 @@ class UGV_CONTROL
         float agent_height;
         // 智能体位置来源（1：代表动捕、2代表viobot odom） - 通过参数配置
         int pose_source;
+        // 是否为仿真
+        bool is_simulation;
         // 是否打印 - 通过参数配置
         bool flag_printf;
         // 

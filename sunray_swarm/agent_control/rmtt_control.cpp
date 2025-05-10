@@ -10,10 +10,12 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     nh.param<std::string>("agent_ip", agent_ip, "192.168.1.1");
     // 【参数】智能体固定的飞行高度
     nh.param<float>("agent_height", agent_height, 1.0);
-    // 【参数】智能体位置来源（1：代表动捕、2代表地图）
+    // 【参数】智能体位置来源（1：代表动捕、2代表地图、3代表odom-gazebo仿真）
     nh.param<int>("pose_source", pose_source, 1);
     // 【参数】RMTT上方mled字符
     nh.param<string>("mled_text", mled_text.data, "YunDrone");
+    // 【参数】是否为仿真
+    nh.param<bool>("is_simulation", is_simulation, false);
     // 【参数】终端是否打印调试信息
     nh.param<bool>("flag_printf", flag_printf, false);
     nh.param<float>("rmtt_control_param/Kp_xy", rmtt_control_param.pid_xy.Kp, 1.5);
@@ -132,7 +134,13 @@ void RMTT_CONTROL::init(ros::NodeHandle& nh)
     agent_state.attitude_q.y = 0.0;
     agent_state.attitude_q.z = 0.0;
     agent_state.attitude_q.w = 1.0;
-    agent_state.battery = -1.0;
+    if(is_simulation)
+    {
+        agent_state.battery = 101.0;
+    }else
+    {
+        agent_state.battery = -1.0;
+    }
     agent_state.control_state = sunray_swarm_msgs::agent_cmd::INIT;
     current_agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::INIT;
 
@@ -373,7 +381,7 @@ float RMTT_CONTROL::pid_control(PIDController& pid, float setpoint, float curren
    {
      if((pid.integral>=-2.5)&&(pid.integral<=2.5))
      {
-         pid.integral += error * dt;
+        pid.integral += error * dt;
      }
    }
    else

@@ -4,6 +4,7 @@
     <!-- 第一个节点：启动1号无人车控制节点 - ugv_control_node -->
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_1" output="screen" launch-prefix="gnome-terminal --tab --title='ugv_control_node_1' --command">
         <param name="agent_id" type="int" value="1" />
+        <param name="is_simulation" type="bool" value="true" />
     </node>
 
     <!-- 第二个节点：启动1号无人车仿真节点 - ugv_sim_node -->

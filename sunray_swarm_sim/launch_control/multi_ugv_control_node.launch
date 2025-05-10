@@ -8,6 +8,7 @@
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_1" output="screen">
         <param name="agent_id" value="1" />
         <param name="ugv_type" value="$(arg ugv_type)" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -15,6 +16,7 @@
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_2" output="screen" >
         <param name="agent_id" type="int" value="2" />
         <param name="ugv_type" value="$(arg ugv_type)" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -22,6 +24,7 @@
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_3" output="screen" >
         <param name="agent_id" type="int" value="3" />
         <param name="ugv_type" value="$(arg ugv_type)" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -29,6 +32,7 @@
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_4" output="screen" >
         <param name="agent_id" type="int" value="4" />
         <param name="ugv_type" value="$(arg ugv_type)" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -36,6 +40,7 @@
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_5" output="screen" >
         <param name="agent_id" type="int" value="5" />
         <param name="ugv_type" value="$(arg ugv_type)" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -43,6 +48,7 @@
     <node pkg="sunray_swarm" type="ugv_control_node" name="ugv_control_node_6" output="screen" >
         <param name="agent_id" type="int" value="6" />
         <param name="ugv_type" value="$(arg ugv_type)" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 </launch>

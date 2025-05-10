@@ -9,6 +9,10 @@
     <arg name="init_2_z"   default="0.0"/>
     <arg name="init_2_yaw" default="0.0"/>
 
+        <!-- <remap from="/ugv_mac1/camera/image_raw" to="/sunray_swarm/ugv_1/camera/image/compressed"/>
+        <remap from="/rmtt1/camera/image_raw" to="/sunray_swarm/rmtt_1/image_raw"/>  -->
+
+
     <!-- 无人车（默认为麦轮） -->
     <group ns="/sunray_swarm/ugv_1">
         <include file="$(find sunray_swarm_sim)/launch_gazebo_sim/spawn_agent_model.launch">

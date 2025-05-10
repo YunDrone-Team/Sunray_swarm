@@ -6,6 +6,7 @@
     <!-- 第一个节点：启动1号无人机控制节点 - rmtt_control_node_1 -->
     <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_1" output="screen" >
         <param name="agent_id" type="int" value="1" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -13,6 +14,7 @@
     <!-- 第一个节点：启动2号无人机控制节点 - rmtt_control_node_2 -->
     <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_2" output="screen" >
         <param name="agent_id" type="int" value="2" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -20,6 +22,7 @@
     <!-- 第一个节点：启动3号无人机控制节点 - rmtt_control_node_3 -->
     <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_3" output="screen" >
         <param name="agent_id" type="int" value="3" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -27,6 +30,7 @@
     <!-- 第一个节点：启动3号无人机控制节点 - rmtt_control_node_4 -->
     <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_4" output="screen" >
         <param name="agent_id" type="int" value="4" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -34,6 +38,7 @@
     <!-- 第一个节点：启动3号无人机控制节点 - rmtt_control_node_5 -->
     <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_5" output="screen" >
         <param name="agent_id" type="int" value="5" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 
@@ -41,6 +46,7 @@
     <!-- 第一个节点：启动3号无人机控制节点 - rmtt_control_node_6 -->
     <node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node_6" output="screen" >
         <param name="agent_id" type="int" value="6" />
+        <param name="is_simulation" type="bool" value="true" />
         <param name="pose_source" value="$(arg pose_source)" />
     </node>
 </launch>

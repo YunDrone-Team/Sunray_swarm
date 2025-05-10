@@ -43,6 +43,8 @@ class RMTT_CONTROL
         string agent_name;
         // 智能体IP - 通过参数配置
         string agent_ip;
+        // 是否为仿真
+        bool is_simulation;
         // 智能体固定的飞行高度 - 通过参数配置
         float agent_height;
         // 智能体位置来源（1：代表动捕、2代表地图） - 通过参数配置
