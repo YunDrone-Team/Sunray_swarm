@@ -56,3 +56,7 @@ orca_params:
   maxSpeed : 0.2
   ## 时间步长 不确定有啥用
   time_step : 0.1
+  ## Z轴位置环控制参数
+  Kp_z: 0.75
+  Ki_z: 0.25
+  Kd_z: 0.05

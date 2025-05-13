@@ -24,6 +24,10 @@ void ORCA::init(ros::NodeHandle& nh)
     nh.param<float>("orca_params/maxSpeed", orca_params.maxSpeed, 0.8);
     // 【参数】时间步长
     nh.param<float>("orca_params/time_step", orca_params.time_step, 0.1);
+       // 【参数】orca位置环控制参数 - z
+    nh.param<float>("orca_params/Kp_z", orca_params.pid_z.Kp, 0.5);
+    nh.param<float>("orca_params/Ki_z", orca_params.pid_z.Ki, 0.25);
+    nh.param<float>("orca_params/Kd_z", orca_params.pid_z.Kd, 0.05);
 
     string agent_prefix;
     if(agent_type == sunray_swarm_msgs::agent_state::RMTT)
@@ -113,6 +117,30 @@ void ORCA::init(ros::NodeHandle& nh)
     // setup_obstacles();
 }
 
+//pid控制器
+float ORCA::pid_control_orca(PIDController_orca& pid, float setpoint, float current_value, float dt)
+{
+    float error = setpoint - current_value;
+    if((error>=-0.3) && (error<=0.3))
+   {
+     if((pid.integral>=-2.5)&&(pid.integral<=2.5))
+     {
+        pid.integral += error * dt;
+     }
+   }
+   else
+   {
+     pid.integral = 0;
+   }
+    float derivative = (error - pid.prev_error) / dt;
+  if(fabs(error)<=0.1)
+  {
+     derivative = derivative*sqrtf(fabs(error));
+  }
+    pid.prev_error = error;
+    return pid.Kp * error + pid.Ki * pid.integral + pid.Kd * derivative;
+}
+
 bool ORCA::orca_run()
 {   
     // 没有收到ORCA算法启动的指令，不执行主循环
@@ -171,6 +199,7 @@ bool ORCA::orca_run()
         // 如果智能体没有达到目标点附近，则将ORCA算法计算得到速度以智能体控制指令发送出去（使用VEL_CONTROL_ENU模式）
 		else
 		{
+            float dt=0.1;
             // 从ORCA算法中读取期望速度 注：这个速度是ENU坐标系的
             RVO::Vector2 vel = sim->getAgentVelCMD(i);   
             agent_cmd[i].agent_id = i+1;
@@ -178,7 +207,7 @@ bool ORCA::orca_run()
             agent_cmd[i].cmd_source = "ORCA";
             agent_cmd[i].desired_vel.linear.x = vel.x();
             agent_cmd[i].desired_vel.linear.y = vel.y();
-            agent_cmd[i].desired_vel.linear.z = 0.0;
+            agent_cmd[i].desired_vel.linear.z = ORCA::pid_control_orca(orca_params.pid_z, agent_height, agent_state[i].pos[2], dt);
             agent_cmd[i].desired_yaw = goal_pose[i].yaw; 
             agent_cmd_pub[i].publish(agent_cmd[i]);
             sleep(0.01);
