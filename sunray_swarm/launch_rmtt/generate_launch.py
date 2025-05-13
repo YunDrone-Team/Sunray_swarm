@@ -21,9 +21,9 @@ from multi_robomaster import tool
 import re
 
 # RMTT无人机SN号列表，几台无人机就填写几个
-SN_LIST = ["0TQZM3QCNT00ZV", "0TQZM48CNT06PF", "0TQZM48CNT06PY", "0TQZJADCNT18QU", "0TQZM43CNT03UU", "0TQZM43CNT03FC", "0TQZM43CNT03RR", "0TQZJADCNT1A6Z"]
+SN_LIST = ["0TQZM3QCNT00ZV", "0TQZM48CNT06PF", "0TQZM48CNT06PY", "0TQZM47CNT046P", "0TQZM41CNT02AY", "0TQZJADCNT18QU", "0TQZM43CNT03UU", ""]
 # local IP指开发主机的IP？
-local_ip = "192.168.25.218"
+local_ip = "192.168.25.91"
 
 if __name__ == '__main__':
     help_str ='rmtt_scan_ip.py -n <num of drones>' 

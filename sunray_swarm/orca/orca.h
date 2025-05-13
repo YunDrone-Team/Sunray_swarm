@@ -60,9 +60,6 @@ class ORCA
             float radius;
             float maxSpeed;
             float time_step;
-            PIDController_orca pid_xy;
-            PIDController_orca pid_z;
-            PIDController_orca pid_yaw;
         };
         orca_param orca_params;
 
@@ -124,6 +121,6 @@ class ORCA
         void setup_scenario_5();
         bool reachedGoal(int i);
         void printf_param();
-        float pid_control_orca(PIDController_orca& pid, float setpoint, float current_value, float dt);
+
 };
 #endif
