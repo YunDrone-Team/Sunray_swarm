@@ -447,7 +447,10 @@ geometry_msgs::Twist RMTT_CONTROL::enu_to_body(geometry_msgs::Twist enu_cmd)
     rotation_yaw(agent_state.att[2], cmd_body, cmd_enu);   
     body_cmd.linear.x = cmd_body[0];
     body_cmd.linear.y = cmd_body[1];
-    body_cmd.linear.z = enu_cmd.linear.z;
+    // body_cmd.linear.z = enu_cmd.linear.z;
+    // 控制指令计算：使用PID控制 - Z
+    body_cmd.linear.z = pid_control(rmtt_control_param.pid_z, agent_height, agent_state.pos[2], dt);
+
     body_cmd.angular.x = 0.0;
     body_cmd.angular.y = 0.0;
     // 控制指令计算：使用PID控制 - YAW
