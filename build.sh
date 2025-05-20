@@ -22,3 +22,5 @@ catkin_make --source vrpn_client_ros --build build/vrpn_client_ros
 catkin_make --source sunray_swarm --build build/sunray_swarm
 # 编译sunray_swarm_sim模块
 catkin_make --source sunray_swarm_sim --build build/sunray_swarm_sim
+# 编译turn_on_wheeltec_robot模块
+catkin_make --source sunray_drivers/web_cam --build build/web_cam
