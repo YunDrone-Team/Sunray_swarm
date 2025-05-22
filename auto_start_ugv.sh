@@ -4,8 +4,8 @@
 source /opt/ros/noetic/setup.bash
 source ~/Sunray_swarm/devel/setup.bash
 export ROS_MASTER_URI=http://192.168.25.91:11311
-export ROS_HOSTNAME=192.168.25.162
-export ROS_IP=192.168.25.162
+export ROS_HOSTNAME=192.168.25.161
+export ROS_IP=192.168.25.161
 
 # 等待开发主机中的roscore就绪
 echo "等待roscore启动..."
@@ -33,7 +33,7 @@ fi
 ## 启动wheeltec_driver
 sleep 5
 gnome-terminal --window --title="wheeltec_driver" -- bash -c "roslaunch sunray_swarm wheeltec_driver.launch ugv_id:=1; exec bash"
-sleep 5
+sleep 8
 ## 启动tianbot_driver
 ##gnome-terminal --window --title="tianbot_driver" -- bash -c "roslaunch sunray_swarm tianbot_driver.launch ugv_id:=1; exec bash"
 ## 启动ugv_control_node
