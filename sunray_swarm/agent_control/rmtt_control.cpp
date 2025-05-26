@@ -198,7 +198,8 @@ void RMTT_CONTROL::mainloop()
         // HOLD：悬停模式，切入该模式的瞬间，无人机在当前位置悬停，并锁定该位置
         case sunray_swarm_msgs::agent_cmd::HOLD:
             // 悬停需要借助位置控制算法进行闭环控制
-            pos_control(desired_position, desired_yaw);
+            desired_vel = pos_control(desired_position, desired_yaw);
+            agent_cmd_vel_pub.publish(desired_vel);
             break;
 
         // POS_CONTROL：位置控制模式，无人机移动到期望的位置+偏航（期望位置由外部指令赋值）

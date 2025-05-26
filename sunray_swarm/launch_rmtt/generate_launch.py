@@ -21,7 +21,7 @@ from multi_robomaster import tool
 import re
 
 # RMTT无人机SN号列表，几台无人机就填写几个
-SN_LIST = ["0TQZM3QCNT00ZV", "0TQZM48CNT06PF", "0TQZM48CNT06PY", "0TQZM47CNT046P", "0TQZM41CNT02AY", "0TQZJADCNT18QU", "0TQZM43CNT03UU", ""]
+SN_LIST = ["0TQZM47CNT046P", "0TQZM41CNT02AY", "", "", "", "", "", ""]
 # local IP指开发主机的IP？
 local_ip = "192.168.25.91"
 
@@ -106,7 +106,7 @@ if __name__ == '__main__':
             f.write(f'\t\t\t<param name="local_ip" type="string" value="$(arg local_ip)" />\n')
             f.write(f'\t\t\t<param name="local_port" type="string" value="{8890+idx}" />\n')
             f.write(f'\t\t\t<param name="video_port" type="string" value="{11111+idx}" />\n')
-            f.write(f'\t\t\t<param name="enable_camera" type="bool" value="true" />\n')
+            f.write(f'\t\t\t<param name="enable_camera" type="bool" value="false" />\n')
             f.write(f'\t\t</node>\n')
             f.write(f'\t\t<!-- 启动rmtt_control_node -->\n')
             f.write(f'\t\t<node pkg="sunray_swarm" type="rmtt_control_node" name="rmtt_control_node" output="screen">\n')

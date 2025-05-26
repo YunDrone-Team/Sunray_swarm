@@ -41,6 +41,6 @@ gnome-terminal --window --title="ugv_control_node" -- bash -c "roslaunch sunray_
 ## 启动ugv_control_node_diff
 ##gnome-terminal --window --title="ugv_control_node" -- bash -c "roslaunch sunray_swarm ugv_control_node_diff.launch ugv_id:=1; exec bash"
 ##启动ugv_cam
-sleep 5
-gnome-terminal --window --title="ugv_cam" -- bash -c "roslaunch sunray_swarm ugv_camera.launch ugv_id:=1; exec bash"
+##sleep 5
+##gnome-terminal --window --title="ugv_cam" -- bash -c "roslaunch sunray_swarm ugv_camera.launch ugv_id:=1; exec bash"
 
