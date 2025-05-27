@@ -12,10 +12,10 @@ mled_text : "Yundrone"
 flag_printf : true
 ## RMTT位置环控制参数
 rmtt_control_param:
-  Kp_xy: 1.5
+  Kp_xy: 0.75
   Ki_xy: 0.05
   Kd_xy: 0.025
-  Kp_z: 1.5
+  Kp_z: 0.75
   Ki_z: 0.05
   Kd_z: 0.025
   Kp_yaw: 0.9
