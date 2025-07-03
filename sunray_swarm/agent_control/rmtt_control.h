@@ -55,6 +55,9 @@ class RMTT_CONTROL
         std_msgs::String mled_text;
         // 是否打印 - 通过参数配置
         bool flag_printf;
+
+        // 地面站接管，true代表地面站接管
+        bool gs_control{false};
         // 定位地图
         tf2_ros::Buffer tf_buffer;
         tf2_ros::TransformListener tf_listener;

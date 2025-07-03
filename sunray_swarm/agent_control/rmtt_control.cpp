@@ -246,6 +246,12 @@ void RMTT_CONTROL::mainloop()
 // 控制指令回调函数 - 来自其他节点
 void RMTT_CONTROL::agent_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
 {
+    // 如果地面站接管了，且收到的话题不是来自于地面站的指令，则直接退出
+    if(gs_control && msg->cmd_source != "sunray_station")
+    {
+        return;
+    }
+
     // 判断指令ID是否正确，否则不接收该指令
     if(msg->agent_id != agent_id && msg->agent_id != 99)
     {
@@ -268,6 +274,16 @@ void RMTT_CONTROL::agent_gs_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr&
     {
         return;
     } 
+
+    // 停止接管
+    if(msg->control_state == sunray_swarm_msgs::agent_cmd::GS_CONTROL)
+    {
+        gs_control = false;
+        return;
+    }else
+    {
+        gs_control = true;
+    }
 
     current_agent_cmd = *msg;
 

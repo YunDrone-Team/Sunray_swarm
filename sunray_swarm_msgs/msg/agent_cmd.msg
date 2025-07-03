@@ -20,6 +20,7 @@ uint8 VEL_CONTROL_BODY = 3          ## 机体系速度控制：机体系中，�
 uint8 VEL_CONTROL_ENU = 4           ## 位置控制：惯性系中，按照指定的速度和指定的偏航角移动，需要配合desired_vel和desired_yaw
 uint8 TAKEOFF = 11                  ## 起飞：仅针对无人机
 uint8 LAND = 12                     ## 降落：仅针对无人机
+uint8 GS_CONTROL = 99               ## 地面站停止接管
 
 ## 期望位置、偏航角 -> 对应POS_CONTROL模式
 geometry_msgs/Point desired_pos    ## [m]
