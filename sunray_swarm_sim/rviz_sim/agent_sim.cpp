@@ -1,4 +1,5 @@
 #include "agent_sim.h"
+
 // agent_sim仿真节点：
 // 仿真逻辑：在仿真模式中，每一个无人车/无人机都需要单独启动一个本节点，来模拟真实无人机/车的运动
 // 本节点通过订阅智能体指令话题以及底层控制指令话题，根据期望的指令仿真得到无人机的实时位置，并伪装发布为动捕更新的位置发回至智能体控制节点
@@ -30,6 +31,8 @@ void AGENT_SIM::init(ros::NodeHandle& nh)
 
     // 【订阅】智能体控制指令 地面站/ORCA等上层算法 -> 本节点 
     agent_cmd_sub = nh.subscribe<sunray_swarm_msgs::agent_cmd>("/sunray_swarm" + agent_name + "/agent_cmd", 1, &AGENT_SIM::agent_cmd_cb, this); 
+      // 【订阅】智能体控制指令 地面站 -> 本节点
+    agent_gs_cmd_sub = nh.subscribe<sunray_swarm_msgs::agent_cmd>("/sunray_swarm/rmtt_gs/agent_cmd", 10, &AGENT_SIM::agent_gs_cmd_cb, this);   
     // 【订阅】智能体底层控制指令 智能体控制节点(rmtt_control/ugv_control) -> 本节点
     agent_cmd_vel_sub = nh.subscribe<geometry_msgs::Twist>("/sunray_swarm" + agent_name + "/cmd_vel", 1, &AGENT_SIM::agent_cmd_vel_cb, this);
     // 【发布】伪装成动捕的位置数据发布 本节点 -> 智能体控制节点(rmtt_control/ugv_control)
@@ -135,6 +138,7 @@ bool AGENT_SIM::mainloop()
             agent_pos.pose.position.z = agent_height;
             agent_pos.pose.orientation = ros_quaternion_from_rpy(0.0, 0.0, agent_yaw);
             mocap_pos_pub.publish(agent_pos);
+            gs_control = false;
             break;
 
         // 当控制指令为LAND时，无人机直接高度更新到地面高度
@@ -154,15 +158,52 @@ bool AGENT_SIM::mainloop()
     return true;
 }
 
+
 void AGENT_SIM::agent_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
 {
+    // 如果地面站接管了，且收到的话题不是来自于地面站的指令，则直接退出
+    if(gs_control && msg->cmd_source != "sunray_station")
+    {
+        return;
+    }
+
     if(msg->agent_id != agent_id && msg->agent_id != 99)
     {
         return;
     }
 
     current_agent_cmd = *msg; 
+        // 处理收到的控制指令
+
+
 }
+
+
+
+// 控制指令回调函数 - 来自地面站
+void AGENT_SIM::agent_gs_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
+{
+    if(msg->agent_id != agent_id && msg->agent_id != 99)
+    {
+        return;
+    } 
+
+    // 停止接管
+    if(msg->control_state == sunray_swarm_msgs::agent_cmd::GS_CONTROL)
+    {
+        gs_control = false;
+        return;
+    }else
+    {
+        gs_control = true;
+    }
+
+    current_agent_cmd = *msg;
+        // 处理收到的控制指令
+
+
+}
+
 
 void AGENT_SIM::agent_cmd_vel_cb(const geometry_msgs::Twist::ConstPtr& msg)
 {

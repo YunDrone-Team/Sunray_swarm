@@ -50,6 +50,10 @@ class UGV_CONTROL
         // 
         int ugv_type;
         // 悬停控制参数 - 通过参数配置
+
+        // 地面站接管，true代表地面站接管
+        bool gs_control{false};
+
         struct control_param
         {
             float Kp_xy;
@@ -97,6 +101,8 @@ class UGV_CONTROL
         ros::Subscriber mocap_vel_sub;
         ros::Subscriber odom_sub;
         ros::Subscriber ugv_cmd_sub;
+        ros::Subscriber agent_gs_cmd_sub;
+
         ros::Subscriber battery_sub;
 
         // 发布话题
@@ -118,6 +124,7 @@ class UGV_CONTROL
         void mocap_vel_cb(const geometry_msgs::TwistStampedConstPtr& msg);
         void odom_cb(const nav_msgs::OdometryConstPtr& msg);
         void agnet_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg);
+        void agent_gs_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg);
         void battery_cb(const std_msgs::Float32ConstPtr& msg);
         void timercb_state(const ros::TimerEvent &e);
         void timercb_rviz(const ros::TimerEvent &e);

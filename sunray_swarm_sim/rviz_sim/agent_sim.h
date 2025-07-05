@@ -9,6 +9,9 @@
 #include "printf_utils.h"
 #include "ros_msg_utils.h"
 
+
+
+
 using namespace std;
 
 class AGENT_SIM
@@ -33,6 +36,11 @@ class AGENT_SIM
         // 智能体的固定高度 - 通过参数配置
         float agent_height;
 
+        // 地面站接管，true代表地面站接管
+        bool gs_control{false};
+
+
+
         // 智能体当前控制指令
         sunray_swarm_msgs::agent_cmd current_agent_cmd;
 
@@ -47,12 +55,16 @@ class AGENT_SIM
         ros::Subscriber agent_cmd_sub;
         ros::Subscriber agent_cmd_vel_sub;
 
+        ros::Subscriber agent_gs_cmd_sub;
+
         // 发布话题
         ros::Publisher mocap_pos_pub;
 
         ros::Timer debug_timer;
         void agent_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg);
+        void agent_gs_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg);
         void agent_cmd_vel_cb(const geometry_msgs::Twist::ConstPtr& msg);
         geometry_msgs::Quaternion ros_quaternion_from_rpy(double roll, double pitch, double yaw);
+        
 };
 #endif

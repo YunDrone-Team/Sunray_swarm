@@ -342,6 +342,8 @@ void RMTT_CONTROL::handle_cmd(const sunray_swarm_msgs::agent_cmd msg)
             takeoff_pub.publish(takeoff); 
             agent_state.control_state = sunray_swarm_msgs::agent_cmd::TAKEOFF;
             agent_state_pub.publish(agent_state);
+            //将标志位置为false，以便demo直接运行
+            gs_control = false;
             // 等待飞机起飞，此时不能发送其他指令
             sleep(5.0);
             // 起飞后进入悬停状态，并设定起飞点上方为悬停点
@@ -356,6 +358,8 @@ void RMTT_CONTROL::handle_cmd(const sunray_swarm_msgs::agent_cmd msg)
             land_pub.publish(land);
             agent_state.control_state = sunray_swarm_msgs::agent_cmd::LAND;
             agent_state_pub.publish(agent_state);
+            //将标志位置为false，以便demo直接运行
+            gs_control = false;
             // 等待飞机降落，此时不能发送其他指令
             sleep(5.0); 
             // 降落后进入INIT

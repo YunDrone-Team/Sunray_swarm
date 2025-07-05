@@ -53,6 +53,8 @@ void UGV_CONTROL::init(ros::NodeHandle& nh)
  
     // 【订阅】智能体控制指令 ORCA算法 -> 本节点
     ugv_cmd_sub = nh.subscribe<sunray_swarm_msgs::agent_cmd>("/sunray_swarm/" + agent_name + "/agent_cmd", 10, &UGV_CONTROL::agnet_cmd_cb, this);
+    // 【订阅】智能体控制指令 地面站 -> 本节点
+    agent_gs_cmd_sub = nh.subscribe<sunray_swarm_msgs::agent_cmd>("/sunray_swarm/ugv_gs/agent_cmd", 10, &UGV_CONTROL::agent_gs_cmd_cb, this);   
     // 【订阅】ugv电池的数据 ugv_driver -> 本节点
     battery_sub = nh.subscribe<std_msgs::Float32>("/sunray_swarm/" + agent_name + "/battery", 1, &UGV_CONTROL::battery_cb, this);  
     
@@ -205,6 +207,13 @@ void UGV_CONTROL::mainloop()
 
 void UGV_CONTROL::agnet_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
 {
+
+        // 如果地面站接管了，且收到的话题不是来自于地面站的指令，则直接退出
+    if(gs_control && msg->cmd_source != "sunray_station")
+    {
+        return;
+    }
+    
     // 判断指令ID是否正确，否则不接收该指令
     if(msg->agent_id != agent_id && msg->agent_id != 99)
     {
@@ -250,6 +259,29 @@ void UGV_CONTROL::agnet_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg
             return;
             break;
     }
+}
+
+
+void UGV_CONTROL::agent_gs_cmd_cb(const sunray_swarm_msgs::agent_cmd::ConstPtr& msg)
+{
+    if(msg->agent_id != agent_id && msg->agent_id != 99)
+    {
+        return;
+    } 
+
+    // 停止接管
+    if(msg->control_state == sunray_swarm_msgs::agent_cmd::GS_CONTROL)
+    {
+        gs_control = false;
+        return;
+    }else
+    {
+        gs_control = true;
+    }
+
+    current_agent_cmd = *msg;
+
+
 }
 
 void UGV_CONTROL::set_desired_position()
