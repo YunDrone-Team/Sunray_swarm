@@ -345,7 +345,14 @@ void RMTT_CONTROL::handle_cmd(const sunray_swarm_msgs::agent_cmd msg)
             //将标志位置为false，以便demo直接运行
             gs_control = false;
             // 等待飞机起飞，此时不能发送其他指令
-            sleep(5.0);
+            ros::spinOnce();
+            sleep(1.0);
+            ros::spinOnce();
+            sleep(1.0);
+            ros::spinOnce();
+            sleep(1.0);
+            ros::spinOnce();
+            sleep(1.0);
             // 起飞后进入悬停状态，并设定起飞点上方为悬停点
             set_desired_position();
             current_agent_cmd.control_state = sunray_swarm_msgs::agent_cmd::HOLD;
@@ -378,6 +385,7 @@ void RMTT_CONTROL::set_desired_position()
     desired_position.x = agent_state.pos[0];
     desired_position.y = agent_state.pos[1];
     desired_position.z = agent_height;
+    desired_yaw = agent_state.att[2];
 }
 
 double RMTT_CONTROL::get_yaw_error(double desired_yaw, double yaw_now)

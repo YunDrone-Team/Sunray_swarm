@@ -1,0 +1,37 @@
+<launch>
+    <!-- 无人车 1 -->
+    <node pkg="sunray_swarm" name="ugv_follow_rmtt_1" type="ugv_follow_rmtt_swarm" output="screen">
+        <param name="agent_id" value="1" />
+        <param name="target_name" value="rmtt_1" />
+    </node>
+
+    <!-- 无人车 2 -->
+    <node pkg="sunray_swarm" name="ugv_follow_rmtt_2" type="ugv_follow_rmtt_swarm" output="screen">
+        <param name="agent_id" value="2" />
+        <param name="target_name" value="rmtt_2" />
+    </node>
+
+    <!-- 无人车 3 -->
+    <node pkg="sunray_swarm" name="ugv_follow_rmtt_3" type="ugv_follow_rmtt_swarm" output="screen">
+        <param name="agent_id" value="3" />
+        <param name="target_name" value="rmtt_3" />
+    </node>
+
+    <!-- 无人车 4 -->
+    <node pkg="sunray_swarm" name="ugv_follow_rmtt_4" type="ugv_follow_rmtt_swarm" output="screen">
+        <param name="agent_id" value="4" />
+        <param name="target_name" value="rmtt_4" />
+    </node>
+
+    <!-- 无人车 5 -->
+    <node pkg="sunray_swarm" name="ugv_follow_rmtt_5" type="ugv_follow_rmtt_swarm" output="screen">
+        <param name="agent_id" value="5" />
+        <param name="target_name" value="rmtt_5" />
+    </node>
+
+    <!-- 无人车 6 -->
+    <node pkg="sunray_swarm" name="ugv_follow_rmtt_6" type="ugv_follow_rmtt_swarm" output="screen">
+        <param name="agent_id" value="6" />
+        <param name="target_name" value="rmtt_6" />
+    </node>
+</launch>

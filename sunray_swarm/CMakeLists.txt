@@ -119,6 +119,11 @@ target_link_libraries(ugv_waypoint ${catkin_LIBRARIES})
 add_executable(ugv_follow_rmtt demo_ugv/ugv_follow_rmtt.cpp)
 add_dependencies(ugv_follow_rmtt sunray_swarm_gencpp)
 target_link_libraries(ugv_follow_rmtt ${catkin_LIBRARIES})
+# UGV_DEMO - 多无人车跟随多无人机
+add_executable(ugv_follow_rmtt_swarm demo_ugv/ugv_follow_rmtt_swarm.cpp)
+add_dependencies(ugv_follow_rmtt_swarm sunray_swarm_gencpp)
+target_link_libraries(ugv_follow_rmtt_swarm ${catkin_LIBRARIES})
+
 
 ## SWARM_DEMO - 集群绕圆
 add_executable(swarm_circle demo_swarm/swarm_circle.cpp)
